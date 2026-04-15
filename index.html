@@ -224,13 +224,15 @@
       border: none; pointer-events: none; display: block;
     }
 
-    /* card iframe preview */
+    /* card iframe preview — mesmas dimensões do card-preview */
     .card-iframe-wrap {
-      width: 100%; height: 160px; overflow: hidden; position: relative; border-radius: 8px; margin-bottom: 4px;
+      width: calc(100% + 48px); margin: -24px -24px 0;
+      height: 150px; overflow: hidden; position: relative;
+      border-radius: 12px 12px 0 0;
     }
     .card-iframe-wrap iframe {
       width: 1080px; height: 1350px;
-      transform: scale(0.185); transform-origin: top left;
+      transform-origin: top left;
       border: none; pointer-events: none; display: block;
     }
     .detail-body { padding: 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 85vh; }
@@ -642,6 +644,7 @@
       document.querySelectorAll(`[data-filter="${type}"]`).forEach(b=>b.classList.remove('active'));
       btn.classList.add('active');
       renderCards();
+      scaleCardIframes();
       renderCalendar();
     }
 
@@ -694,7 +697,7 @@
         grid.insertAdjacentHTML('beforeend', `
           <div class="card" id="card-${p.id}" onclick="openDetail(${p.id})">
             ${previewImg}
-            <div class="card-top" style="margin-top:${p.slide_preview?'12px':'0'}">
+            <div class="card-top" style="margin-top:${(p.slide_preview||p.arquivo)?'12px':'0'}">
               <div class="card-tema">${p.tema}</div>
               <div class="status-pill ${statusClass(p.status)}">${p.status}</div>
             </div>
@@ -867,7 +870,7 @@
       const p = pautas.find(x=>x.id===id); if(!p) return;
       p.status = newStatus;
       if (newStatus==='Publicado' && !p.data_publicacao) p.data_publicacao = new Date().toISOString().split('T')[0];
-      save(); renderStats(); renderCards(); renderCalendar();
+      save(); renderStats(); renderCards(); scaleCardIframes(); renderCalendar();
     }
 
     function changeStatus(id) {
@@ -879,7 +882,7 @@
     function deletePauta(id) {
       if (!confirm('Remover esta pauta?')) return;
       pautas = pautas.filter(p=>p.id!==id);
-      save(); renderStats(); renderCards(); renderCalendar();
+      save(); renderStats(); renderCards(); scaleCardIframes(); renderCalendar();
     }
 
     // ── MODAL ──
@@ -917,6 +920,19 @@
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(pautas)); }
+
+    // ── ESCALAR IFRAMES DOS CARDS ──────────────────────────────
+    function scaleCardIframes() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.card-iframe-wrap').forEach(wrap => {
+          const iframe = wrap.querySelector('iframe');
+          if (!iframe) return;
+          const scale = wrap.offsetWidth / 1080;
+          iframe.style.transform = `scale(${scale})`;
+          iframe.style.height    = `${150 / scale}px`;
+        });
+      });
+    }
 
     // ── SETTINGS ──────────────────────────────────────────────
     function toggleSettings() {
