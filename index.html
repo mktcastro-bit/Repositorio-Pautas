@@ -213,6 +213,26 @@
     }
     .detail-preview-empty span { font-size: 2.5rem; opacity: 0.3; }
     .detail-preview-empty p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+
+    /* iframe preview escalado */
+    .preview-iframe-wrap {
+      width: 280px; height: 350px; overflow: hidden; position: relative; flex-shrink: 0;
+    }
+    .preview-iframe-wrap iframe {
+      width: 1080px; height: 1350px;
+      transform: scale(0.2593); transform-origin: top left;
+      border: none; pointer-events: none; display: block;
+    }
+
+    /* card iframe preview */
+    .card-iframe-wrap {
+      width: 100%; height: 160px; overflow: hidden; position: relative; border-radius: 8px; margin-bottom: 4px;
+    }
+    .card-iframe-wrap iframe {
+      width: 1080px; height: 1350px;
+      transform: scale(0.185); transform-origin: top left;
+      border: none; pointer-events: none; display: block;
+    }
     .detail-body { padding: 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 85vh; }
     .detail-tema { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.35; }
     .detail-row { display: flex; flex-direction: column; gap: 4px; }
@@ -655,7 +675,9 @@
 
         const previewImg = p.slide_preview
           ? `<img class="card-preview" src="${p.slide_preview}" alt="preview" onerror="this.style.display='none'">`
-          : '';
+          : p.arquivo
+            ? `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`
+            : '';
 
         const hasLegenda = p.legenda_ig || p.legenda_li;
         const legendaSection = hasLegenda ? `
@@ -780,7 +802,9 @@
 
       const preview = p.slide_preview
         ? `<img src="${p.slide_preview}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`
-        : `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
+        : p.arquivo
+          ? `<div class="preview-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`
+          : `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
 
       const arteBtn = p.arquivo
         ? `<a class="detail-btn primary" href="${p.arquivo}" target="_blank">↗ Ver Arte</a>`
