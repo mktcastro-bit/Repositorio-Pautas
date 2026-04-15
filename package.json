@@ -1,0 +1,14 @@
+{
+  "name": "nexum360-publisher",
+  "version": "1.0.0",
+  "description": "API de publicação Nexum360 — Instagram & LinkedIn",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev"
+  },
+  "dependencies": {
+    "form-data": "^4.0.0"
+  }
+}
