@@ -400,6 +400,71 @@
     .add-btn { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 22px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
     .add-btn:hover { opacity: 0.85; }
 
+    /* GENERATE BTN */
+    .gen-btn {
+      background: transparent; border: 1px solid rgba(200,169,110,0.4); color: var(--accent);
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 9px 22px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .gen-btn:hover { background: rgba(200,169,110,0.1); border-color: var(--accent); }
+
+    /* GENERATE MODAL */
+    .gen-modal { background: var(--s2); border: 1px solid var(--border); border-radius: 16px; padding: 36px; width: 100%; max-width: 640px; display: flex; flex-direction: column; gap: 16px; }
+    .gen-modal h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text); }
+
+    .gen-option-row { display: flex; gap: 10px; }
+    .gen-option-btn {
+      flex: 1; padding: 14px 10px; border-radius: 10px; cursor: pointer; border: 1px solid var(--border);
+      background: var(--s1); color: var(--text); font-size: 0.82rem; font-weight: 600;
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      transition: all 0.2s; text-align: center;
+    }
+    .gen-option-btn:hover { border-color: var(--accent); }
+    .gen-option-btn .gen-opt-icon { font-size: 1.6rem; }
+    .gen-option-btn .gen-opt-label { font-weight: 700; font-size: 0.8rem; letter-spacing: 0.04em; }
+    .gen-option-btn .gen-opt-desc { font-size: 0.7rem; color: var(--muted); font-weight: 400; }
+    .gen-option-btn.ai { border-color: rgba(200,169,110,0.35); }
+    .gen-option-btn.ai:hover { background: rgba(200,169,110,0.08); }
+    .gen-option-btn.claude { border-color: rgba(77,143,218,0.35); }
+    .gen-option-btn.claude:hover { background: rgba(77,143,218,0.08); }
+
+    /* Divider */
+    .gen-divider { display: flex; align-items: center; gap: 12px; }
+    .gen-divider::before, .gen-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .gen-divider span { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+
+    /* Result box */
+    .gen-result {
+      background: var(--s1); border: 1px solid rgba(200,169,110,0.25); border-radius: 10px;
+      padding: 20px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .gen-result-tema { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--text); }
+    .gen-result-gancho { font-size: 0.85rem; color: var(--muted); font-style: italic; border-left: 2px solid var(--accent); padding-left: 10px; }
+    .gen-result-section { display: flex; flex-direction: column; gap: 4px; }
+    .gen-result-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .gen-result-text { font-size: 0.82rem; color: var(--text); line-height: 1.6; white-space: pre-wrap; max-height: 180px; overflow-y: auto; }
+    .gen-slides-list { display: flex; flex-direction: column; gap: 6px; max-height: 240px; overflow-y: auto; }
+    .gen-slide { background: var(--s2); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+    .gen-slide-num { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 2px; }
+    .gen-slide-title { font-weight: 700; font-size: 0.85rem; color: var(--text); }
+    .gen-slide-text { font-size: 0.8rem; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+    .gen-add-btn {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 10px 22px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s;
+      align-self: flex-start;
+    }
+    .gen-add-btn:hover { opacity: 0.85; }
+
+    .gen-spinner {
+      width: 28px; height: 28px; border-radius: 50%; align-self: center; margin: 8px 0;
+      border: 3px solid rgba(200,169,110,0.2);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+
     /* TOOLTIP */
     [title] { cursor: help; }
   </style>
@@ -418,6 +483,7 @@
         <button class="view-btn" id="btnCalendario" onclick="setView('calendario')">Calendário</button>
       </div>
       <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
+      <button class="gen-btn" onclick="openGenerate()">✦ Gerar</button>
       <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
     </div>
   </header>
@@ -488,6 +554,76 @@
       <button class="cal-nav-btn" onclick="calNav(1)">Próximo →</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- MODAL GERAR CONTEÚDO IA -->
+  <div class="modal-overlay" id="generateOverlay" onclick="closeModalOutside(event)">
+    <div class="gen-modal">
+      <h2>✦ Gerar Conteúdo com IA</h2>
+
+      <!-- Parâmetros -->
+      <div class="modal-row">
+        <label class="modal" style="flex:1">Pilar
+          <select id="g-pilar" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+            <option>Estratégia de Marca</option>
+            <option>Marketing e Performance</option>
+            <option selected>Tecnologia e IA</option>
+            <option>Mentalidade e Gestão Empresarial</option>
+            <option>Bastidores e Diagnóstico</option>
+          </select>
+        </label>
+        <label class="modal" style="flex:1">Rede Social
+          <select id="g-rede" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+            <option value="Ambos" selected>Ambos</option>
+            <option value="Instagram">Instagram</option>
+            <option value="LinkedIn">LinkedIn</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-row">
+        <label class="modal" style="flex:1">Formato
+          <select id="g-formato" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+            <option>Carrossel</option>
+            <option>Post Único</option>
+            <option>Artigo</option>
+            <option>Notícia</option>
+          </select>
+        </label>
+        <label class="modal" style="flex:1">Variante Visual
+          <select id="g-variante" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+            <option>Dark</option>
+            <option>Blue</option>
+            <option>White</option>
+          </select>
+        </label>
+      </div>
+      <label style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Tema (opcional — deixe em branco para IA sugerir)
+        <input type="text" id="g-tema" placeholder="Ex: Como IA está mudando decisões empresariais em 2026" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+      </label>
+      <label style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Gancho (opcional — frase de abertura)
+        <input type="text" id="g-gancho" placeholder="Ex: 80% das empresas que usam IA não sabem medir o resultado." style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
+      </label>
+
+      <!-- Opções de geração -->
+      <div class="gen-divider"><span>Como gerar</span></div>
+      <div class="gen-option-row">
+        <button class="gen-option-btn ai" onclick="doGenerateAI()">
+          <span class="gen-opt-icon">🤖</span>
+          <span class="gen-opt-label">Gerar com IA</span>
+          <span class="gen-opt-desc">Anthropic API direto<br>no painel</span>
+        </button>
+        <button class="gen-option-btn claude" onclick="doOpenClaude()">
+          <span class="gen-opt-icon">📋</span>
+          <span class="gen-opt-label">Abrir no Claude</span>
+          <span class="gen-opt-desc">Copia prompt e abre<br>claude.ai</span>
+        </button>
+      </div>
+
+      <!-- Área de resultado (oculta até gerar) -->
+      <div id="gen-result-area" style="display:none"></div>
+
+      <button class="modal-cancel" onclick="closeModal('generateOverlay')" style="align-self:flex-end;margin-top:4px">Fechar</button>
+    </div>
   </div>
 
   <!-- MODAL NOVA PAUTA -->
@@ -889,9 +1025,10 @@
     function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
     function closeModal(id) { document.getElementById(id||'modalOverlay').classList.remove('open'); }
     function closeModalOutside(e) {
-      if (e.target.id==='modalOverlay')   closeModal('modalOverlay');
-      if (e.target.id==='detailOverlay')  closeModal('detailOverlay');
-      if (e.target.id==='publishOverlay') closeModal('publishOverlay');
+      if (e.target.id==='modalOverlay')    closeModal('modalOverlay');
+      if (e.target.id==='detailOverlay')   closeModal('detailOverlay');
+      if (e.target.id==='publishOverlay')  closeModal('publishOverlay');
+      if (e.target.id==='generateOverlay') closeModal('generateOverlay');
     }
 
     function savePauta() {
@@ -1220,6 +1357,215 @@
       if (!d) return '—';
       const [y,m,day] = d.split('-');
       return `${day}/${m}/${y}`;
+    }
+
+    // ── GERAÇÃO DE CONTEÚDO IA ────────────────────────────────
+
+    function openGenerate() {
+      document.getElementById('gen-result-area').style.display = 'none';
+      document.getElementById('gen-result-area').innerHTML = '';
+      document.getElementById('generateOverlay').classList.add('open');
+    }
+
+    function getGenParams() {
+      return {
+        pilar:       document.getElementById('g-pilar').value,
+        rede_social: document.getElementById('g-rede').value,
+        formato:     document.getElementById('g-formato').value,
+        variante:    document.getElementById('g-variante').value,
+        tema:        document.getElementById('g-tema').value.trim(),
+        gancho:      document.getElementById('g-gancho').value.trim(),
+      };
+    }
+
+    async function doGenerateAI() {
+      const url = getVercelUrl();
+      if (!url) {
+        showToast('Configure a URL do Vercel nas configurações (⚙ API) antes de usar a IA.', 'error');
+        return;
+      }
+
+      const params = getGenParams();
+      const area   = document.getElementById('gen-result-area');
+      area.style.display = 'flex';
+      area.style.flexDirection = 'column';
+      area.style.alignItems = 'center';
+      area.innerHTML = `<div class="gen-spinner"></div><div style="font-size:0.8rem;color:var(--muted);text-align:center">Gerando conteúdo com IA… pode levar alguns segundos</div>`;
+
+      try {
+        const r = await fetch(`${url}/api/generate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(params),
+        });
+        const d = await r.json();
+
+        if (!d.success) {
+          area.innerHTML = `<div style="color:#e07070;font-size:0.82rem;padding:12px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px">
+            ⚠ Erro: ${d.error || 'Falha ao gerar conteúdo.'}</div>`;
+          return;
+        }
+
+        renderGenResult(d.result, params);
+
+      } catch(e) {
+        area.innerHTML = `<div style="color:#e07070;font-size:0.82rem;padding:12px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px">
+          ⚠ Erro de conexão: ${e.message}</div>`;
+      }
+    }
+
+    function renderGenResult(result, params) {
+      const area   = document.getElementById('gen-result-area');
+      const slides = (result.slides || []).map((s, i) => `
+        <div class="gen-slide">
+          <div class="gen-slide-num">Slide ${s.numero || i+1}</div>
+          <div class="gen-slide-title">${escHtml(s.titulo || '')}</div>
+          ${s.texto ? `<div class="gen-slide-text">${escHtml(s.texto)}</div>` : ''}
+        </div>`).join('');
+
+      const picahBadges = (result.picah || []).map(x =>
+        `<span class="badge badge-picah">${x}</span>`).join('');
+
+      area.style.alignItems = 'stretch';
+      area.innerHTML = `
+        <div class="gen-result">
+          <div class="gen-result-tema">${escHtml(result.tema || '')}</div>
+          ${result.gancho ? `<div class="gen-result-gancho">${escHtml(result.gancho)}</div>` : ''}
+
+          <div class="card-meta" style="padding-top:0;border-top:none;gap:6px">
+            <span class="badge badge-pilar">${params.pilar}</span>
+            <span class="badge badge-formato">${params.formato}</span>
+            <span class="badge ${varianteBadgeClass(params.variante)}">${params.variante}</span>
+            <span class="badge ${redeBadgeClass(params.rede_social)}">${params.rede_social}</span>
+            ${picahBadges}
+          </div>
+
+          ${result.angulo_nexum ? `
+          <div class="gen-result-section">
+            <div class="gen-result-label">Ângulo Nexum360</div>
+            <div class="gen-result-text" style="max-height:60px">${escHtml(result.angulo_nexum)}</div>
+          </div>` : ''}
+
+          ${slides ? `
+          <div class="gen-result-section">
+            <div class="gen-result-label">${params.formato === 'Carrossel' ? 'Slides' : 'Conteúdo'}</div>
+            <div class="gen-slides-list">${slides}</div>
+          </div>` : ''}
+
+          ${result.legenda_ig ? `
+          <div class="gen-result-section">
+            <div class="gen-result-label">Legenda Instagram</div>
+            <div class="gen-result-text">${escHtml(result.legenda_ig)}</div>
+          </div>` : ''}
+
+          ${result.legenda_li ? `
+          <div class="gen-result-section">
+            <div class="gen-result-label">Legenda LinkedIn</div>
+            <div class="gen-result-text">${escHtml(result.legenda_li)}</div>
+          </div>` : ''}
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+            <button class="gen-add-btn" onclick="addGenToPautas()">
+              + Adicionar ao Repositório
+            </button>
+            <button onclick="copyGenResult()" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:0.75rem;font-weight:600;padding:10px 16px;border-radius:6px;cursor:pointer;letter-spacing:0.06em;text-transform:uppercase" onmouseover="this.style.borderColor='var(--accent)';this.style.color='var(--accent)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--muted)'">
+              📋 Copiar Legenda IG
+            </button>
+          </div>
+        </div>`;
+
+      // Salva resultado temporário para usar nos handlers
+      window._lastGenResult = { result, params };
+    }
+
+    function addGenToPautas() {
+      const { result, params } = window._lastGenResult || {};
+      if (!result) return;
+      const now   = new Date().toISOString().split('T')[0];
+      const newId = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+      pautas.unshift({
+        id:          newId,
+        tema:        result.tema        || params.tema || 'Conteúdo gerado por IA',
+        pilar:       params.pilar,
+        rede_social: params.rede_social,
+        formato:     params.formato,
+        variante:    params.variante,
+        status:      'Ideia',
+        gancho:      result.gancho      || '',
+        angulo_nexum:result.angulo_nexum|| '',
+        picah:       result.picah       || [],
+        legenda_ig:  result.legenda_ig  || '',
+        legenda_li:  result.legenda_li  || '',
+        fonte:       '',
+        arquivo:     '',
+        slide_preview:'',
+        data_criacao:now,
+        data_planejada:null,
+        data_publicacao:null,
+        notas:       `Gerado por IA em ${now}.`,
+      });
+      save();
+      closeModal('generateOverlay');
+      renderStats();
+      renderCards();
+      scaleCardIframes();
+      showToast(`✓ Pauta "${result.tema?.slice(0,40)}..." adicionada!`, 'success');
+    }
+
+    function copyGenResult() {
+      const { result } = window._lastGenResult || {};
+      if (!result?.legenda_ig) { showToast('Nenhuma legenda para copiar.', 'error'); return; }
+      navigator.clipboard.writeText(result.legenda_ig).then(() => {
+        showToast('Legenda Instagram copiada!', 'success');
+      });
+    }
+
+    // ── OPÇÃO 2: ABRIR NO CLAUDE.AI ───────────────────────────
+
+    function doOpenClaude() {
+      const p = getGenParams();
+      const temaTxt  = p.tema   ? `O tema é: "${p.tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
+      const ganchoTxt = p.gancho ? `O gancho sugerido: "${p.gancho}"` : 'Crie um gancho forte e original.';
+
+      const isCarrossel = p.formato === 'Carrossel';
+      const prompt = `Você é um estrategista sênior de marketing da Nexum360, especialista em posicionamento de marca, marketing orientado a resultados e inteligência artificial aplicada a negócios.
+
+PARÂMETROS DO CONTEÚDO:
+- Pilar: ${p.pilar}
+- Rede Social: ${p.rede_social}
+- Formato: ${p.formato}
+- Variante Visual: ${p.variante}
+- Tema: ${temaTxt}
+- Gancho: ${ganchoTxt}
+
+TOM DE VOZ:
+- Direto, inteligente e provocativo
+- Sem clichês e sem frases motivacionais vazias
+- Linguagem de negócio, não de influencer
+- Foque em clareza, profundidade e impacto
+- Público: empresários, gestores e decisores
+
+ESTRUTURA${isCarrossel ? ' CARROSSEL (8 slides):\n- Slide 1: Hook forte (máx 15 palavras)\n- Slides 2–6: Desenvolvimento progressivo (máx 40 palavras por slide)\n- Slide 7: Insight ou virada de chave\n- Slide 8: Fechamento + CTA' : ' POST ÚNICO:\n- Frase principal forte e compartilhável\n- Subtexto de apoio estratégico'}
+
+ENTREGUE:
+1. Tema/Título completo
+2. Gancho (frase de abertura)
+3. Ângulo Nexum360 (como posiciona a marca)
+4. ${isCarrossel ? 'Conteúdo de cada slide (número, título, texto)' : 'Conteúdo do post (título + texto)'}
+5. Legenda Instagram completa (com CTA + 12 hashtags)
+6. Legenda LinkedIn completa (com CTA + 10 hashtags)
+7. PICAH identificado (P/I/C/A/H)
+
+Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimento real — não em projeto piloto.`;
+
+      navigator.clipboard.writeText(prompt).then(() => {
+        showToast('Prompt copiado! Abrindo Claude.ai…', 'success');
+        setTimeout(() => window.open('https://claude.ai/new', '_blank'), 600);
+      }).catch(() => {
+        // Fallback se clipboard não disponível
+        window.open('https://claude.ai/new', '_blank');
+        showToast('Abriu Claude.ai. Cole o prompt manualmente.', '');
+      });
     }
 
     // Init

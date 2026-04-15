@@ -11,14 +11,16 @@ export default function handler(req, res) {
       access_token: !!process.env.LINKEDIN_ACCESS_TOKEN,
       person_id:    !!process.env.LINKEDIN_PERSON_ID,
     },
+    ai: {
+      anthropic_api_key: !!process.env.ANTHROPIC_API_KEY,
+    },
     vercel_url: process.env.VERCEL_URL || process.env.NEXT_PUBLIC_VERCEL_URL || 'não detectada',
   };
 
   const allOk =
     vars.instagram.user_id &&
     vars.instagram.access_token &&
-    vars.linkedin.access_token &&
-    vars.linkedin.person_id;
+    vars.ai.anthropic_api_key;
 
   res.status(200).json({
     status: allOk ? 'ok' : 'incompleto',
