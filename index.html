@@ -879,8 +879,12 @@
       localStorage.setItem('nexum360_vercel_url', val);
     }
     function loadVercelUrl() {
-      const saved = localStorage.getItem('nexum360_vercel_url') || '';
+      const DEFAULT = 'https://repositorio-pautas-git-main-luciano-castro.vercel.app';
+      const saved = localStorage.getItem('nexum360_vercel_url') || DEFAULT;
       document.getElementById('vercelUrl').value = saved;
+      if (!localStorage.getItem('nexum360_vercel_url')) {
+        localStorage.setItem('nexum360_vercel_url', DEFAULT);
+      }
       return saved;
     }
     function getVercelUrl() {
