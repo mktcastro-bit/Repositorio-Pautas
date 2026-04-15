@@ -82,15 +82,16 @@ export default async function handler(req, res) {
   }
 
   const {
-    pilar      = 'Tecnologia e IA',
-    rede_social = 'Ambos',
-    formato    = 'Carrossel',
-    variante   = 'Dark',
-    tema       = '',
-    gancho     = '',
+    pilar       = 'Tecnologia e IA',
+    rede_social  = 'Ambos',
+    formato     = 'Carrossel',
+    variante    = 'Dark',
+    pub_formato = 'feed',
+    tema        = '',
+    gancho      = '',
   } = req.body || {};
 
-  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, tema, gancho });
+  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, tema, gancho });
 
   try {
     const r = await fetch(ANTHROPIC_API, {
@@ -131,10 +132,17 @@ export default async function handler(req, res) {
 
 // ── HELPERS ───────────────────────────────────────────────────
 
-function buildUserPrompt({ pilar, rede_social, formato, variante, tema, gancho }) {
-  const isCarrossel = formato === 'Carrossel';
-  const temaTxt     = tema   ? `O tema é: "${tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
-  const ganchoTxt   = gancho ? `O gancho de abertura sugerido é: "${gancho}"` : 'Crie um gancho forte e original.';
+const PUB_FORMAT_LABELS = {
+  feed:  'Feed (post no grid do Instagram, proporção 4:5 — legenda completa)',
+  story: 'Story (vertical 9:16 — conteúdo direto, sem legenda longa, texto na própria imagem)',
+  reels: 'Reels (vídeo curto — forneça roteiro/script e legenda dinâmica para o vídeo)',
+};
+
+function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, tema, gancho }) {
+  const isCarrossel  = formato === 'Carrossel';
+  const pubLabel     = PUB_FORMAT_LABELS[pub_formato] || pub_formato;
+  const temaTxt      = tema   ? `O tema é: "${tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
+  const ganchoTxt    = gancho ? `O gancho de abertura sugerido é: "${gancho}"` : 'Crie um gancho forte e original.';
 
   const slidesSchema = isCarrossel
     ? `"slides": [{ "numero": 1, "titulo": "...", "texto": "..." }, ... (8 slides)]`
@@ -145,7 +153,8 @@ function buildUserPrompt({ pilar, rede_social, formato, variante, tema, gancho }
 PARÂMETROS:
 - Pilar: ${pilar}
 - Rede Social: ${rede_social}
-- Formato: ${formato}
+- Formato de conteúdo: ${formato}
+- Formato de publicação: ${pubLabel}
 - Variante Visual: ${variante}
 - Tema: ${temaTxt}
 - Gancho: ${ganchoTxt}

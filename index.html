@@ -581,7 +581,7 @@
         </label>
       </div>
       <div class="modal-row">
-        <label class="modal" style="flex:1">Formato
+        <label class="modal" style="flex:1">Formato de conteúdo
           <select id="g-formato" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
             <option>Carrossel</option>
             <option>Post Único</option>
@@ -596,6 +596,23 @@
             <option>White</option>
           </select>
         </label>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Formato de publicação</label>
+        <div style="display:flex;gap:8px" id="g-pub-format-selector">
+          <button onclick="selectGenPubFormat(this,'feed')" data-format="feed"
+            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--accent);background:rgba(200,169,110,0.1);color:var(--text);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+            📰 Feed
+          </button>
+          <button onclick="selectGenPubFormat(this,'story')" data-format="story"
+            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+            📖 Story
+          </button>
+          <button onclick="selectGenPubFormat(this,'reels')" data-format="reels"
+            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+            🎬 Reels
+          </button>
+        </div>
       </div>
       <label style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Tema (opcional — deixe em branco para IA sugerir)
         <input type="text" id="g-tema" placeholder="Ex: Como IA está mudando decisões empresariais em 2026" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
@@ -1364,17 +1381,43 @@
     function openGenerate() {
       document.getElementById('gen-result-area').style.display = 'none';
       document.getElementById('gen-result-area').innerHTML = '';
+      // Reset formato publicação para Feed
+      selectGenPubFormat(
+        document.querySelector('#g-pub-format-selector [data-format="feed"]'), 'feed'
+      );
       document.getElementById('generateOverlay').classList.add('open');
+    }
+
+    function selectGenPubFormat(btn, format) {
+      document.querySelectorAll('#g-pub-format-selector button').forEach(b => {
+        b.style.borderColor = 'var(--border)';
+        b.style.background  = 'transparent';
+        b.style.color       = 'var(--muted)';
+      });
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.background  = 'rgba(200,169,110,0.1)';
+      btn.style.color       = 'var(--text)';
+    }
+
+    function getGenPubFormat() {
+      const btns = document.querySelectorAll('#g-pub-format-selector button');
+      for (const b of btns) {
+        if (b.style.borderColor === 'var(--accent)' || b.style.background.includes('200')) {
+          return b.dataset.format;
+        }
+      }
+      return 'feed';
     }
 
     function getGenParams() {
       return {
-        pilar:       document.getElementById('g-pilar').value,
-        rede_social: document.getElementById('g-rede').value,
-        formato:     document.getElementById('g-formato').value,
-        variante:    document.getElementById('g-variante').value,
-        tema:        document.getElementById('g-tema').value.trim(),
-        gancho:      document.getElementById('g-gancho').value.trim(),
+        pilar:        document.getElementById('g-pilar').value,
+        rede_social:  document.getElementById('g-rede').value,
+        formato:      document.getElementById('g-formato').value,
+        variante:     document.getElementById('g-variante').value,
+        pub_formato:  getGenPubFormat(),
+        tema:         document.getElementById('g-tema').value.trim(),
+        gancho:       document.getElementById('g-gancho').value.trim(),
       };
     }
 
@@ -1524,8 +1567,9 @@
 
     function doOpenClaude() {
       const p = getGenParams();
-      const temaTxt  = p.tema   ? `O tema é: "${p.tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
+      const temaTxt   = p.tema   ? `O tema é: "${p.tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
       const ganchoTxt = p.gancho ? `O gancho sugerido: "${p.gancho}"` : 'Crie um gancho forte e original.';
+      const pubFmtMap = { feed: 'Feed (grid do Instagram, proporção 4:5)', story: 'Story (vertical 9:16, sem legenda longa)', reels: 'Reels (vídeo curto, roteiro/legenda dinâmica)' };
 
       const isCarrossel = p.formato === 'Carrossel';
       const prompt = `Você é um estrategista sênior de marketing da Nexum360, especialista em posicionamento de marca, marketing orientado a resultados e inteligência artificial aplicada a negócios.
@@ -1533,7 +1577,8 @@
 PARÂMETROS DO CONTEÚDO:
 - Pilar: ${p.pilar}
 - Rede Social: ${p.rede_social}
-- Formato: ${p.formato}
+- Formato de conteúdo: ${p.formato}
+- Formato de publicação: ${pubFmtMap[p.pub_formato] || p.pub_formato}
 - Variante Visual: ${p.variante}
 - Tema: ${temaTxt}
 - Gancho: ${ganchoTxt}
