@@ -5,10 +5,11 @@
  *
  * Body (JSON):
  * {
- *   type:      "single" | "carousel",
+ *   type:      "single" | "carousel" | "story" | "reels",
  *   caption:   "Texto da legenda...",
- *   imageUrl:  "https://..." (para single)
+ *   imageUrl:  "https://..." (para single e story)
  *   imageUrls: ["https://...", ...] (para carousel — máx 10)
+ *   videoUrl:  "https://...mp4" (para reels)
  * }
  *
  * Variáveis de ambiente necessárias:
@@ -31,12 +32,54 @@ export default async function handler(req, res) {
     });
   }
 
-  const { type = 'single', caption = '', imageUrl, imageUrls = [] } = req.body || {};
+  const { type = 'single', caption = '', imageUrl, imageUrls = [], videoUrl } = req.body || {};
 
   try {
     let postId;
 
-    if (type === 'carousel') {
+    if (type === 'story') {
+      // ── STORY ─────────────────────────────────────────────────
+      if (!imageUrl) return res.status(400).json({ error: 'imageUrl é obrigatório para story.' });
+
+      const container = await graphPost(`/${userId}/media`, {
+        image_url:    imageUrl,
+        media_type:   'IMAGE',
+        access_token: token,
+      });
+      if (container.error) throw new Error(container.error.message);
+
+      await waitForStatus(container.id, token);
+
+      const pub = await graphPost(`/${userId}/media_publish`, {
+        creation_id:  container.id,
+        access_token: token,
+      });
+      if (pub.error) throw new Error(pub.error.message);
+      postId = pub.id;
+
+    } else if (type === 'reels') {
+      // ── REELS ─────────────────────────────────────────────────
+      if (!videoUrl) return res.status(400).json({ error: 'videoUrl é obrigatório para reels.' });
+
+      const container = await graphPost(`/${userId}/media`, {
+        media_type:   'REELS',
+        video_url:    videoUrl,
+        caption:      caption,
+        access_token: token,
+      });
+      if (container.error) throw new Error(container.error.message);
+
+      // Reels levam mais tempo para processar (até 5 min)
+      await waitForStatus(container.id, token, 300000);
+
+      const pub = await graphPost(`/${userId}/media_publish`, {
+        creation_id:  container.id,
+        access_token: token,
+      });
+      if (pub.error) throw new Error(pub.error.message);
+      postId = pub.id;
+
+    } else if (type === 'carousel') {
       // ── CARROSSEL ─────────────────────────────────────────────
       if (!imageUrls.length) {
         return res.status(400).json({ error: 'imageUrls é obrigatório para carousel.' });

@@ -950,21 +950,44 @@
 
       document.getElementById('publishContent').innerHTML = `
         <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem">Publicar Post</h2>
-        <div style="font-size:0.85rem;color:var(--muted);line-height:1.5">${p.tema}</div>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.5;margin-bottom:4px">${p.tema}</div>
 
         ${!url ? `<div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px;padding:14px;font-size:0.8rem;color:#e07070">
           ⚠ Configure a URL da API Vercel nas configurações (botão ⚙ API no topo) antes de publicar.
         </div>` : ''}
 
-        ${isCarousel ? `
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URLs dos slides no Vercel (uma por linha)</label>
-          <textarea id="pub-carousel-urls" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.78rem;padding:10px;border-radius:6px;outline:none;resize:vertical;min-height:100px;font-family:monospace" placeholder="https://seu-dominio.vercel.app/posts/slide-01.png&#10;https://seu-dominio.vercel.app/posts/slide-02.png">${buildCarouselUrls(p, url)}</textarea>
-        </div>` : `
-        <div style="display:flex;flex-direction:column;gap:6px">
-          <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URL da imagem no Vercel</label>
-          <input id="pub-image-url" type="text" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.82rem;padding:9px 12px;border-radius:6px;outline:none" value="${buildImageUrl(p, url)}" placeholder="https://seu-dominio.vercel.app/posts/imagem.png">
-        </div>`}
+        <!-- Seletor de formato -->
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Formato de publicação</label>
+          <div style="display:flex;gap:8px" id="pub-format-selector">
+            <button onclick="selectPubFormat(this,'feed')" class="pub-format-btn active" data-format="feed"
+              style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--accent);background:var(--accent-alpha);color:var(--text);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+              📰 Feed
+            </button>
+            <button onclick="selectPubFormat(this,'story')" class="pub-format-btn" data-format="story"
+              style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+              📖 Story
+            </button>
+            <button onclick="selectPubFormat(this,'reels')" class="pub-format-btn" data-format="reels"
+              style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
+              🎬 Reels
+            </button>
+          </div>
+          <div id="pub-format-hint" style="font-size:0.75rem;color:var(--muted)">Feed: post no grid do Instagram (proporção 4:5)</div>
+        </div>
+
+        <!-- Campo de mídia — varia conforme formato -->
+        <div id="pub-media-field">
+          ${isCarousel ? `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URLs dos slides (uma por linha)</label>
+            <textarea id="pub-carousel-urls" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.78rem;padding:10px;border-radius:6px;outline:none;resize:vertical;min-height:100px;font-family:monospace">${buildCarouselUrls(p, url)}</textarea>
+          </div>` : `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URL da imagem</label>
+            <input id="pub-image-url" type="text" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.82rem;padding:9px 12px;border-radius:6px;outline:none" value="${buildImageUrl(p, url)}" placeholder="https://...imagem.png">
+          </div>`}
+        </div>
 
         <div class="publish-row">
           ${hasIg ? `<button class="pub-btn pub-btn-ig" onclick="doPublish(${id},'instagram')" ${!canPublish?'disabled':''}>
@@ -981,6 +1004,55 @@
       `;
       closeModal('detailOverlay');
       document.getElementById('publishOverlay').classList.add('open');
+    }
+
+    // ── SELETOR DE FORMATO ────────────────────────────────────
+    const FORMAT_HINTS = {
+      feed:  'Feed: post no grid do Instagram (proporção 4:5)',
+      story: 'Story: imagem vertical 9:16 — dura 24h',
+      reels: 'Reels: vídeo curto — informe a URL do arquivo MP4'
+    };
+
+    function selectPubFormat(btn, format) {
+      document.querySelectorAll('.pub-format-btn').forEach(b => {
+        b.style.borderColor     = 'var(--border)';
+        b.style.background      = 'transparent';
+        b.style.color           = 'var(--muted)';
+      });
+      btn.style.borderColor = 'var(--accent)';
+      btn.style.background  = 'var(--accent-alpha)';
+      btn.style.color       = 'var(--text)';
+      document.getElementById('pub-format-hint').textContent = FORMAT_HINTS[format] || '';
+
+      // Para Reels: trocar campo de imagem por campo de vídeo
+      const mediaField = document.getElementById('pub-media-field');
+      if (format === 'reels') {
+        mediaField.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URL do vídeo (MP4 público)</label>
+            <input id="pub-video-url" type="text" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.82rem;padding:9px 12px;border-radius:6px;outline:none" placeholder="https://...video.mp4">
+            <span style="font-size:0.72rem;color:var(--muted)">O vídeo precisa ser hospedado em URL pública acessível pelo Instagram.</span>
+          </div>`;
+      } else if (format === 'story') {
+        const cur = document.getElementById('pub-image-url');
+        const val = cur ? cur.value : '';
+        mediaField.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URL da imagem (formato 9:16 recomendado)</label>
+            <input id="pub-image-url" type="text" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.82rem;padding:9px 12px;border-radius:6px;outline:none" value="${val}" placeholder="https://...imagem.png">
+          </div>`;
+      }
+    }
+
+    function getPubFormat() {
+      const active = document.querySelector('.pub-format-btn.active') ||
+                     document.querySelector('[data-format][style*="accent"]');
+      // Pega o botão com borda accent (ativo)
+      const btns = document.querySelectorAll('.pub-format-btn');
+      for (const b of btns) {
+        if (b.style.borderColor.includes('200') || b.style.borderColor === 'var(--accent)') return b.dataset.format;
+      }
+      return 'feed';
     }
 
     function buildImageUrl(p, baseUrl) {
@@ -1020,10 +1092,15 @@
       if (!url) return showToast('Configure a URL do Vercel primeiro.', 'error');
 
       const isCarousel = p.formato === 'Carrossel';
-      let imageUrl   = '';
-      let imageUrls  = [];
+      const pubFormat  = getPubFormat(); // 'feed' | 'story' | 'reels'
+      let imageUrl  = '';
+      let imageUrls = [];
+      let videoUrl  = '';
 
-      if (isCarousel) {
+      if (pubFormat === 'reels') {
+        videoUrl = document.getElementById('pub-video-url')?.value.trim() || '';
+        if (!videoUrl) return showToast('Informe a URL do vídeo MP4.', 'error');
+      } else if (isCarousel && pubFormat === 'feed') {
         const raw = document.getElementById('pub-carousel-urls')?.value || '';
         imageUrls = raw.split('\n').map(s => s.trim()).filter(Boolean);
         if (!imageUrls.length) return showToast('Adicione ao menos uma URL de slide.', 'error');
@@ -1045,9 +1122,16 @@
         showToast(`Publicando no ${netLabel}... aguarde`, 'loading', true);
 
         try {
-          const body = isCarousel && net === 'instagram'
-            ? { type: 'carousel', caption, imageUrls }
-            : { type: 'single',   caption, imageUrl };
+          let body;
+          if (net === 'instagram') {
+            if (pubFormat === 'reels')                    body = { type: 'reels',    caption, videoUrl };
+            else if (pubFormat === 'story')               body = { type: 'story',    imageUrl };
+            else if (isCarousel)                          body = { type: 'carousel', caption, imageUrls };
+            else                                          body = { type: 'single',   caption, imageUrl };
+          } else {
+            // LinkedIn só suporta feed
+            body = { caption, imageUrl: imageUrl || videoUrl };
+          }
 
           const r = await fetch(`${url}/api/${net}`, {
             method:  'POST',
