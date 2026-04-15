@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexum360 — Repositório de Pautas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0a0a0a;
+      --s1:      #111111;
+      --s2:      #161616;
+      --border:  #1e1e1e;
+      --accent:  #c8a96e;
+      --text:    #f0f0f0;
+      --muted:   #888888;
+      --green:   #4caf7d;
+      --yellow:  #e8b84b;
+      --blue:    #4d8fda;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* ── HEADER ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 20px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0;
+      background: rgba(10,10,10,0.92); backdrop-filter: blur(12px); z-index: 100;
+    }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 400; }
+    .logo span { color: var(--accent); }
+    .header-subtitle { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    /* ── STATS ── */
+    .stats-bar { display: flex; gap: 28px; padding: 20px 48px; border-bottom: 1px solid var(--border); background: var(--s1); flex-wrap: wrap; }
+    .stat { display: flex; flex-direction: column; gap: 3px; }
+    .stat-value { font-family: 'Playfair Display', serif; font-size: 1.9rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .stat-divider { width: 1px; background: var(--border); }
+
+    /* ── TOOLBAR ── */
+    .toolbar {
+      padding: 20px 48px;
+      background: var(--s1);
+      border-bottom: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .filter-group {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-group:last-child { border-bottom: none; }
+
+    .toolbar-label {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 0.65rem; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--muted);
+      min-width: 110px; flex-shrink: 0;
+    }
+    .toolbar-label::after {
+      content: '';
+      display: block; width: 1px; height: 14px;
+      background: var(--border); margin-left: 6px;
+    }
+
+    .filter-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--muted);
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em;
+      padding: 5px 14px; border-radius: 6px;
+      cursor: pointer; transition: all 0.18s ease;
+      text-transform: uppercase; white-space: nowrap;
+    }
+    .filter-btn:hover { background: rgba(200,169,110,0.08); color: var(--accent); }
+    .filter-btn.active {
+      background: rgba(200,169,110,0.15);
+      border-color: rgba(200,169,110,0.4);
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* ── VIEW TOGGLE ── */
+    .view-toggle { display: flex; gap: 6px; background: var(--s1); border: 1px solid var(--border); border-radius: 8px; padding: 4px; }
+    .view-btn {
+      background: transparent; border: none; color: var(--muted);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 5px; cursor: pointer; transition: all 0.2s ease;
+    }
+    .view-btn.active { background: var(--accent); color: #0a0a0a; }
+
+    /* ── GRID ── */
+    .grid { padding: 28px 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; display: flex; flex-direction: column; gap: 14px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: rgba(200,169,110,0.3); transform: translateY(-2px); }
+    .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+    .card-tema { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .card-gancho { font-size: 0.85rem; color: var(--muted); line-height: 1.5; font-style: italic; border-left: 2px solid var(--accent); padding-left: 12px; }
+    .card-angulo { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .card-angulo strong { color: var(--text); font-weight: 600; }
+    .card-meta { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+    .card-fonte { font-size: 0.68rem; color: var(--muted); opacity: 0.6; }
+    .card-date { font-size: 0.68rem; color: var(--muted); opacity: 0.7; display: flex; gap: 12px; }
+    .card-actions { display: flex; gap: 7px; margin-top: 2px; }
+
+    /* BADGES */
+    .badge { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; }
+    .badge-pilar { background: rgba(200,169,110,0.1); color: var(--accent); }
+    .badge-formato { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+    .badge-variante-dark  { background: #1a1a1a; color: var(--muted); border: 1px solid #2a2a2a; }
+    .badge-variante-blue  { background: rgba(77,143,218,0.12); color: var(--blue); border: 1px solid rgba(77,143,218,0.2); }
+    .badge-variante-white { background: rgba(255,255,255,0.08); color: #ccc; border: 1px solid rgba(255,255,255,0.15); }
+    .badge-picah { background: rgba(200,169,110,0.08); color: var(--accent); border: 1px solid rgba(200,169,110,0.15); }
+    .badge-ig   { background: rgba(225,100,100,0.12); color: #e07070; border: 1px solid rgba(225,100,100,0.2); }
+    .badge-li   { background: rgba(77,143,218,0.12); color: var(--blue); border: 1px solid rgba(77,143,218,0.2); }
+    .badge-ambos{ background: rgba(200,169,110,0.1); color: var(--accent); border: 1px solid rgba(200,169,110,0.2); }
+
+    /* STATUS PILLS */
+    .status-pill { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 4px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+    .status-Publicado { background: rgba(76,175,125,0.15); color: var(--green);  border: 1px solid rgba(76,175,125,0.3); }
+    .status-Produção  { background: rgba(232,184,75,0.15);  color: var(--yellow); border: 1px solid rgba(232,184,75,0.3); }
+    .status-Ideia     { background: rgba(200,169,110,0.1);  color: var(--accent); border: 1px solid rgba(200,169,110,0.25); }
+
+    /* ACTION BUTTONS */
+    .action-btn {
+      flex: 1; background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .action-btn a { color: inherit; text-decoration: none; }
+    .action-btn.danger:hover { border-color: #c0392b; color: #c0392b; }
+
+    /* STATUS SELECT */
+    .status-select {
+      flex: 1; background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 7px 10px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+      outline: none; appearance: none; -webkit-appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23888'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center;
+      padding-right: 28px;
+    }
+    .status-select:hover { border-color: var(--accent); color: var(--accent); }
+    .status-select option { background: #161616; color: #f0f0f0; text-transform: none; font-weight: 600; }
+
+    /* CARD CLICKABLE */
+    .card { cursor: pointer; }
+    .card-actions { cursor: default; }
+    .card-actions * { cursor: pointer; }
+
+    /* CARD PREVIEW IMAGE */
+    .card-preview {
+      width: calc(100% + 48px); margin: -24px -24px 0;
+      height: 150px; object-fit: cover; object-position: top;
+      border-radius: 12px 12px 0 0; display: block;
+    }
+
+    /* CARD LEGENDA */
+    .card-legenda-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .card-legenda-tabs { display: flex; gap: 6px; }
+    .legenda-tab {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 4px; cursor: pointer;
+      border: 1px solid var(--border); color: var(--muted); background: transparent;
+      transition: all 0.15s;
+    }
+    .legenda-tab.active { background: rgba(200,169,110,0.15); border-color: rgba(200,169,110,0.4); color: var(--accent); }
+    .card-legenda {
+      font-size: 0.8rem; color: var(--muted); line-height: 1.6;
+      white-space: pre-wrap; overflow: hidden;
+      display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+    }
+    .card-legenda.expanded { display: block; }
+    .legenda-toggle {
+      font-size: 0.68rem; color: var(--accent); cursor: pointer;
+      background: none; border: none; padding: 0; font-weight: 600;
+      text-align: left; letter-spacing: 0.04em;
+    }
+
+    /* DETAIL MODAL WIDE */
+    .detail-modal {
+      background: var(--s2); border: 1px solid var(--border); border-radius: 16px;
+      width: 100%; max-width: 860px;
+      display: grid; grid-template-columns: 280px 1fr; gap: 0;
+      overflow: hidden;
+    }
+    .detail-preview {
+      background: #000;
+      display: flex; align-items: center; justify-content: center;
+      border-right: 1px solid var(--border);
+      min-height: 360px; position: relative; overflow: hidden;
+    }
+    .detail-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .detail-preview-empty {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 12px; padding: 32px; text-align: center;
+    }
+    .detail-preview-empty span { font-size: 2.5rem; opacity: 0.3; }
+    .detail-preview-empty p { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .detail-body { padding: 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 85vh; }
+    .detail-tema { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .detail-row { display: flex; flex-direction: column; gap: 4px; }
+    .detail-row-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .detail-row-value { font-size: 0.85rem; color: var(--text); line-height: 1.55; }
+    .detail-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .detail-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s; text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .detail-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .detail-btn.primary { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+    .detail-btn.primary:hover { opacity: 0.85; }
+    .detail-btn.publish { background: #1a1a1a; border-color: var(--green); color: var(--green); }
+    .detail-btn.publish:hover { background: rgba(76,175,125,0.12); }
+    .detail-btn.publish:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* PUBLISH TOAST */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%);
+      background: var(--s2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 24px; font-size: 0.85rem; color: var(--text);
+      display: flex; align-items: center; gap: 12px;
+      z-index: 500; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; pointer-events: auto; }
+    .toast.success { border-color: var(--green); }
+    .toast.error   { border-color: #c0392b; }
+
+    /* SETTINGS BAR */
+    .settings-bar {
+      padding: 14px 48px; background: var(--s2);
+      border-bottom: 1px solid var(--border);
+      display: none; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .settings-bar.open { display: flex; }
+    .settings-bar label { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+    .settings-bar input {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.82rem; padding: 7px 12px; border-radius: 6px; outline: none;
+      width: 320px; transition: border-color 0.2s;
+    }
+    .settings-bar input:focus { border-color: var(--accent); }
+    .settings-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .api-status { font-size: 0.72rem; display: flex; align-items: center; gap: 6px; }
+    .api-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+    .api-dot.ok  { background: var(--green); }
+    .api-dot.err { background: #c0392b; }
+
+    /* PUBLISH NETWORK BTNS */
+    .publish-row { display: flex; gap: 8px; }
+    .pub-btn {
+      flex: 1; padding: 10px; border-radius: 8px; cursor: pointer; font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border: 1px solid;
+      transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .pub-btn-ig  { background: rgba(225,100,100,0.1); border-color: rgba(225,100,100,0.3); color: #e07070; }
+    .pub-btn-ig:hover  { background: rgba(225,100,100,0.2); }
+    .pub-btn-li  { background: rgba(77,143,218,0.1); border-color: rgba(77,143,218,0.3); color: var(--blue); }
+    .pub-btn-li:hover  { background: rgba(77,143,218,0.2); }
+    .pub-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── CALENDAR ── */
+    .calendar-wrap { padding: 28px 48px; display: none; }
+    .calendar-wrap.active { display: block; }
+
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .cal-title { font-family: 'Playfair Display', serif; font-size: 1.6rem; font-weight: 700; color: var(--text); }
+    .cal-nav-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.8rem; font-weight: 600; padding: 8px 18px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    }
+    .cal-nav-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .cal-dow { background: var(--s2); padding: 10px 8px; font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; }
+    .cal-cell { background: var(--s1); min-height: 110px; padding: 10px 8px; display: flex; flex-direction: column; gap: 4px; position: relative; }
+    .cal-cell.other-month { background: var(--bg); opacity: 0.5; }
+    .cal-cell.today { background: rgba(200,169,110,0.06); }
+    .cal-day-num { font-size: 0.8rem; font-weight: 600; color: var(--muted); margin-bottom: 4px; }
+    .cal-cell.today .cal-day-num { color: var(--accent); font-weight: 700; }
+
+    .cal-chip {
+      font-size: 0.62rem; font-weight: 600; padding: 3px 7px; border-radius: 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+      cursor: pointer; transition: opacity 0.15s;
+    }
+    .cal-chip:hover { opacity: 0.75; }
+    .chip-Ideia     { background: rgba(200,169,110,0.18); color: var(--accent); }
+    .chip-Produção  { background: rgba(232,184,75,0.18);  color: var(--yellow); }
+    .chip-Publicado { background: rgba(76,175,125,0.18);  color: var(--green); }
+
+    /* ── EMPTY ── */
+    .empty { grid-column: 1 / -1; text-align: center; padding: 80px; color: var(--muted); font-size: 0.9rem; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(6px); z-index: 200; align-items: center; justify-content: center; padding: 40px; overflow-y: auto; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--s2); border: 1px solid var(--border); border-radius: 16px; padding: 36px; width: 100%; max-width: 580px; display: flex; flex-direction: column; gap: 16px; }
+    .modal h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--text); }
+    .modal label { display: flex; flex-direction: column; gap: 5px; font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .modal input, .modal select, .modal textarea {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.88rem;
+      padding: 9px 13px; border-radius: 6px; outline: none; transition: border-color 0.2s;
+    }
+    .modal input:focus, .modal select:focus, .modal textarea:focus { border-color: var(--accent); }
+    .modal textarea { resize: vertical; min-height: 72px; }
+    .modal select option { background: var(--s2); }
+    .modal-row { display: flex; gap: 14px; }
+    .modal-row label { flex: 1; }
+    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 4px; }
+    .modal-cancel { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 0.78rem; font-weight: 600; padding: 9px 22px; border-radius: 6px; cursor: pointer; }
+    .modal-cancel:hover { border-color: var(--muted); }
+    .modal-save { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 26px; border-radius: 6px; cursor: pointer; }
+    .modal-save:hover { opacity: 0.85; }
+
+    /* DETAIL MODAL */
+    .detail-modal { background: var(--s2); border: 1px solid var(--border); border-radius: 16px; padding: 36px; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; }
+    .detail-tema { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .detail-row { display: flex; flex-direction: column; gap: 4px; }
+    .detail-row-label { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .detail-row-value { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+
+    /* PICAH LEGEND */
+    .picah-legend { display: flex; gap: 16px; padding: 0 48px 18px; font-size: 0.7rem; color: var(--muted); flex-wrap: wrap; }
+    .picah-legend span { color: var(--accent); font-weight: 700; }
+
+    /* ADD BTN */
+    .add-btn { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 22px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
+    .add-btn:hover { opacity: 0.85; }
+
+    /* TOOLTIP */
+    [title] { cursor: help; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div>
+      <div class="logo">nexum<span>360</span></div>
+      <div class="header-subtitle">Repositório de Pautas</div>
+    </div>
+    <div class="header-right">
+      <div class="view-toggle">
+        <button class="view-btn active" id="btnLista" onclick="setView('lista')">Lista</button>
+        <button class="view-btn" id="btnCalendario" onclick="setView('calendario')">Calendário</button>
+      </div>
+      <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
+      <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
+    </div>
+  </header>
+
+  <!-- SETTINGS BAR -->
+  <div class="settings-bar" id="settingsBar">
+    <label>URL da API Vercel
+      <input type="text" id="vercelUrl" placeholder="https://nexum360-publisher.vercel.app" oninput="saveVercelUrl()">
+    </label>
+    <button class="settings-btn" onclick="checkHealth()">Testar conexão</button>
+    <div class="api-status" id="apiStatus"><div class="api-dot" id="apiDot"></div><span id="apiMsg">Não testado</span></div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar" id="statsBar"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="filter-group">
+      <span class="toolbar-label">Status</span>
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="status" data-value="todos" onclick="setFilter('status','todos',this)">Todos</button>
+        <button class="filter-btn" data-filter="status" data-value="Ideia" onclick="setFilter('status','Ideia',this)">Ideia</button>
+        <button class="filter-btn" data-filter="status" data-value="Produção" onclick="setFilter('status','Produção',this)">Em Produção</button>
+        <button class="filter-btn" data-filter="status" data-value="Publicado" onclick="setFilter('status','Publicado',this)">Publicado</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="toolbar-label">Pilar</span>
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="pilar" data-value="todos" onclick="setFilter('pilar','todos',this)">Todos</button>
+        <button class="filter-btn" data-filter="pilar" data-value="Estratégia de Marca" onclick="setFilter('pilar','Estratégia de Marca',this)">Estratégia de Marca</button>
+        <button class="filter-btn" data-filter="pilar" data-value="Marketing e Performance" onclick="setFilter('pilar','Marketing e Performance',this)">Marketing e Performance</button>
+        <button class="filter-btn" data-filter="pilar" data-value="Tecnologia e IA" onclick="setFilter('pilar','Tecnologia e IA',this)">Tecnologia e IA</button>
+        <button class="filter-btn" data-filter="pilar" data-value="Mentalidade e Gestão Empresarial" onclick="setFilter('pilar','Mentalidade e Gestão Empresarial',this)">Mentalidade e Gestão</button>
+        <button class="filter-btn" data-filter="pilar" data-value="Bastidores e Diagnóstico" onclick="setFilter('pilar','Bastidores e Diagnóstico',this)">Bastidores</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="toolbar-label">Rede Social</span>
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="rede_social" data-value="todos" onclick="setFilter('rede_social','todos',this)">Todas</button>
+        <button class="filter-btn" data-filter="rede_social" data-value="Instagram" onclick="setFilter('rede_social','Instagram',this)">Instagram</button>
+        <button class="filter-btn" data-filter="rede_social" data-value="LinkedIn" onclick="setFilter('rede_social','LinkedIn',this)">LinkedIn</button>
+        <button class="filter-btn" data-filter="rede_social" data-value="Ambos" onclick="setFilter('rede_social','Ambos',this)">Ambos</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="toolbar-label">Formato</span>
+      <div class="filter-pills">
+        <button class="filter-btn active" data-filter="formato" data-value="todos" onclick="setFilter('formato','todos',this)">Todos</button>
+        <button class="filter-btn" data-filter="formato" data-value="Carrossel" onclick="setFilter('formato','Carrossel',this)">Carrossel</button>
+        <button class="filter-btn" data-filter="formato" data-value="Post Único" onclick="setFilter('formato','Post Único',this)">Post Único</button>
+        <button class="filter-btn" data-filter="formato" data-value="Artigo" onclick="setFilter('formato','Artigo',this)">Artigo</button>
+        <button class="filter-btn" data-filter="formato" data-value="Notícia" onclick="setFilter('formato','Notícia',this)">Notícia</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LISTA -->
+  <div class="grid" id="grid"></div>
+
+  <!-- CALENDÁRIO -->
+  <div class="calendar-wrap" id="calendarWrap">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="calNav(-1)">← Anterior</button>
+      <div class="cal-title" id="calTitle"></div>
+      <button class="cal-nav-btn" onclick="calNav(1)">Próximo →</button>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- MODAL NOVA PAUTA -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal">
+      <h2>Nova Pauta</h2>
+      <label>Tema / Título
+        <input type="text" id="f-tema" placeholder="Ex: IA generativa nos processos de vendas">
+      </label>
+      <div class="modal-row">
+        <label>Pilar
+          <select id="f-pilar">
+            <option>Estratégia de Marca</option>
+            <option>Marketing e Performance</option>
+            <option selected>Tecnologia e IA</option>
+            <option>Mentalidade e Gestão Empresarial</option>
+            <option>Bastidores e Diagnóstico</option>
+          </select>
+        </label>
+        <label>Rede Social
+          <select id="f-rede">
+            <option value="Ambos" selected>Ambos</option>
+            <option value="Instagram">Instagram</option>
+            <option value="LinkedIn">LinkedIn</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-row">
+        <label>Formato
+          <select id="f-formato">
+            <option>Carrossel</option>
+            <option>Post Único</option>
+            <option>Artigo</option>
+            <option>Notícia</option>
+          </select>
+        </label>
+        <label>Variante Visual
+          <select id="f-variante">
+            <option>Dark</option>
+            <option>Blue</option>
+            <option>White</option>
+          </select>
+        </label>
+      </div>
+      <div class="modal-row">
+        <label>Status
+          <select id="f-status">
+            <option>Ideia</option>
+            <option>Produção</option>
+            <option>Publicado</option>
+          </select>
+        </label>
+        <label>Data Planejada
+          <input type="date" id="f-data-planejada">
+        </label>
+      </div>
+      <label>Gancho (frase de abertura)
+        <input type="text" id="f-gancho" placeholder="Ex: 80% dos gestores tomam decisões sem dados.">
+      </label>
+      <label>Ângulo Nexum360
+        <textarea id="f-angulo" placeholder="Como isso se conecta ao posicionamento da Nexum360?"></textarea>
+      </label>
+      <label>Fonte (opcional)
+        <input type="text" id="f-fonte" placeholder="Ex: HBR, Gartner, próprio…">
+      </label>
+      <label>PICAH (letras separadas por vírgula)
+        <input type="text" id="f-picah" placeholder="Ex: P, A">
+      </label>
+      <label>Notas internas
+        <textarea id="f-notas" placeholder="Observações…"></textarea>
+      </label>
+      <div class="modal-actions">
+        <button class="modal-cancel" onclick="closeModal('modalOverlay')">Cancelar</button>
+        <button class="modal-save" onclick="savePauta()">Salvar Pauta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DETALHE -->
+  <div class="modal-overlay" id="detailOverlay" onclick="closeModalOutside(event)">
+    <div class="detail-modal" id="detailContent"></div>
+  </div>
+
+  <!-- MODAL PUBLICAR -->
+  <div class="modal-overlay" id="publishOverlay" onclick="closeModalOutside(event)">
+    <div class="modal" style="max-width:480px" id="publishContent"></div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STORAGE_KEY = 'nexum360_pautas_v4';
+
+    const defaultData = [
+      { id:1, tema:"A IA não vai te substituir — vai substituir quem não a usa", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Dark", picah:["P","I"], status:"Publicado", gancho:"A IA não vai te substituir. Vai substituir quem não a usa.", angulo_nexum:"Posiciona a Nexum360 como parceira de transformação, não de substituição.", fonte:"", arquivo:"../01-transformacao-digital/transformacao-digital-carrossel.html", slide_preview:"../01-transformacao-digital/slides/slide-01.png", legenda_ig:"A IA não vai te substituir.\nA pessoa que sabe usar IA, vai.\n\nE essa pessoa pode ser você — ou o seu concorrente.\n\nA transformação digital chegou para separar quem evolui de quem fica parado esperando a tempestade passar.\n\nFerramenta não demite ninguém. Quem demite é o gestor que percebeu que uma ferramenta faz o que você faz — mais rápido, mais barato, sem reclamar.\n\nA pergunta certa não é \"vou ser substituído?\"\nÉ \"o que eu consigo fazer com tecnologia que ninguém mais consegue?\"\n\nArraste os slides e veja como essa virada acontece na prática. 👉\n\nQuer entender como aplicar isso no seu negócio?\nFale com a Nexum360. 🔗 nexum360.com.br\n\n#TransformaçãoDigital #InteligênciaArtificial #MarketingDigital #Nexum360 #EstratégiaDeNegócios #InovacaoEmpresarial #Branding #IA #Automacao #GestaoEmpresarial #Crescimento #MarketingB2B #FuturoDoTrabalho #Tecnologia #Negocios", legenda_li:"A tecnologia não substitui pessoas.\nA falta de domínio dela, sim.\n\nToda grande transformação digital tem um ponto em comum: as empresas e profissionais que saíram na frente não foram os que tinham mais budget ou mais equipe. Foram os que entenderam mais rápido como usar as novas ferramentas a seu favor.\n\nIA, automação e dados não são ameaças — são vantagens competitivas para quem sabe operá-las estrategicamente.\n\nQual é o seu próximo movimento?\n\nNa Nexum360, ajudamos, treinamos e posicionamos empresas para dominar a tecnologia que gera resultado.\n\n📩 nexum360.com.br\n\n#TransformacaoDigital #InteligenciaArtificial #Estrategia #Negocios #Inovacao #Nexum360 #Marketing #Automacao #LiderancaEmpresarial #GestaoDeNegócios #IA #FuturoDigital #Crescimento #B2B", data_criacao:"2026-04-13", data_planejada:"2026-04-13", data_publicacao:"2026-04-13", notas:"Carrossel de 8 slides." },
+      { id:2, tema:"Apenas 1 em cada 50 investimentos em IA entrega resultado real (Gartner 2025)", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Post Único", variante:"Blue", picah:["A","P"], status:"Publicado", gancho:"Ferramenta sem método é despesa disfarçada de inovação.", angulo_nexum:"Estratégia antes de ferramenta. A ordem importa.", fonte:"Gartner Research, 2025", arquivo:"../02-ia-sem-estrategia/ia-sem-estrategia-card.html", slide_preview:"../02-ia-sem-estrategia/ia-sem-estrategia-card.png", legenda_ig:"Apenas 1 em cada 50 investimentos em IA entrega transformação real.\n\nO Gartner acaba de confirmar o que a gente já via acontecer nas empresas:\n\n→ 2% geram transformação real\n→ 18% têm algum retorno, mas nada que mude o negócio\n→ 80% não geram absolutamente nada mensurável\n\nO problema não é a IA. O problema é que a maioria das empresas compra ferramenta sem ter estratégia, processo ou método por trás.\n\nFerramenta sem método é despesa disfarçada de inovação.\n\nAntes de investir em tecnologia, a sua empresa sabe responder:\n— Qual problema específico isso resolve?\n— Como vai ser medido?\n— Quem vai operar e com qual processo?\n\nSe não tem resposta, o investimento já começou errado.\n\n📌 Fonte: Gartner Research, 2025 — via Seu Dinheiro\n\nQuer estruturar uma estratégia de IA que realmente entregue resultado?\nFala com a Nexum360. 🔗 nexum360.com.br\n\n#InteligenciaArtificial #IA #Gartner #TransformacaoDigital #Nexum360 #Estrategia #Inovacao #MarketingDigital #GestaoEmpresarial #Tecnologia #Negocios #ROI #AIStrategy #Crescimento", legenda_li:"O Gartner publicou um dado que todo gestor precisa ver:\n\nApenas 1 em cada 50 investimentos em IA entrega transformação real.\n\n• 2% — transformação real\n• 18% — algum retorno mensurável, sem transformação\n• 80% — nenhum retorno mensurável\n\nIsso não é falha da tecnologia. É falha de estratégia.\n\nA maioria das empresas está comprando IA como quem compra software: instala, treina o time superficialmente, e espera resultado. Não funciona assim.\n\nIA entrega resultado quando está atrelada a um problema real, um processo definido e um método de medição claro.\n\nFerramenta sem método é despesa disfarçada de inovação.\n\nNa Nexum360, ajudamos empresas a construir a estratégia antes de escolher a ferramenta — porque a ordem importa.\n\n📌 Fonte: Gartner Research, 2025 — via Seu Dinheiro\n\n📩 nexum360.com.br\n\n#InteligenciaArtificial #Gartner #Estrategia #Inovacao #Nexum360 #TransformacaoDigital #GestaoEmpresarial #Tecnologia #IA #Negocios #LiderancaEmpresarial #ROI #AIStrategy #MarketingB2B", data_criacao:"2026-04-14", data_planejada:"2026-04-14", data_publicacao:"2026-04-14", notas:"Card único variante Blue." },
+      { id:3, tema:"Decidir branding com base no espelho é o erro mais caro da marca", pilar:"Estratégia de Marca", rede_social:"Ambos", formato:"Carrossel", variante:"White", picah:["P","H","C"], status:"Publicado", gancho:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.", angulo_nexum:"Marca feita pro dono conquista uma pessoa. Feita pro mercado, conquista milhares.", fonte:"", arquivo:"../03-branding-no-espelho/branding-espelho-carrossel.html", slide_preview:"../03-branding-no-espelho/slides-branding-espelho/slide-01.png", legenda_ig:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\n\"Eu não gostei da cor.\"\n\"Eu prefiro essa fonte.\"\n\"Eu não usaria isso.\"\n\nTudo bem ter opinião. Mas quando o gosto pessoal substitui a pesquisa, os dados e o comportamento real do público — o resultado é uma marca que fala sobre o dono, não sobre o cliente.\n\nBranding não é sobre o que você gosta.\nÉ sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você.\n\nMarca feita pro dono conquista uma pessoa.\nMarca feita pro mercado conquista milhares.\n\nArraste e veja como essa diferença funciona na prática. 👉\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n🔗 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #Nexum360 #EstrategiaQueGera #MarketingEstratégico #ConsultoriaDeMarca #GestaoEmpresarial #IdentidadeDeMarca #Marketing #Empreendedorismo #Negocios #MarcaForte", legenda_li:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\nCena clássica de reunião:\n— \"Eu não gostei da cor.\"\n— \"Mas o público-alvo testou e aprovou.\"\n— \"Não importa. É a minha empresa.\"\n\nO problema não é ter opinião. É quando ela substitui a estratégia.\n\nCor favorita, fonte bonita, layout copiado do concorrente — nada disso é branding. É decoração.\n\nBranding é sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você. Quando a marca é construída a partir do mercado, ela conquista milhares. Quando é construída a partir do espelho, conquista uma pessoa.\n\nO espelho mostra quem você é. Branding mostra quem a sua empresa precisa ser para o cliente.\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n📩 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #ConsultoriaEstratégica #Nexum360 #Marketing #IdentidadeDeMarca #GestaoDeNegocios #LiderancaEmpresarial #MarcaForte #Empreendedorismo #Negocios #MarketingB2B", data_criacao:"2026-04-14", data_planejada:"2026-04-14", data_publicacao:"2026-04-14", notas:"Carrossel 7 slides com imagens reais." },
+      { id:4, tema:"75% dos ganhos com IA são capturados por apenas 20% das empresas (PwC 2026)", pilar:"Tecnologia e IA", rede_social:"LinkedIn", formato:"Carrossel", variante:"Blue", picah:["A","P"], status:"Ideia", gancho:"Não basta usar IA. Tem que decidir com ela.", angulo_nexum:"Líderes em IA tomam decisões sem intervenção humana 2,8x mais rápido.", fonte:"PwC AI Performance Study — abril 2026", arquivo:"", slide_preview:"", legenda_ig:"", legenda_li:"", data_criacao:"2026-04-14", data_planejada:null, data_publicacao:null, notas:"Notícia fresca 13/04/2026." },
+      { id:5, tema:"Harvard Business Review: decisão por consenso não funciona na era da IA", pilar:"Mentalidade e Gestão Empresarial", rede_social:"LinkedIn", formato:"Post Único", variante:"Dark", picah:["P","C"], status:"Ideia", gancho:"O modelo de decisão que construiu sua empresa pode ser o que está te travando.", angulo_nexum:"Consenso é lento e distorce informação. Decisão ágil é vantagem competitiva.", fonte:"Harvard Business Review — abril 2026", arquivo:"", slide_preview:"", legenda_ig:"", legenda_li:"", data_criacao:"2026-04-14", data_planejada:null, data_publicacao:null, notas:"Provocação forte. Pode derivar em carrossel." },
+      { id:6, tema:"Em 2 anos, IA saiu de 32,8% para 95,2% das prioridades empresariais no Brasil", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Post Único", variante:"Blue", picah:["A","P"], status:"Ideia", gancho:"Adotar IA sem estratégia de decisão é só trocar planilha por chatbot.", angulo_nexum:"Todos entraram na corrida. Poucos sabem onde está a chegada.", fonte:"Panorama 2026 — Amcham Brasil", arquivo:"", slide_preview:"", legenda_ig:"", legenda_li:"", data_criacao:"2026-04-14", data_planejada:null, data_publicacao:null, notas:"Dado local forte para contexto brasileiro." }
+    ];
+
+    let pautas = (() => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw).map(migrate);
+      return defaultData;
+    })();
+
+    function migrate(p) {
+      if (!p.rede_social)    p.rede_social   = 'Ambos';
+      if (!p.data_planejada) p.data_planejada = p.data_publicacao || null;
+      if (!p.slide_preview)  p.slide_preview  = '';
+      if (!p.legenda_ig)     p.legenda_ig     = '';
+      if (!p.legenda_li)     p.legenda_li     = '';
+      return p;
+    }
+
+    const filters = { status:'todos', pilar:'todos', rede_social:'todos', formato:'todos' };
+    let currentView = 'lista';
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+
+    // ── STATS ──
+    function renderStats() {
+      const t = pautas.length;
+      const i = pautas.filter(p=>p.status==='Ideia').length;
+      const pr = pautas.filter(p=>p.status==='Produção').length;
+      const pub = pautas.filter(p=>p.status==='Publicado').length;
+      document.getElementById('statsBar').innerHTML = `
+        <div class="stat"><div class="stat-value">${t}</div><div class="stat-label">Total</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-value" style="color:var(--accent)">${i}</div><div class="stat-label">Ideias</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-value" style="color:var(--yellow)">${pr}</div><div class="stat-label">Em Produção</div></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><div class="stat-value" style="color:var(--green)">${pub}</div><div class="stat-label">Publicadas</div></div>
+      `;
+    }
+
+    // ── FILTER ──
+    function filteredPautas() {
+      return pautas.filter(p => {
+        if (filters.status    !== 'todos' && p.status       !== filters.status)    return false;
+        if (filters.pilar     !== 'todos' && p.pilar        !== filters.pilar)     return false;
+        if (filters.rede_social!=='todos' && p.rede_social  !== filters.rede_social) return false;
+        if (filters.formato   !== 'todos' && p.formato      !== filters.formato)   return false;
+        return true;
+      });
+    }
+
+    function setFilter(type, value, btn) {
+      filters[type] = value;
+      document.querySelectorAll(`[data-filter="${type}"]`).forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards();
+      renderCalendar();
+    }
+
+    // ── LISTA ──
+    function varianteBadgeClass(v) {
+      if (v==='Dark') return 'badge-variante-dark';
+      if (v==='Blue') return 'badge-variante-blue';
+      return 'badge-variante-white';
+    }
+    function redeBadgeClass(r) {
+      if (r==='Instagram') return 'badge-ig';
+      if (r==='LinkedIn')  return 'badge-li';
+      return 'badge-ambos';
+    }
+    function statusClass(s) {
+      if (s==='Publicado') return 'status-Publicado';
+      if (s==='Produção')  return 'status-Produção';
+      return 'status-Ideia';
+    }
+
+    function renderCards() {
+      const grid = document.getElementById('grid');
+      grid.innerHTML = '';
+      const list = filteredPautas();
+      if (!list.length) { grid.innerHTML='<div class="empty">Nenhuma pauta encontrada com esses filtros.</div>'; return; }
+      list.forEach(p => {
+        const picahBadges = (p.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
+        const dateInfo = p.data_planejada
+          ? `<span>📅 ${formatDate(p.data_planejada)}</span>`
+          : '<span style="opacity:0.4">Sem data</span>';
+
+        const previewImg = p.slide_preview
+          ? `<img class="card-preview" src="${p.slide_preview}" alt="preview" onerror="this.style.display='none'">`
+          : '';
+
+        const hasLegenda = p.legenda_ig || p.legenda_li;
+        const legendaSection = hasLegenda ? `
+          <div class="card-legenda-wrap" onclick="event.stopPropagation()">
+            <div class="card-legenda-tabs">
+              ${p.legenda_ig ? `<button class="legenda-tab active" onclick="switchTab(this,'ig-${p.id}','li-${p.id}')">Instagram</button>` : ''}
+              ${p.legenda_li ? `<button class="legenda-tab ${!p.legenda_ig?'active':''}" onclick="switchTab(this,'li-${p.id}','ig-${p.id}')">LinkedIn</button>` : ''}
+            </div>
+            ${p.legenda_ig ? `<div class="card-legenda" id="ig-${p.id}">${escHtml(p.legenda_ig)}</div>` : ''}
+            ${p.legenda_li ? `<div class="card-legenda" id="li-${p.id}" style="display:none">${escHtml(p.legenda_li)}</div>` : ''}
+            <button class="legenda-toggle" onclick="toggleLegenda(${p.id})">Ver mais ↓</button>
+          </div>` : '';
+
+        grid.insertAdjacentHTML('beforeend', `
+          <div class="card" id="card-${p.id}" onclick="openDetail(${p.id})">
+            ${previewImg}
+            <div class="card-top" style="margin-top:${p.slide_preview?'12px':'0'}">
+              <div class="card-tema">${p.tema}</div>
+              <div class="status-pill ${statusClass(p.status)}">${p.status}</div>
+            </div>
+            ${p.gancho ? `<div class="card-gancho">${p.gancho}</div>` : ''}
+            <div class="card-meta">
+              <span class="badge badge-pilar">${p.pilar}</span>
+              <span class="badge badge-formato">${p.formato}</span>
+              <span class="badge ${varianteBadgeClass(p.variante)}">${p.variante}</span>
+              <span class="badge ${redeBadgeClass(p.rede_social)}">${p.rede_social}</span>
+              ${picahBadges}
+            </div>
+            ${legendaSection}
+            ${p.fonte ? `<div class="card-fonte">Fonte: ${p.fonte}</div>` : ''}
+            <div class="card-date">${dateInfo}</div>
+            <div class="card-actions" onclick="event.stopPropagation()">
+              <select class="status-select" onchange="setStatus(${p.id}, this.value)">
+                <option value="Ideia"     ${p.status==='Ideia'    ?'selected':''}>Ideia</option>
+                <option value="Produção"  ${p.status==='Produção' ?'selected':''}>Em Produção</option>
+                <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
+              </select>
+              <button class="action-btn danger" onclick="deletePauta(${p.id})">✕</button>
+            </div>
+          </div>`);
+      });
+    }
+
+    function escHtml(t) {
+      return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function switchTab(btn, showId, hideId) {
+      document.getElementById(showId).style.display = '';
+      document.getElementById(hideId) && (document.getElementById(hideId).style.display = 'none');
+      btn.closest('.card-legenda-tabs').querySelectorAll('.legenda-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function toggleLegenda(id) {
+      const card = document.getElementById('card-'+id);
+      const legendas = card.querySelectorAll('.card-legenda');
+      const btn = card.querySelector('.legenda-toggle');
+      const expanded = btn.textContent.includes('menos');
+      legendas.forEach(l => l.classList.toggle('expanded', !expanded));
+      btn.textContent = expanded ? 'Ver mais ↓' : 'Ver menos ↑';
+    }
+
+    // ── CALENDAR ──
+    const MONTHS_PT = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    const DAYS_PT   = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+
+    function calNav(dir) { calMonth += dir; if (calMonth > 11) { calMonth=0; calYear++; } if (calMonth < 0) { calMonth=11; calYear--; } renderCalendar(); }
+
+    function renderCalendar() {
+      document.getElementById('calTitle').textContent = `${MONTHS_PT[calMonth]} ${calYear}`;
+      const grid = document.getElementById('calGrid');
+      grid.innerHTML = '';
+
+      DAYS_PT.forEach(d => { grid.insertAdjacentHTML('beforeend', `<div class="cal-dow">${d}</div>`); });
+
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+      const daysInPrev  = new Date(calYear, calMonth, 0).getDate();
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      const filtered = filteredPautas();
+
+      // Get pautas for a given date string YYYY-MM-DD
+      function pautasForDate(dateStr) {
+        return filtered.filter(p => {
+          const d = p.status === 'Publicado' ? p.data_publicacao : p.data_planejada;
+          return d === dateStr;
+        });
+      }
+
+      function buildCell(day, month, year, isOther) {
+        const dateStr = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+        const cellDate = new Date(year, month, day);
+        const isToday = cellDate.getTime() === today.getTime();
+        const list = pautasForDate(dateStr);
+        const chips = list.slice(0,3).map(p =>
+          `<div class="cal-chip chip-${p.status}" onclick="openDetail(${p.id})" title="${p.tema}">${p.tema}</div>`
+        ).join('');
+        const more = list.length > 3 ? `<div style="font-size:0.6rem;color:var(--muted);padding:2px 4px">+${list.length-3} mais</div>` : '';
+        grid.insertAdjacentHTML('beforeend',
+          `<div class="cal-cell${isOther?' other-month':''}${isToday?' today':''}">
+            <div class="cal-day-num">${day}</div>
+            ${chips}${more}
+          </div>`);
+      }
+
+      // Prev month padding
+      for (let i = firstDay - 1; i >= 0; i--) buildCell(daysInPrev - i, calMonth-1 < 0 ? 11 : calMonth-1, calMonth-1 < 0 ? calYear-1 : calYear, true);
+      // Current month
+      for (let d = 1; d <= daysInMonth; d++) buildCell(d, calMonth, calYear, false);
+      // Next month padding
+      const total = firstDay + daysInMonth;
+      const remaining = total % 7 === 0 ? 0 : 7 - (total % 7);
+      for (let d = 1; d <= remaining; d++) buildCell(d, calMonth+1 > 11 ? 0 : calMonth+1, calMonth+1 > 11 ? calYear+1 : calYear, true);
+    }
+
+    function openDetail(id) {
+      const p = pautas.find(x => x.id === id);
+      if (!p) return;
+      const picahBadges = (p.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
+
+      const preview = p.slide_preview
+        ? `<img src="${p.slide_preview}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`
+        : `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
+
+      const arteBtn = p.arquivo
+        ? `<a class="detail-btn primary" href="${p.arquivo}" target="_blank">↗ Ver Arte</a>`
+        : '';
+      const legendaBtn = p.legenda_arquivo
+        ? `<a class="detail-btn" href="${p.legenda_arquivo}" target="_blank">📄 Ver Legenda</a>`
+        : '';
+
+      document.getElementById('detailContent').innerHTML = `
+        <div class="detail-preview">${preview}</div>
+        <div class="detail-body">
+          <div class="detail-tema">${p.tema}</div>
+
+          <div class="card-meta" style="padding-top:0;border-top:none">
+            <span class="badge badge-pilar">${p.pilar}</span>
+            <span class="badge badge-formato">${p.formato}</span>
+            <span class="badge ${varianteBadgeClass(p.variante)}">${p.variante}</span>
+            <span class="badge ${redeBadgeClass(p.rede_social)}">${p.rede_social}</span>
+            ${picahBadges}
+          </div>
+
+          ${p.gancho ? `<div class="detail-row"><div class="detail-row-label">Gancho</div><div class="detail-row-value" style="font-style:italic;color:var(--muted)">${p.gancho}</div></div>` : ''}
+          ${p.angulo_nexum ? `<div class="detail-row"><div class="detail-row-label">Ângulo Nexum360</div><div class="detail-row-value">${p.angulo_nexum}</div></div>` : ''}
+          ${p.fonte ? `<div class="detail-row"><div class="detail-row-label">Fonte</div><div class="detail-row-value" style="opacity:0.7;font-size:0.8rem">${p.fonte}</div></div>` : ''}
+          ${p.data_planejada ? `<div class="detail-row"><div class="detail-row-label">Data Planejada</div><div class="detail-row-value">${formatDate(p.data_planejada)}</div></div>` : ''}
+          ${p.notas ? `<div class="detail-row"><div class="detail-row-label">Notas</div><div class="detail-row-value" style="opacity:0.7;font-size:0.8rem">${p.notas}</div></div>` : ''}
+
+          <div class="detail-row">
+            <div class="detail-row-label">Status</div>
+            <select class="status-select" style="flex:none;width:100%" onchange="setStatus(${p.id},this.value);document.querySelector('#detailContent .status-select').value=this.value">
+              <option value="Ideia"     ${p.status==='Ideia'    ?'selected':''}>Ideia</option>
+              <option value="Produção"  ${p.status==='Produção' ?'selected':''}>Em Produção</option>
+              <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
+            </select>
+          </div>
+
+          <div class="detail-actions">
+            ${arteBtn}
+            ${legendaBtn}
+            <button class="detail-btn publish" onclick="openPublish(${p.id})">↑ Publicar</button>
+            <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
+          </div>
+        </div>`;
+      document.getElementById('detailOverlay').classList.add('open');
+    }
+
+    // ── VIEW TOGGLE ──
+    function setView(v) {
+      currentView = v;
+      document.getElementById('grid').style.display        = v==='lista' ? '' : 'none';
+      document.getElementById('calendarWrap').classList.toggle('active', v==='calendario');
+      document.getElementById('picah-legend-row') && null;
+      document.getElementById('btnLista').classList.toggle('active', v==='lista');
+      document.getElementById('btnCalendario').classList.toggle('active', v==='calendario');
+      if (v==='calendario') renderCalendar();
+    }
+
+    // ── STATUS ──
+    function setStatus(id, newStatus) {
+      const p = pautas.find(x=>x.id===id); if(!p) return;
+      p.status = newStatus;
+      if (newStatus==='Publicado' && !p.data_publicacao) p.data_publicacao = new Date().toISOString().split('T')[0];
+      save(); renderStats(); renderCards(); renderCalendar();
+    }
+
+    function changeStatus(id) {
+      const p = pautas.find(x=>x.id===id); if(!p) return;
+      const order = ['Ideia','Produção','Publicado'];
+      setStatus(id, order[(order.indexOf(p.status)+1) % order.length]);
+    }
+
+    function deletePauta(id) {
+      if (!confirm('Remover esta pauta?')) return;
+      pautas = pautas.filter(p=>p.id!==id);
+      save(); renderStats(); renderCards(); renderCalendar();
+    }
+
+    // ── MODAL ──
+    function openModal()  { document.getElementById('modalOverlay').classList.add('open'); }
+    function closeModal(id) { document.getElementById(id||'modalOverlay').classList.remove('open'); }
+    function closeModalOutside(e) {
+      if (e.target.id==='modalOverlay')   closeModal('modalOverlay');
+      if (e.target.id==='detailOverlay')  closeModal('detailOverlay');
+      if (e.target.id==='publishOverlay') closeModal('publishOverlay');
+    }
+
+    function savePauta() {
+      const tema = document.getElementById('f-tema').value.trim();
+      if (!tema) { alert('Insira o tema da pauta.'); return; }
+      const picahRaw = document.getElementById('f-picah').value.trim();
+      const picah = picahRaw ? picahRaw.split(',').map(s=>s.trim().toUpperCase()).filter(Boolean) : [];
+      const now = new Date().toISOString().split('T')[0];
+      const newId = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+      pautas.unshift({
+        id: newId, tema,
+        pilar:        document.getElementById('f-pilar').value,
+        rede_social:  document.getElementById('f-rede').value,
+        formato:      document.getElementById('f-formato').value,
+        variante:     document.getElementById('f-variante').value,
+        status:       document.getElementById('f-status').value,
+        data_planejada: document.getElementById('f-data-planejada').value || null,
+        gancho:       document.getElementById('f-gancho').value.trim(),
+        angulo_nexum: document.getElementById('f-angulo').value.trim(),
+        fonte:        document.getElementById('f-fonte').value.trim(),
+        picah, notas: document.getElementById('f-notas').value.trim(),
+        arquivo:'', data_criacao:now, data_publicacao:null,
+      });
+      save(); closeModal('modalOverlay'); renderStats(); renderCards(); renderCalendar();
+      ['f-tema','f-gancho','f-angulo','f-fonte','f-picah','f-notas','f-data-planejada'].forEach(id=>document.getElementById(id).value='');
+    }
+
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(pautas)); }
+
+    // ── SETTINGS ──────────────────────────────────────────────
+    function toggleSettings() {
+      document.getElementById('settingsBar').classList.toggle('open');
+    }
+    function saveVercelUrl() {
+      const val = document.getElementById('vercelUrl').value.trim().replace(/\/$/, '');
+      localStorage.setItem('nexum360_vercel_url', val);
+    }
+    function loadVercelUrl() {
+      const saved = localStorage.getItem('nexum360_vercel_url') || '';
+      document.getElementById('vercelUrl').value = saved;
+      return saved;
+    }
+    function getVercelUrl() {
+      return (localStorage.getItem('nexum360_vercel_url') || '').replace(/\/$/, '');
+    }
+
+    async function checkHealth() {
+      const url = getVercelUrl();
+      const dot = document.getElementById('apiDot');
+      const msg = document.getElementById('apiMsg');
+      if (!url) { dot.className='api-dot err'; msg.textContent='Configure a URL primeiro'; return; }
+      msg.textContent = 'Testando...'; dot.className = 'api-dot';
+      try {
+        const r = await fetch(`${url}/api/health`);
+        const d = await r.json();
+        if (d.status === 'ok') {
+          dot.className = 'api-dot ok';
+          msg.textContent = 'API conectada ✓';
+        } else {
+          dot.className = 'api-dot err';
+          msg.textContent = 'Variáveis incompletas — verifique o Vercel';
+        }
+      } catch {
+        dot.className = 'api-dot err';
+        msg.textContent = 'Não foi possível conectar';
+      }
+    }
+
+    // ── PUBLISH ───────────────────────────────────────────────
+    function openPublish(id) {
+      const p = pautas.find(x => x.id === id);
+      if (!p) return;
+      const url = getVercelUrl();
+
+      const canPublish = !!url;
+      const hasIg = !!p.legenda_ig;
+      const hasLi = !!p.legenda_li;
+      const isCarousel = p.formato === 'Carrossel';
+
+      document.getElementById('publishContent').innerHTML = `
+        <h2 style="font-family:'Playfair Display',serif;font-size:1.2rem">Publicar Post</h2>
+        <div style="font-size:0.85rem;color:var(--muted);line-height:1.5">${p.tema}</div>
+
+        ${!url ? `<div style="background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px;padding:14px;font-size:0.8rem;color:#e07070">
+          ⚠ Configure a URL da API Vercel nas configurações (botão ⚙ API no topo) antes de publicar.
+        </div>` : ''}
+
+        ${isCarousel ? `
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URLs dos slides no Vercel (uma por linha)</label>
+          <textarea id="pub-carousel-urls" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.78rem;padding:10px;border-radius:6px;outline:none;resize:vertical;min-height:100px;font-family:monospace" placeholder="https://seu-dominio.vercel.app/posts/slide-01.png&#10;https://seu-dominio.vercel.app/posts/slide-02.png">${buildCarouselUrls(p, url)}</textarea>
+        </div>` : `
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">URL da imagem no Vercel</label>
+          <input id="pub-image-url" type="text" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.82rem;padding:9px 12px;border-radius:6px;outline:none" value="${buildImageUrl(p, url)}" placeholder="https://seu-dominio.vercel.app/posts/imagem.png">
+        </div>`}
+
+        <div class="publish-row">
+          ${hasIg ? `<button class="pub-btn pub-btn-ig" onclick="doPublish(${id},'instagram')" ${!canPublish?'disabled':''}>
+            📸 Instagram
+          </button>` : ''}
+          ${hasLi ? `<button class="pub-btn pub-btn-li" onclick="doPublish(${id},'linkedin')" ${!canPublish?'disabled':''}>
+            💼 LinkedIn
+          </button>` : ''}
+          ${(hasIg && hasLi) ? `<button class="pub-btn" style="background:rgba(200,169,110,0.1);border-color:rgba(200,169,110,0.3);color:var(--accent)" onclick="doPublish(${id},'ambos')" ${!canPublish?'disabled':''}>
+            ✦ Ambos
+          </button>` : ''}
+        </div>
+        <button class="modal-cancel" onclick="closeModal('publishOverlay')" style="align-self:flex-end">Cancelar</button>
+      `;
+      closeModal('detailOverlay');
+      document.getElementById('publishOverlay').classList.add('open');
+    }
+
+    function buildImageUrl(p, baseUrl) {
+      if (!baseUrl) return '';
+      if (p.slide_preview) {
+        const filename = p.slide_preview.split('/').pop();
+        return `${baseUrl}/posts/${filename}`;
+      }
+      return '';
+    }
+
+    function buildCarouselUrls(p, baseUrl) {
+      if (!baseUrl || !p.slide_preview) return '';
+      // Tenta construir URLs sequenciais com base no slide-01
+      const base = p.slide_preview.split('/').pop().replace(/slide-\d+/, '');
+      const lines = [];
+      for (let i = 1; i <= 7; i++) {
+        const name = `slide-${String(i).padStart(2,'0')}.png`;
+        lines.push(`${baseUrl}/posts/${name}`);
+      }
+      return lines.join('\n');
+    }
+
+    async function doPublish(id, network) {
+      const p = pautas.find(x => x.id === id);
+      if (!p) return;
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel primeiro.', 'error');
+
+      const isCarousel = p.formato === 'Carrossel';
+      let imageUrl   = '';
+      let imageUrls  = [];
+
+      if (isCarousel) {
+        const raw = document.getElementById('pub-carousel-urls')?.value || '';
+        imageUrls = raw.split('\n').map(s => s.trim()).filter(Boolean);
+        if (!imageUrls.length) return showToast('Adicione ao menos uma URL de slide.', 'error');
+        imageUrl = imageUrls[0];
+      } else {
+        imageUrl = document.getElementById('pub-image-url')?.value.trim() || '';
+        if (!imageUrl) return showToast('Informe a URL da imagem.', 'error');
+      }
+
+      const networks = network === 'ambos' ? ['instagram','linkedin'] : [network];
+
+      for (const net of networks) {
+        const caption = net === 'linkedin' ? (p.legenda_li || p.legenda_ig) : (p.legenda_ig || p.legenda_li);
+
+        showToast(`Publicando no ${net === 'instagram' ? 'Instagram' : 'LinkedIn'}...`, '');
+
+        try {
+          const body = isCarousel && net === 'instagram'
+            ? { type: 'carousel', caption, imageUrls }
+            : { type: 'single',   caption, imageUrl };
+
+          const r = await fetch(`${url}/api/${net}`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(body),
+          });
+          const d = await r.json();
+
+          if (d.success) {
+            showToast(`✓ Publicado no ${net === 'instagram' ? 'Instagram' : 'LinkedIn'}!`, 'success');
+            // Marcar como publicado
+            setStatus(id, 'Publicado');
+          } else {
+            showToast(`Erro: ${d.error}`, 'error');
+          }
+        } catch (e) {
+          showToast(`Erro de conexão com a API.`, 'error');
+        }
+      }
+
+      closeModal('publishOverlay');
+    }
+
+    // ── TOAST ─────────────────────────────────────────────────
+    let toastTimer;
+    function showToast(msg, type = '') {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.className = `toast show ${type}`;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+    }
+
+    function formatDate(d) {
+      if (!d) return '—';
+      const [y,m,day] = d.split('-');
+      return `${day}/${m}/${y}`;
+    }
+
+    // Init
+    loadVercelUrl();
+    renderStats();
+    renderCards();
+  </script>
+</body>
+</html>
