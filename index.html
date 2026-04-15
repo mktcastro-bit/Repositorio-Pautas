@@ -241,10 +241,34 @@
       z-index: 500; opacity: 0; pointer-events: none;
       transition: opacity 0.3s ease;
       box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      min-width: 260px; max-width: 480px;
     }
     .toast.show { opacity: 1; pointer-events: auto; }
     .toast.success { border-color: var(--green); }
     .toast.error   { border-color: #c0392b; }
+    .toast.loading { border-color: var(--accent); }
+
+    /* Spinner do toast */
+    .toast-spinner {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid rgba(200,169,110,0.3);
+      border-top-color: var(--accent);
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Botão publicando */
+    .pub-btn.publishing {
+      opacity: 0.6; cursor: not-allowed; pointer-events: none;
+    }
+    .pub-btn.publishing::before {
+      content: ''; display: inline-block;
+      width: 12px; height: 12px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      margin-right: 8px; vertical-align: middle;
+    }
 
     /* SETTINGS BAR */
     .settings-bar {
@@ -1011,10 +1035,14 @@
 
       const networks = network === 'ambos' ? ['instagram','linkedin'] : [network];
 
+      // Desabilitar todos os botões de publicação durante o processo
+      document.querySelectorAll('.pub-btn').forEach(b => b.classList.add('publishing'));
+
       for (const net of networks) {
         const caption = net === 'linkedin' ? (p.legenda_li || p.legenda_ig) : (p.legenda_ig || p.legenda_li);
+        const netLabel = net === 'instagram' ? 'Instagram' : 'LinkedIn';
 
-        showToast(`Publicando no ${net === 'instagram' ? 'Instagram' : 'LinkedIn'}...`, '');
+        showToast(`Publicando no ${netLabel}... aguarde`, 'loading', true);
 
         try {
           const body = isCarousel && net === 'instagram'
@@ -1029,8 +1057,7 @@
           const d = await r.json();
 
           if (d.success) {
-            showToast(`✓ Publicado no ${net === 'instagram' ? 'Instagram' : 'LinkedIn'}!`, 'success');
-            // Marcar como publicado
+            showToast(`✓ Publicado no ${netLabel} com sucesso!`, 'success');
             setStatus(id, 'Publicado');
           } else {
             showToast(`Erro: ${d.error}`, 'error');
@@ -1040,17 +1067,29 @@
         }
       }
 
+      // Reabilitar botões ao terminar
+      document.querySelectorAll('.pub-btn').forEach(b => b.classList.remove('publishing'));
       closeModal('publishOverlay');
     }
 
     // ── TOAST ─────────────────────────────────────────────────
     let toastTimer;
-    function showToast(msg, type = '') {
+    function showToast(msg, type = '', persist = false) {
       const el = document.getElementById('toast');
-      el.textContent = msg;
-      el.className = `toast show ${type}`;
       clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+      if (type === 'loading') {
+        el.innerHTML = `<div class="toast-spinner"></div><span>${msg}</span>`;
+      } else {
+        el.textContent = msg;
+      }
+      el.className = `toast show ${type}`;
+      if (!persist) {
+        toastTimer = setTimeout(() => el.classList.remove('show'), 4000);
+      }
+    }
+    function hideToast() {
+      const el = document.getElementById('toast');
+      el.classList.remove('show');
     }
 
     function formatDate(d) {
