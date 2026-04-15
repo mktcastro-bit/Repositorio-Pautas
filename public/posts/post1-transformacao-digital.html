@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexum360 — Carrossel: Transformação Digital</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface-1: #111111;
+      --surface-2: #161616;
+      --border: #1e1e1e;
+      --accent: #c8a96e;
+      --accent-alpha: rgba(200, 169, 110, 0.15);
+      --text: #f0f0f0;
+      --muted: #888888;
+    }
+
+    body {
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+      gap: 32px;
+    }
+
+    /* ── VIEWER WRAPPER ─────────────────────────────────── */
+    .viewer {
+      position: relative;
+      width: 1080px;
+      height: 1350px;
+    }
+
+    /* ── SLIDE ──────────────────────────────────────────── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1350px;
+      background: var(--bg);
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 88px 80px;
+      overflow: hidden;
+    }
+    .slide.active { display: flex; }
+
+    /* ── DECORATIVE NUMBER ──────────────────────────────── */
+    .deco-number {
+      position: absolute;
+      font-family: 'Playfair Display', serif;
+      font-size: 320px;
+      font-weight: 700;
+      color: rgba(200, 169, 110, 0.04);
+      line-height: 1;
+      right: -20px;
+      bottom: -40px;
+      user-select: none;
+      letter-spacing: -0.04em;
+    }
+
+    /* ── HORIZONTAL RULE ────────────────────────────────── */
+    .h-rule {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── SECTION LABEL ──────────────────────────────────── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .label-line {
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── LOGO ───────────────────────────────────────────── */
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+
+    /* ── HEADER / FOOTER ROW ────────────────────────────── */
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .slide-counter {
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN CONTENT AREA ──────────────────────────────── */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 22px;
+      padding: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── TYPOGRAPHY ─────────────────────────────────────── */
+    .eyebrow {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(4rem, 7vw, 5.5rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.4rem, 6.2vw, 5rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    h1 em, h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .body-text {
+      font-size: 2.2rem;
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 900px;
+    }
+    .body-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .highlight-block {
+      border-left: 2px solid var(--accent);
+      padding-left: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    /* ── CTA BUTTON ─────────────────────────────────────── */
+    .cta-btn {
+      display: inline-block;
+      background: var(--accent);
+      color: var(--bg);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 16px 40px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+
+    /* ── ACCENT LINE DECORATION ─────────────────────────── */
+    .accent-line {
+      width: 64px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* ── LIST ITEMS ─────────────────────────────────────── */
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .item-list .item {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .item-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 10px;
+    }
+    .item-text {
+      font-size: 2rem;
+      color: var(--text);
+      line-height: 1.4;
+    }
+    .item-text span {
+      color: var(--muted);
+      font-size: 1.75rem;
+    }
+
+    /* ── BIG QUOTE ───────────────────────────────────────── */
+    .big-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.8rem, 5vw, 4rem);
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.28;
+      letter-spacing: -0.01em;
+      border-left: 2px solid var(--accent);
+      padding-left: 32px;
+    }
+
+    /* ── SLIDE 1 specific ────────────────────────────────── */
+    .slide-1 {
+      padding-left: 120px;
+      padding-right: 120px;
+    }
+    .slide-1 .content {
+      gap: 24px;
+    }
+
+    /* ── CONTROLS ───────────────────────────────────────── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+    .btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.2);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.35s ease;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.6);
+    }
+    .btn:disabled {
+      opacity: 0.2;
+      cursor: default;
+    }
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(200, 169, 110, 0.25);
+      transition: all 0.35s ease;
+      cursor: pointer;
+    }
+    .dot.active {
+      background: var(--accent);
+      width: 24px;
+      border-radius: 3px;
+    }
+
+    /* Scale down for screen viewing */
+    @media (max-width: 1200px) {
+      .viewer {
+        transform: scale(0.65);
+        transform-origin: top center;
+        margin-bottom: -472px;
+      }
+    }
+    @media (max-width: 860px) {
+      .viewer {
+        transform: scale(0.38);
+        transform-origin: top center;
+        margin-bottom: -837px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="viewer">
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 1 — HOOK
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide slide-1 active">
+      <div class="deco-number">01</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="accent-line"></div>
+        <h1>A IA não vai<br>te substituir.</h1>
+        <h1>A pessoa que<br>sabe usar IA, <em>vai.</em></h1>
+        <p class="body-text">
+          E essa pessoa pode ser você — ou o seu concorrente.<br>
+          <strong>A escolha acontece agora.</strong>
+        </p>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">01 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 2
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">02</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">A verdade que ninguém quer ouvir</div>
+        <h2>Toda transformação digital tem uma verdade incômoda:</h2>
+        <p class="body-text">
+          A tecnologia não é o problema.<br><br>
+          <strong>Quem resiste à mudança, vira parte do problema.</strong>
+        </p>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">02 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 3
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">03</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">Como a substituição realmente acontece</div>
+        <div class="highlight-block">
+          <h2>Ferramenta não demite ninguém.</h2>
+        </div>
+        <p class="body-text">
+          Quem demite é o gestor que percebeu que uma ferramenta faz
+          o que você faz — <strong>mais rápido, mais barato, sem reclamar.</strong>
+        </p>
+        <p class="body-text">
+          Não é crueldade. É matemática.
+        </p>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">03 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 4
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">04</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">O outro lado da história</div>
+        <h2>Quem domina a tecnologia não é substituído.</h2>
+        <div class="accent-line"></div>
+        <h2 style="color: var(--accent);">É promovido.</h2>
+        <p class="body-text">
+          Sempre existiu um grupo que enxergou a mudança antes dos outros —
+          e usou isso para <strong>abrir distância.</strong>
+        </p>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">04 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 5
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">05</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">O que muda quando você domina as ferramentas</div>
+        <h2>Você não perde espaço.<br>Você <em>multiplica</em> o seu.</h2>
+        <div class="item-list" style="margin-top: 8px;">
+          <div class="item">
+            <div class="item-dot"></div>
+            <div class="item-text">Faz em 1h o que antes levava 1 dia <span>— e usa o tempo que sobrou para pensar</span></div>
+          </div>
+          <div class="item">
+            <div class="item-dot"></div>
+            <div class="item-text">Entrega resultados que antes eram impossíveis <span>— sem precisar de equipe maior</span></div>
+          </div>
+          <div class="item">
+            <div class="item-dot"></div>
+            <div class="item-text">Toma decisões com dados, não com intuição cega <span>— e erra menos</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">05 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 6
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">06</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Transformação Digital</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">O que é — e o que não é — transformação digital</div>
+        <h2>Transformação digital não é trocar pessoas<br>por máquinas.</h2>
+        <div class="accent-line"></div>
+        <p class="body-text">
+          É sobre <strong>pessoas que usam máquinas</strong> para
+          entregar o que antes era impossível.
+        </p>
+        <p class="body-text">
+          A tecnologia é o instrumento. O estrategista ainda é humano.
+        </p>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">06 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 7 — VIRADA DE CHAVE
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">07</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>A pergunta certa</div>
+      </div>
+
+      <div class="content">
+        <div class="big-quote">
+          "A pergunta certa não é:<br>
+          <em>'a tecnologia vai me substituir?'</em>
+        </div>
+        <div class="big-quote" style="border-left-color: transparent; padding-left: 34px; margin-top: -8px;">
+          É: <em style="color: var(--accent);">'o que eu consigo fazer com ela que ninguém mais consegue?'</em>"
+        </div>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">07 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         SLIDE 8 — CTA
+    ═══════════════════════════════════════════════════ -->
+    <div class="slide">
+      <div class="deco-number">08</div>
+
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Nexum360</div>
+      </div>
+
+      <div class="content">
+        <div class="eyebrow">Estratégia · Tecnologia · Crescimento</div>
+        <h2>Na Nexum<span style="color:var(--accent)">360</span>, a gente não instala ferramentas.</h2>
+        <p class="body-text" style="color: var(--text);">
+          A gente ajuda, treina e posiciona empresas para <strong>dominá-las.</strong>
+        </p>
+        <div class="h-rule" style="margin: 8px 0;"></div>
+        <p class="body-text" style="color: var(--muted);">
+          Salva esse post e compartilha com alguém que precisa ver isso.
+        </p>
+        <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--accent); letter-spacing: -0.01em;">@nexum360</span>
+          <span style="font-size: 1.8rem; color: var(--muted); letter-spacing: 0.04em;">nexum360.com.br</span>
+        </div>
+      </div>
+
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">08 / 08</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+  </div><!-- /viewer -->
+
+  <!-- ── NAVIGATION CONTROLS ──────────────────────── -->
+  <div class="controls">
+    <button class="btn" id="btnPrev" onclick="navigate(-1)" disabled>← Anterior</button>
+    <div class="progress-dots" id="dots"></div>
+    <button class="btn" id="btnNext" onclick="navigate(1)">Próximo →</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('dots');
+    let current = 0;
+
+    // Build dots
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsContainer.appendChild(d);
+    });
+
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      dotsContainer.children[current].classList.remove('active');
+      current = n;
+      slides[current].classList.add('active');
+      dotsContainer.children[current].classList.add('active');
+      document.getElementById('btnPrev').disabled = current === 0;
+      document.getElementById('btnNext').disabled = current === slides.length - 1;
+    }
+
+    function navigate(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < slides.length) goTo(next);
+    }
+
+    // Keyboard navigation
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'ArrowLeft')  navigate(-1);
+    });
+  </script>
+
+</body>
+</html>

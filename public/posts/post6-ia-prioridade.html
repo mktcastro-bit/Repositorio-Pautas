@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nexum360 — IA: de 32,8% para 95,2%</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a1628;
+    --surface-1: #0d1f3c;
+    --surface-2: rgba(13,31,60,0.8);
+    --border: rgba(200,169,110,0.2);
+    --accent: #c8a96e;
+    --accent-alpha: rgba(200,169,110,0.12);
+    --text: #f0f0f0;
+    --muted: #8ba3c0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #050d1a;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    gap: 32px;
+  }
+
+  .slide-wrapper {
+    position: relative;
+    width: 1080px;
+    height: 1350px;
+    overflow: hidden;
+    background: var(--bg);
+    flex-shrink: 0;
+  }
+
+  /* ── FUNDO GRADIENTE AZUL ── */
+  .slide-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(200,169,110,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 100% 100%, rgba(13,60,120,0.5) 0%, transparent 50%),
+      radial-gradient(ellipse 50% 60% at -10% 50%, rgba(10,40,100,0.4) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── GRID DE PONTOS ── */
+  .slide-wrapper::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(200,169,110,0.06) 1px, transparent 1px);
+    background-size: 48px 48px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .slide-inner {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 72px 80px;
+  }
+
+  /* ── HEADER ── */
+  .slide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 64px;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: var(--text);
+    text-transform: lowercase;
+  }
+
+  .logo span {
+    color: var(--accent);
+  }
+
+  .slide-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* ── SECTION LABEL ── */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 32px;
+  }
+
+  .label-line {
+    width: 28px;
+    height: 1px;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── CONTEÚDO PRINCIPAL ── */
+  .slide-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.8rem, 5.5vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 32px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 4.5vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 28px;
+  }
+
+  h2 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    line-height: 1.65;
+    color: var(--muted);
+    max-width: 800px;
+  }
+
+  /* ── NÚMERO GRANDE DECORATIVO ── */
+  .deco-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 14rem;
+    font-weight: 700;
+    color: rgba(200,169,110,0.05);
+    position: absolute;
+    right: 60px;
+    bottom: 120px;
+    line-height: 1;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── BARRA DE DADOS ── */
+  .data-bar {
+    background: var(--surface-2);
+    backdrop-filter: blur(16px);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px 48px;
+    margin-top: 48px;
+    display: flex;
+    align-items: center;
+    gap: 48px;
+  }
+
+  .data-item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .data-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 3.6rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .data-value.low {
+    color: var(--muted);
+    font-size: 2.8rem;
+  }
+
+  .data-label {
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .data-divider {
+    width: 1px;
+    height: 80px;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  .data-arrow {
+    font-size: 2rem;
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+
+  /* ── HIGHLIGHT CARD ── */
+  .highlight {
+    background: var(--accent-alpha);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 28px 36px;
+    margin-top: 40px;
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* ── LISTA ── */
+  .list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .list-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+    margin-top: 10px;
+  }
+
+  .list-text {
+    font-size: 1.15rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .list-text span {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── COMPARAÇÃO VISUAL ── */
+  .compare {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .compare-row {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .compare-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .compare-label strong {
+    color: var(--accent);
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .bar-track {
+    height: 10px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 8px;
+    background: var(--accent);
+    opacity: 0.4;
+  }
+
+  .bar-fill.high {
+    opacity: 1;
+  }
+
+  /* ── QUOTE ── */
+  .quote-block {
+    margin-top: 40px;
+    padding: 40px 48px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    position: relative;
+  }
+
+  .quote-mark {
+    font-family: 'Playfair Display', serif;
+    font-size: 6rem;
+    line-height: 0.6;
+    color: var(--accent);
+    opacity: 0.3;
+    position: absolute;
+    top: 24px;
+    left: 36px;
+  }
+
+  .quote-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.9rem;
+    line-height: 1.4;
+    font-style: italic;
+    color: var(--text);
+    padding-top: 32px;
+  }
+
+  /* ── BIG STAT ── */
+  .big-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 16px;
+  }
+
+  .big-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 8rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+    text-align: center;
+  }
+
+  .big-stat-label {
+    font-size: 1.1rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: center;
+  }
+
+  /* ── FOOTER ── */
+  .slide-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+    padding-top: 40px;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-cta {
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .footer-dot {
+    display: flex;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+  }
+
+  .dot.active {
+    background: var(--accent);
+    width: 20px;
+    border-radius: 3px;
+  }
+
+  /* ── CTA FINAL ── */
+  .cta-btn {
+    display: inline-block;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 18px 40px;
+    border-radius: 8px;
+    margin-top: 48px;
+  }
+
+  /* ── DIVISOR ── */
+  hr.section-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 40px 0;
+  }
+
+  /* ── PRINT HELPERS ── */
+  @media print {
+    body { background: transparent; padding: 0; gap: 0; }
+    .slide-wrapper { page-break-after: always; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 1 — HOOK                                         -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-1">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">01 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>Inteligência & Decisão com IA</div>
+
+      <h1>Em 2 anos,<br>a IA saiu de<br><em>32,8%</em> para<br><em>95,2%</em><br>das prioridades.</h1>
+
+      <p class="subtitle">O que mudou no Brasil corporativo — e o que isso significa para o seu negócio agora.</p>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">Continue lendo ↓</span>
+      <div class="footer-dot">
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 2 — DADO BRUTO                                   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-2">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">02 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>O Dado</div>
+
+      <h2>Era 2023.<br>Apenas <em>1 em cada 3</em> empresas via IA como prioridade.</h2>
+
+      <div class="compare">
+        <div class="compare-row">
+          <div class="compare-label">
+            <span>2023</span>
+            <strong>32,8%</strong>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:32.8%"></div></div>
+        </div>
+        <div class="compare-row">
+          <div class="compare-label">
+            <span>2025</span>
+            <strong>95,2%</strong>
+          </div>
+          <div class="bar-track"><div class="bar-fill high" style="width:95.2%"></div></div>
+        </div>
+      </div>
+
+      <div class="highlight">
+        Em menos de 24 meses, o mercado virou de cabeça para baixo. Sem aviso. Sem esperar sua empresa estar pronta.
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">Fonte: pesquisa setorial 2025</span>
+      <div class="footer-dot">
+        <div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 3 — A VIRADA                                     -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-3">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">03 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>A Realidade</div>
+
+      <h2>Adotar IA <em>não é mais inovação.</em><br>É o mínimo esperado.</h2>
+
+      <p class="subtitle" style="margin-bottom: 40px;">Quando 95% do mercado já considera IA uma prioridade, quem ainda está "avaliando" está, na prática, ficando para trás.</p>
+
+      <div class="data-bar">
+        <div class="data-item">
+          <div class="data-value low">4,8%</div>
+          <div class="data-label">Ainda não priorizam</div>
+        </div>
+        <div class="data-divider"></div>
+        <div class="data-arrow">→</div>
+        <div class="data-divider"></div>
+        <div class="data-item">
+          <div class="data-value">95,2%</div>
+          <div class="data-label">Já priorizam IA</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">E você, onde está?</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 4 — O PROBLEMA REAL                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-4">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">04 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>O Problema</div>
+
+      <h2><em>95% priorizam.</em><br>Quantos estão fazendo do jeito certo?</h2>
+
+      <p class="subtitle">Priorizar não é implementar. Implementar não é integrar. Integrar sem estratégia não transforma negócio.</p>
+
+      <div class="list">
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text"><span>Comprar ferramenta de IA</span> ≠ ter estratégia de IA</div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text"><span>Automatizar processo ruim</span> = processo ruim mais rápido</div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text"><span>IA sem dados de qualidade</span> = decisões equivocadas em escala</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">A ferramenta não é o problema</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 5 — DIAGNÓSTICO                                  -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-5">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">05 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>Diagnóstico</div>
+
+      <h2>A maioria das empresas está usando IA para <em>parecer moderna.</em><br>Não para crescer.</h2>
+
+      <div class="quote-block">
+        <div class="quote-mark">"</div>
+        <div class="quote-text">IA como vitrine não gera resultado. IA como motor de decisão, sim.</div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">Qual é o seu caso?</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 6 — O CAMINHO CERTO                              -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-6">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">06 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>O Caminho</div>
+
+      <h2>IA estratégica começa antes da tecnologia.</h2>
+
+      <p class="subtitle">Antes de implementar qualquer solução, você precisa responder:</p>
+
+      <div class="list">
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text">Quais decisões do negócio se beneficiam de <span>mais velocidade e menos viés?</span></div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text">Onde estão os <span>dados que você precisa</span> — e estão estruturados?</div>
+        </div>
+        <div class="list-item">
+          <div class="list-dot"></div>
+          <div class="list-text">Qual é o <span>resultado de negócio</span> esperado com IA em 90 dias?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">Estratégia antes de implementação</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 7 — INSIGHT / VIRADA DE CHAVE                   -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-7">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">07 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>Insight</div>
+
+      <h2>A corrida não é de quem implementou <em>primeiro.</em><br>É de quem implementou <em>com inteligência.</em></h2>
+
+      <div class="highlight" style="margin-top: 48px; font-size: 1.2rem;">
+        O mercado está cheio de empresas com IA e sem resultado. A oportunidade está em ser a exceção — não em ser mais um número nos 95,2%.
+      </div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">Seja a exceção</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+        <div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- SLIDE 8 — CTA FINAL                                    -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="slide-wrapper" id="slide-8">
+  <div class="slide-inner">
+    <div class="slide-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="slide-num">08 / 08</div>
+    </div>
+
+    <div class="slide-content">
+      <div class="section-label"><span class="label-line"></span>A Pergunta</div>
+
+      <h1>Você está usando IA para <em>crescer</em> — ou para se sentir <em>moderno?</em></h1>
+
+      <p class="subtitle">A Nexum360 ajuda empresas a transformar IA em decisão, resultado e crescimento real. Não em projeto piloto.</p>
+
+      <div class="cta-btn">Fale com a Nexum360</div>
+    </div>
+
+    <div class="slide-footer">
+      <span class="footer-cta">nexum360.com.br</span>
+      <div class="footer-dot">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        <div class="dot active"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

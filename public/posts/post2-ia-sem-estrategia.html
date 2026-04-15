@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexum360 — Card: IA sem Estratégia</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:           #070d1a;
+      --surface-1:    #0d1628;
+      --surface-2:    #111e35;
+      --border:       #1a2b47;
+      --accent:       #4d8fda;
+      --accent-alpha: rgba(77, 143, 218, 0.12);
+      --text:         #f0f0f0;
+      --muted:        #7a90b0;
+    }
+
+    body {
+      background: #04080f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+    }
+
+    /* ── CARD ───────────────────────────────────────────── */
+    .card {
+      position: relative;
+      width: 1080px;
+      height: 1350px;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 88px 100px;
+      overflow: hidden;
+    }
+
+    /* ── BACKGROUND TEXTURE ─────────────────────────────── */
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -200px;
+      right: -200px;
+      width: 700px;
+      height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(77,143,218,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      bottom: -150px;
+      left: -150px;
+      width: 500px;
+      height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(77,143,218,0.05) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* ── DECORATIVE BIG NUMBER ──────────────────────────── */
+    .deco-number {
+      position: absolute;
+      font-family: 'Playfair Display', serif;
+      font-size: 420px;
+      font-weight: 700;
+      color: rgba(77, 143, 218, 0.04);
+      line-height: 1;
+      right: -30px;
+      bottom: 60px;
+      user-select: none;
+      letter-spacing: -0.04em;
+    }
+
+    /* ── SECTION LABEL ──────────────────────────────────── */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .label-line {
+      width: 28px;
+      height: 1px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* ── LOGO ───────────────────────────────────────────── */
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+
+    /* ── HEADER / FOOTER ────────────────────────────────── */
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+      z-index: 1;
+    }
+    .slide-counter {
+      font-size: 13px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    /* ── H-RULE ─────────────────────────────────────────── */
+    .h-rule {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── CONTENT ────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 40px;
+      padding: 40px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── STAT BLOCK ─────────────────────────────────────── */
+    .stat-block {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .stat-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--accent-alpha);
+      border: 1px solid rgba(77,143,218,0.2);
+      border-radius: 4px;
+      padding: 8px 16px;
+      width: fit-content;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .stat-tag .dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .stat-numbers {
+      display: flex;
+      gap: 24px;
+      margin-top: 8px;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .stat-value {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.6rem;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+    .stat-value.muted {
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    .stat-label {
+      font-size: 1rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ── DIVIDER ────────────────────────────────────────── */
+    .accent-line {
+      width: 56px;
+      height: 2px;
+      background: var(--accent);
+    }
+
+    /* ── HEADLINE ───────────────────────────────────────── */
+    .eyebrow {
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(3.2rem, 5.5vw, 4.4rem);
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+    h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .body-text {
+      font-size: 1.75rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+    .body-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    /* ── SOURCE TAG ─────────────────────────────────────── */
+    .source {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+    .source-line {
+      width: 20px;
+      height: 1px;
+      background: var(--muted);
+      opacity: 0.5;
+    }
+
+    /* ── INSIGHT BOX ────────────────────────────────────── */
+    .insight-box {
+      background: var(--accent-alpha);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 28px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .insight-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .insight-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.4rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    /* Scale down for screen viewing */
+    @media (max-width: 1200px) {
+      .card {
+        transform: scale(0.65);
+        transform-origin: top center;
+        margin-bottom: -472px;
+      }
+    }
+    @media (max-width: 860px) {
+      .card {
+        transform: scale(0.38);
+        transform-origin: top center;
+        margin-bottom: -837px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="deco-number">2%</div>
+
+    <!-- HEADER -->
+    <div class="card-header">
+      <div class="logo">nexum<span>360</span></div>
+      <div class="section-label"><span class="label-line"></span>Inteligência Artificial</div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Source tag -->
+      <div class="source">
+        <span class="source-line"></span>
+        Gartner Research · 2025
+      </div>
+
+      <!-- Headline -->
+      <div style="display:flex; flex-direction:column; gap:20px;">
+        <h1>Apenas 1 em cada 50<br>investimentos em IA<br>entrega resultado <em>real.</em></h1>
+        <p class="body-text">
+          Apenas <strong>20% geram algum retorno mensurável.</strong><br>
+          O problema não é a tecnologia.
+        </p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stat-numbers">
+        <div class="stat-item">
+          <span class="stat-value">2%</span>
+          <span class="stat-label">transformação real nas empresas</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value muted">18%</span>
+          <span class="stat-label">algum retorno, sem transformação</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-value">80%</span>
+          <span class="stat-label">nenhum retorno mensurável</span>
+        </div>
+      </div>
+
+      <!-- Insight box -->
+      <div class="insight-box">
+        <span class="insight-label">Visão Nexum360</span>
+        <p class="insight-text">"Ferramenta sem método é despesa<br>disfarçada de inovação."</p>
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="h-rule" style="margin-bottom: 20px;"></div>
+    <div class="card-footer">
+      <div class="slide-counter">nexum360.com.br</div>
+      <div class="section-label"><span class="label-line"></span>Estratégia · IA · Resultado</div>
+    </div>
+  </div>
+
+</body>
+</html>

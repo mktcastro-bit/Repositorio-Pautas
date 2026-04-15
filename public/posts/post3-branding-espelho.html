@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexum360 — Carrossel: Branding no Espelho</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --surface-1: rgba(255,255,255,0.55);
+      --surface-2: rgba(255,255,255,0.55);
+      --border: rgba(0,0,0,0.15);
+      --accent: #c8a96e;
+      --accent-alpha: rgba(200, 169, 110, 0.15);
+      --text: #0a0a0a;
+      --muted: #333333;
+    }
+
+    body {
+      background: #050505;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      padding: 40px 20px;
+      gap: 32px;
+    }
+
+    .viewer {
+      position: relative;
+      width: 1080px;
+      height: 1350px;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      width: 1080px;
+      height: 1350px;
+      background: url('slides-branding-espelho/background.png') center center / cover no-repeat;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 88px 100px;
+      overflow: hidden;
+    }
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.15);
+      z-index: 0;
+    }
+    .slide .slide-header,
+    .slide .content,
+    .slide .h-rule,
+    .slide .slide-footer {
+      position: relative;
+      z-index: 1;
+    }
+    .slide.active { display: flex; }
+
+    .deco-number { display: none; }
+
+    .h-rule { width: 100%; height: 1px; background: var(--border); }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    .label-line { width: 28px; height: 1px; background: var(--accent); flex-shrink: 0; }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.5rem;
+      font-weight: 400;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+    .logo span { color: var(--accent); }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .slide-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .slide-counter {
+      font-size: 14px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      padding: 20px 0;
+      position: relative;
+      z-index: 1;
+    }
+
+    .eyebrow {
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 4.4rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+    h1 em, h2 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .body-text {
+      font-size: 2.1rem;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .body-text strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .accent-line { width: 56px; height: 2px; background: var(--accent); }
+
+    .highlight-block {
+      border-left: 2px solid var(--accent);
+      padding-left: 28px;
+    }
+
+    .big-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.6rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      border-left: 2px solid var(--accent);
+      padding-left: 32px;
+    }
+    .big-quote em { color: var(--accent); }
+
+    .dialog {
+      background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(0,0,0,0.10);
+      border-radius: 12px;
+      padding: 32px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .dialog-line {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .dialog-label {
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      flex-shrink: 0;
+      min-width: 60px;
+      padding-top: 4px;
+    }
+    .dialog-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.85rem;
+      font-style: italic;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .vs-block {
+      display: flex;
+      gap: 32px;
+    }
+    .vs-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .vs-label {
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .vs-label.wrong { color: var(--muted); opacity: 0.6; }
+    .vs-label.right { color: var(--accent); }
+    .vs-text {
+      font-size: 2.1rem;
+      line-height: 1.4;
+      color: var(--text);
+    }
+    .vs-divider {
+      width: 1px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ── CONTROLS ───────────────────────────────────────── */
+    .controls { display: flex; align-items: center; gap: 20px; }
+    .btn {
+      background: transparent;
+      border: 1px solid rgba(0,0,0,0.25);
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 10px 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.35s ease;
+    }
+    .btn:hover { background: rgba(0,0,0,0.06); border-color: rgba(0,0,0,0.5); }
+    .btn:disabled { opacity: 0.2; cursor: default; }
+    .progress-dots { display: flex; gap: 8px; }
+    .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(200, 169, 110, 0.25);
+      transition: all 0.35s ease; cursor: pointer;
+    }
+    .dot.active { background: var(--accent); width: 24px; border-radius: 3px; }
+
+    /* ── SLIDE 1 — ESPELHO BACKGROUND ──────────────────── */
+    .slide-1 {
+      background: url('slides-branding-espelho/espelho.png') center center / cover no-repeat;
+    }
+    .slide-1 h1 em { color: var(--accent); }
+
+    @media (max-width: 1200px) {
+      .viewer { transform: scale(0.65); transform-origin: top center; margin-bottom: -472px; }
+    }
+    @media (max-width: 860px) {
+      .viewer { transform: scale(0.38); transform-origin: top center; margin-bottom: -837px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="viewer">
+
+    <!-- ═══ SLIDE 1 — HOOK ═══ -->
+    <div class="slide slide-1 active">
+      <div class="deco-number">01</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="accent-line"></div>
+        <h1>Decidir a estratégia<br>da marca com base<br>no <em>espelho</em></h1>
+        <p class="body-text">
+          é o erro mais caro do branding.
+        </p>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">01 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 2 — DIÁLOGO ═══ -->
+    <div class="slide">
+      <div class="deco-number">02</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">Cena clássica de reunião</div>
+        <div class="dialog">
+          <div class="dialog-line">
+            <span class="dialog-label">Dono:</span>
+            <span class="dialog-text">"Eu não gostei da cor."</span>
+          </div>
+          <div class="dialog-line">
+            <span class="dialog-label">Equipe:</span>
+            <span class="dialog-text">"Mas o público-alvo testou e aprovou."</span>
+          </div>
+          <div class="dialog-line">
+            <span class="dialog-label">Dono:</span>
+            <span class="dialog-text">"Não importa. É a minha empresa."</span>
+          </div>
+        </div>
+        <p class="body-text">
+          Parece familiar?
+        </p>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">02 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 3 ═══ -->
+    <div class="slide">
+      <div class="deco-number">03</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">O problema não é ter opinião</div>
+        <h2>O problema é quando o gosto pessoal<br>substitui a <em>estratégia.</em></h2>
+        <p class="body-text">
+          Cor favorita, fonte que "acha bonita", layout que viu em outra marca — nada disso é branding.
+        </p>
+        <p class="body-text">
+          <strong>É decoração.</strong>
+        </p>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">03 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 4 ═══ -->
+    <div class="slide">
+      <div class="deco-number">04</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">O que branding realmente é</div>
+        <h2>Branding não é sobre<br>o que você <em>gosta.</em></h2>
+        <div class="accent-line"></div>
+        <p class="body-text" style="font-size: 2.3rem;">
+          É sobre o que o seu cliente precisa <strong>sentir</strong> para confiar, lembrar e escolher você.
+        </p>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">04 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 5 — COMPARAÇÃO ═══ -->
+    <div class="slide">
+      <div class="deco-number">05</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">A diferença na prática</div>
+        <div class="vs-block">
+          <div class="vs-item">
+            <span class="vs-label wrong">Marca feita pro dono</span>
+            <p class="vs-text" style="color: var(--muted);">Conquista <strong style="color:var(--muted)">uma</strong> pessoa.</p>
+          </div>
+          <div class="vs-divider"></div>
+          <div class="vs-item">
+            <span class="vs-label right">Marca feita pro mercado</span>
+            <p class="vs-text">Conquista <strong style="color:var(--accent)">milhares.</strong></p>
+          </div>
+        </div>
+        <div class="accent-line"></div>
+        <p class="body-text">
+          E adivinha qual das duas <strong>cobra mais caro</strong> e tem fila de espera?
+        </p>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">05 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 6 — VIRADA ═══ -->
+    <div class="slide">
+      <div class="deco-number">06</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Branding</div>
+      </div>
+      <div class="content">
+        <div class="big-quote">
+          "O espelho mostra quem<br>você é.
+        </div>
+        <div class="big-quote" style="border-left-color: transparent; padding-left: 34px; margin-top: -8px;">
+          Branding mostra quem<br>a sua empresa <em>precisa ser</em><br>para o cliente."
+        </div>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">06 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+    <!-- ═══ SLIDE 7 — CTA ═══ -->
+    <div class="slide">
+      <div class="deco-number">07</div>
+      <div class="slide-header">
+        <div class="logo">nexum<span>360</span></div>
+        <div class="section-label"><span class="label-line"></span>Nexum360</div>
+      </div>
+      <div class="content">
+        <div class="eyebrow">Estratégia · Branding · Posicionamento</div>
+        <h2>Na Nexum<span style="color:var(--accent)">360</span>, sua marca é projetada para o mercado escolher <em>você.</em></h2>
+        <div class="h-rule" style="margin: 8px 0;"></div>
+        <p class="body-text">
+          Salva esse post e manda pra quem decide branding por gosto pessoal.
+        </p>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 4px;">
+          <span style="font-family: 'Playfair Display', serif; font-size: 2.8rem; color: var(--accent); letter-spacing: -0.01em;">@nexum360</span>
+          <span style="font-size: 1.6rem; color: var(--muted); letter-spacing: 0.04em;">nexum360.com.br</span>
+        </div>
+      </div>
+      <div class="h-rule"></div>
+      <div class="slide-footer" style="padding-top:16px">
+        <div class="slide-counter">07 / 07</div>
+        <div class="section-label"><span class="label-line"></span>nexum360.com.br</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn" id="btnPrev" onclick="navigate(-1)" disabled>← Anterior</button>
+    <div class="progress-dots" id="dots"></div>
+    <button class="btn" id="btnNext" onclick="navigate(1)">Próximo →</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('dots');
+    let current = 0;
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.onclick = () => goTo(i);
+      dotsContainer.appendChild(d);
+    });
+    function goTo(n) {
+      slides[current].classList.remove('active');
+      dotsContainer.children[current].classList.remove('active');
+      current = n;
+      slides[current].classList.add('active');
+      dotsContainer.children[current].classList.add('active');
+      document.getElementById('btnPrev').disabled = current === 0;
+      document.getElementById('btnNext').disabled = current === slides.length - 1;
+    }
+    function navigate(dir) {
+      const next = current + dir;
+      if (next >= 0 && next < slides.length) goTo(next);
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight') navigate(1);
+      if (e.key === 'ArrowLeft') navigate(-1);
+    });
+  </script>
+
+</body>
+</html>
