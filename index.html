@@ -828,12 +828,6 @@
       { id:6, tema:"Em 2 anos, IA saiu de 32,8% para 95,2% das prioridades empresariais no Brasil", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Blue", picah:["A","P"], status:"Pronto", gancho:"Adotar IA sem estratégia de decisão é só trocar planilha por chatbot.", angulo_nexum:"Todos entraram na corrida. Poucos sabem onde está a chegada.", fonte:"Panorama 2026 — Amcham Brasil", arquivo:"/public/posts/post6-ia-prioridade.html", slide_preview:"/public/images/post6-slide-01.png", legenda_ig:"Em 2023, apenas 32,8% das empresas brasileiras tinham IA como prioridade estratégica.\n\nEm 2025: 95,2%.\n\nEm menos de 24 meses, o mercado virou de cabeça para baixo — sem aviso, sem esperar ninguém estar pronto.\n\nMas aqui está o ponto que ninguém está falando:\n\nPriorizar não é implementar.\nImplementar não é integrar.\nIntegrar sem estratégia não transforma negócio.\n\nO mercado está cheio de empresas com IA e sem resultado.\n\nComprar ferramenta de IA ≠ ter estratégia de IA.\nAutomatizar processo ruim = processo ruim mais rápido.\nIA sem dados de qualidade = decisões erradas em escala.\n\nA corrida não é de quem implementou primeiro.\nÉ de quem implementou com inteligência.\n\nA pergunta que você precisa responder hoje:\nVocê está usando IA para crescer — ou para se sentir moderno?\n\nA Nexum360 transforma IA em decisão, resultado e crescimento real. Não em projeto piloto.\n\n👇 Salva esse post. Compartilha com quem precisa ouvir isso.\n\n#InteligênciaArtificial #EstrategiaDeIA #TransformacaoDigital #Nexum360 #EstrategiaQueGera #NexumInteligencia #Negócios #IANasEmpresas #GestaoEmpresarial #Empreendedorismo #MarketingDigital #InovacaoEmpresarial", legenda_li:"Dois anos. 32,8% → 95,2%.\n\nEsse é o salto da IA nas prioridades estratégicas das empresas brasileiras.\n\nMas enquanto todo mundo fala do número, poucos estão fazendo a pergunta certa:\n\nDe quantas dessas empresas a IA está gerando resultado real?\n\nVejo empresas comprando plataformas de IA como se isso fosse estratégia. Implementando automações em processos mal desenhados. Gerando relatórios bonitos com dados ruins.\n\nIsso não é transformação. É ilusão de progresso.\n\nIA estratégica começa antes da tecnologia. Antes de qualquer implementação, três perguntas precisam ter resposta:\n\n→ Quais decisões do negócio se beneficiam de mais velocidade e menos viés?\n→ Onde estão os dados que você precisa — e estão estruturados?\n→ Qual resultado de negócio você espera em 90 dias?\n\nA corrida não é de quem chegou primeiro.\nÉ de quem chegou com inteligência.\n\nVocê está usando IA para crescer — ou para se sentir parte dos 95,2%?\n\n─────────────────────────\nNexum360 | Inteligência & Decisão com IA\nnexum360.com.br\n\n#InteligênciaArtificial #EstrategiaEmpresarial #TransformacaoDigital #LiderancaEmpresarial #Nexum360 #IANasEmpresas #DecisaoEstrategica #GestaoDeNegócios #InovacaoDigital #B2B", data_criacao:"2026-04-14", data_planejada:"2026-04-15", data_publicacao:null, notas:"Carrossel 8 slides variante Blue. Arte e legendas prontas.", slides:["/public/images/post6-slide-01.png","/public/images/post6-slide-02.png","/public/images/post6-slide-03.png","/public/images/post6-slide-04.png","/public/images/post6-slide-05.png","/public/images/post6-slide-06.png","/public/images/post6-slide-07.png","/public/images/post6-slide-08.png"] }
     ];
 
-    let pautas = (() => {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw).map(migrate);
-      return defaultData;
-    })();
-
     const KNOWN_SLIDES = {
       1: ['/public/images/post1-slide-01.png','/public/images/post1-slide-02.png','/public/images/post1-slide-03.png','/public/images/post1-slide-04.png','/public/images/post1-slide-05.png','/public/images/post1-slide-06.png','/public/images/post1-slide-07.png','/public/images/post1-slide-08.png'],
       3: ['/public/images/post3-slide-01.png','/public/images/post3-slide-02.png','/public/images/post3-slide-03.png','/public/images/post3-slide-04.png','/public/images/post3-slide-05.png','/public/images/post3-slide-06.png','/public/images/post3-slide-07.png'],
@@ -849,6 +843,12 @@
       if (!p.slides)         p.slides = KNOWN_SLIDES[p.id] || (p.slide_preview ? [p.slide_preview] : []);
       return p;
     }
+
+    let pautas = (() => {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) return JSON.parse(raw).map(migrate);
+      return defaultData;
+    })();
 
     const filters = { status:'todos', pilar:'todos', rede_social:'todos', formato:'todos' };
     let currentView = 'lista';
