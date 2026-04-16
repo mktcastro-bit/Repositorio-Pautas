@@ -281,7 +281,23 @@
       border-right: 1px solid var(--border);
       min-height: 360px; position: relative; overflow: hidden;
     }
-    .detail-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .detail-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; cursor: zoom-in; }
+
+    .detail-carousel {
+      position: absolute; inset: 0;
+    }
+    .detail-carousel .carousel-track { width: 100%; height: 100%; position: relative; }
+    .detail-carousel .carousel-slide {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top;
+      opacity: 0; transition: opacity 0.3s ease; cursor: zoom-in;
+    }
+    .detail-carousel .carousel-slide.active { opacity: 1; }
+    .detail-carousel .carousel-btn { opacity: 0; }
+    .detail-preview:hover .carousel-btn { opacity: 1; }
+    .detail-carousel .carousel-dots { pointer-events: auto; }
+    .detail-carousel .carousel-dot { cursor: pointer; }
     .detail-preview-empty {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: 12px; padding: 32px; text-align: center;
@@ -922,17 +938,8 @@
 
         const slides = p.slides && p.slides.length ? p.slides : (p.slide_preview ? [p.slide_preview] : []);
         let previewImg = '';
-        if (slides.length > 1) {
-          const dotHtml  = slides.map((_,i) => `<div class="carousel-dot${i===0?' active':''}"></div>`).join('');
-          const slideHtml = slides.map((src,i) => `<img class="carousel-slide${i===0?' active':''}" src="${src}" alt="Slide ${i+1}" onclick="openLightbox(${p.id},${i})" draggable="false">`).join('');
-          previewImg = `<div class="card-carousel" onclick="event.stopPropagation()" onmousedown="carouselDragStart(event,${p.id})" ontouchstart="carouselTouchStart(event,${p.id})" ontouchend="carouselTouchEnd(event,${p.id})">
-            <div class="carousel-track">${slideHtml}</div>
-            <button class="carousel-btn carousel-prev" onclick="event.stopPropagation();carouselNav(${p.id},-1)">&#8249;</button>
-            <button class="carousel-btn carousel-next" onclick="event.stopPropagation();carouselNav(${p.id},1)">&#8250;</button>
-            <div class="carousel-dots">${dotHtml}</div>
-          </div>`;
-        } else if (slides.length === 1) {
-          previewImg = `<img class="card-preview" src="${slides[0]}" alt="preview" onerror="this.style.display='none'" onclick="event.stopPropagation();openLightbox(${p.id},0)">`;
+        if (slides.length >= 1) {
+          previewImg = `<img class="card-preview" src="${slides[0]}" alt="preview" onerror="this.style.display='none'">`;
         } else if (p.arquivo) {
           previewImg = `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
         }
@@ -1058,11 +1065,24 @@
       if (!p) return;
       const picahBadges = (p.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
 
-      const preview = p.slide_preview
-        ? `<img src="${p.slide_preview}" alt="Preview" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`
-        : p.arquivo
-          ? `<div class="preview-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`
-          : `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
+      const detailSlides = getSlides(p);
+      let preview;
+      if (detailSlides.length > 1) {
+        const slideHtml = detailSlides.map((src,i) => `<img class="carousel-slide${i===0?' active':''}" src="${src}" alt="Slide ${i+1}" onclick="openLightbox(${p.id},${i})" draggable="false">`).join('');
+        const dotHtml   = detailSlides.map((_,i) => `<div class="carousel-dot${i===0?' active':''}"></div>`).join('');
+        preview = `<div class="detail-carousel">
+          <div class="carousel-track">${slideHtml}</div>
+          <button class="carousel-btn carousel-prev" onclick="carouselNavDetail(${p.id},-1)">&#8249;</button>
+          <button class="carousel-btn carousel-next" onclick="carouselNavDetail(${p.id},1)">&#8250;</button>
+          <div class="carousel-dots">${dotHtml}</div>
+        </div>`;
+      } else if (detailSlides.length === 1) {
+        preview = `<img src="${detailSlides[0]}" alt="Preview" style="cursor:zoom-in" onclick="openLightbox(${p.id},0)" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`;
+      } else if (p.arquivo) {
+        preview = `<div class="preview-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
+      } else {
+        preview = `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
+      }
 
       const arteBtn = p.arquivo
         ? `<a class="detail-btn primary" href="${p.arquivo}" target="_blank">↗ Ver Arte</a>`
@@ -1211,22 +1231,17 @@
       card.querySelectorAll('.carousel-dot').forEach((el, i)  => el.classList.toggle('active', i === idx));
     }
 
-    // Drag/swipe no carrossel
-    let _dragStartX = 0;
-    function carouselDragStart(e, id) {
-      _dragStartX = e.clientX;
-      const up = (ev) => {
-        const dx = ev.clientX - _dragStartX;
-        if (Math.abs(dx) > 40) carouselNav(id, dx < 0 ? 1 : -1);
-        window.removeEventListener('mouseup', up);
-      };
-      window.addEventListener('mouseup', up);
-    }
-    let _touchStartX = 0;
-    function carouselTouchStart(e, id) { _touchStartX = e.touches[0].clientX; }
-    function carouselTouchEnd(e, id) {
-      const dx = e.changedTouches[0].clientX - _touchStartX;
-      if (Math.abs(dx) > 40) carouselNav(id, dx < 0 ? 1 : -1);
+    function carouselNavDetail(id, dir) {
+      const p = pautas.find(x => x.id === id); if (!p) return;
+      const slides = getSlides(p); if (slides.length <= 1) return;
+      const key = 'detail-' + id;
+      const cur = carouselState[key] || 0;
+      const next = (cur + dir + slides.length) % slides.length;
+      carouselState[key] = next;
+      const modal = document.getElementById('detailContent');
+      if (!modal) return;
+      modal.querySelectorAll('.detail-carousel .carousel-slide').forEach((el,i) => el.classList.toggle('active', i === next));
+      modal.querySelectorAll('.detail-carousel .carousel-dot').forEach((el,i)  => el.classList.toggle('active', i === next));
     }
 
     // ── LIGHTBOX ──────────────────────────────────────────────
