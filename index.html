@@ -171,6 +171,33 @@
       border-radius: 12px 12px 0 0; display: block;
     }
 
+    /* CARD CAROUSEL */
+    .card-carousel {
+      width: calc(100% + 48px); margin: -24px -24px 0;
+      height: 150px; border-radius: 12px 12px 0 0;
+      overflow: hidden; position: relative; flex-shrink: 0;
+    }
+    .card-carousel img {
+      width: 100%; height: 100%; object-fit: cover; object-position: top; display: block;
+    }
+    .card-carousel-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.55); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 50%;
+      cursor: pointer; font-size: 1.1rem; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; z-index: 2;
+    }
+    .card-carousel-nav:hover { background: rgba(0,0,0,0.85); }
+    .card-carousel-nav.prev { left: 8px; }
+    .card-carousel-nav.next { right: 8px; }
+    .card-carousel-counter {
+      position: absolute; bottom: 7px; right: 10px;
+      background: rgba(0,0,0,0.6); color: #fff;
+      font-size: 0.6rem; font-weight: 700; padding: 2px 7px; border-radius: 10px;
+      letter-spacing: 0.06em; pointer-events: none;
+    }
+
     /* CARD LEGENDA */
     .card-legenda-wrap { display: flex; flex-direction: column; gap: 8px; }
     .card-legenda-tabs { display: flex; gap: 6px; }
@@ -760,6 +787,7 @@
     }
 
     const filters = { status:'todos', pilar:'todos', rede_social:'todos', formato:'todos' };
+    const cardSlides = {};
     let currentView = 'lista';
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
@@ -818,6 +846,28 @@
       return 'status-Ideia';
     }
 
+    function getCardSlides(p) {
+      if (!p.slide_preview) return [];
+      const filename = p.slide_preview.split('/').pop();
+      const prefix   = filename.replace(/\d{2}\.png$/, '');
+      const ext      = filename.match(/\.\w+$/)?.[0] || '.png';
+      const totalMap = { 'post1-slide-': 8, 'post2-card': 1, 'post3-slide-': 7, 'post6-slide-': 8 };
+      const total    = totalMap[prefix] || 1;
+      if (total === 1) return [p.slide_preview];
+      const dir    = p.slide_preview.substring(0, p.slide_preview.lastIndexOf('/') + 1);
+      const slides = [];
+      for (let i = 1; i <= total; i++) slides.push(`${dir}${prefix}${String(i).padStart(2,'0')}${ext}`);
+      return slides;
+    }
+
+    function cardNav(id, dir) {
+      const st = cardSlides[id]; if (!st) return;
+      st.current = (st.current + dir + st.slides.length) % st.slides.length;
+      document.getElementById('carousel-img-'+id).src = st.slides[st.current];
+      const counter = document.getElementById('carousel-counter-'+id);
+      if (counter) counter.textContent = `${st.current + 1} / ${st.slides.length}`;
+    }
+
     function renderCards() {
       const grid = document.getElementById('grid');
       grid.innerHTML = '';
@@ -829,8 +879,18 @@
           ? `<span>📅 ${formatDate(p.data_planejada)}</span>`
           : '<span style="opacity:0.4">Sem data</span>';
 
-        const previewImg = p.slide_preview
-          ? `<img class="card-preview" src="${p.slide_preview}" alt="preview" onerror="this.style.display='none'">`
+        const slides = getCardSlides(p);
+        cardSlides[p.id] = { slides, current: 0 };
+        const hasPreview = slides.length > 0 || !!p.arquivo;
+        const previewImg = slides.length > 0
+          ? `<div class="card-carousel" id="carousel-${p.id}">
+               <img src="${slides[0]}" id="carousel-img-${p.id}" alt="slide 1" onerror="this.style.display='none'">
+               ${slides.length > 1 ? `
+                 <button class="card-carousel-nav prev" onclick="event.stopPropagation();cardNav(${p.id},-1)">‹</button>
+                 <button class="card-carousel-nav next" onclick="event.stopPropagation();cardNav(${p.id},1)">›</button>
+                 <div class="card-carousel-counter" id="carousel-counter-${p.id}">1 / ${slides.length}</div>
+               ` : ''}
+             </div>`
           : p.arquivo
             ? `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`
             : '';
@@ -850,7 +910,7 @@
         grid.insertAdjacentHTML('beforeend', `
           <div class="card" id="card-${p.id}" onclick="openDetail(${p.id})">
             ${previewImg}
-            <div class="card-top" style="margin-top:${(p.slide_preview||p.arquivo)?'12px':'0'}">
+            <div class="card-top" style="margin-top:${hasPreview?'12px':'0'}">
               <div class="card-tema">${p.tema}</div>
               <div class="status-pill ${statusClass(p.status)}">${p.status}</div>
             </div>
