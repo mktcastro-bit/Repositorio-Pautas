@@ -167,8 +167,83 @@
     /* CARD PREVIEW IMAGE */
     .card-preview {
       width: calc(100% + 48px); margin: -24px -24px 0;
-      height: 150px; object-fit: cover; object-position: top;
+      height: 200px; object-fit: cover; object-position: top;
       border-radius: 12px 12px 0 0; display: block;
+      cursor: zoom-in;
+    }
+
+    /* ── CARD CAROUSEL ── */
+    .card-carousel {
+      width: calc(100% + 48px); margin: -24px -24px 0;
+      height: 200px; position: relative; overflow: hidden;
+      border-radius: 12px 12px 0 0;
+    }
+    .carousel-track { width: 100%; height: 100%; position: relative; }
+    .carousel-slide {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: cover; object-position: top;
+      opacity: 0; transition: opacity 0.3s ease;
+      cursor: zoom-in;
+    }
+    .carousel-slide.active { opacity: 1; }
+    .carousel-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 1.3rem; width: 30px; height: 30px;
+      border-radius: 50%; cursor: pointer; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; transition: opacity 0.2s; padding: 0; line-height: 1;
+    }
+    .card-carousel:hover .carousel-btn { opacity: 1; }
+    .carousel-prev { left: 8px; }
+    .carousel-next { right: 8px; }
+    .carousel-dots {
+      position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 5px; z-index: 2; pointer-events: none;
+    }
+    .carousel-dot {
+      width: 6px; height: 6px; border-radius: 3px;
+      background: rgba(255,255,255,0.4); transition: all 0.2s;
+    }
+    .carousel-dot.active { background: #fff; width: 16px; }
+
+    /* ── LIGHTBOX ── */
+    .lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.96); z-index: 1000;
+      align-items: center; justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-img {
+      max-height: 92vh; max-width: 88vw;
+      object-fit: contain; border-radius: 4px;
+      user-select: none;
+    }
+    .lightbox-btn {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; font-size: 1.8rem; width: 44px; height: 44px;
+      border-radius: 50%; cursor: pointer; z-index: 2;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; padding: 0; line-height: 1;
+    }
+    .lightbox-btn:hover { background: rgba(255,255,255,0.18); }
+    .lightbox-prev { left: 18px; }
+    .lightbox-next { right: 18px; }
+    .lightbox-close {
+      position: absolute; top: 14px; right: 14px;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.18);
+      color: #fff; font-size: 1rem; width: 34px; height: 34px;
+      border-radius: 50%; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; z-index: 2;
+    }
+    .lightbox-close:hover { background: rgba(255,255,255,0.2); }
+    .lightbox-counter {
+      position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+      font-size: 0.78rem; color: rgba(255,255,255,0.5);
+      letter-spacing: 0.12em; pointer-events: none;
     }
 
     /* CARD LEGENDA */
@@ -227,7 +302,7 @@
     /* card iframe preview — mesmas dimensões do card-preview */
     .card-iframe-wrap {
       width: calc(100% + 48px); margin: -24px -24px 0;
-      height: 150px; overflow: hidden; position: relative;
+      height: 200px; overflow: hidden; position: relative;
       border-radius: 12px 12px 0 0;
     }
     .card-iframe-wrap iframe {
@@ -732,16 +807,25 @@
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
 
+  <!-- LIGHTBOX -->
+  <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <button class="lightbox-btn lightbox-prev" id="lb-prev" onclick="event.stopPropagation();lightboxNav(-1)">&#8249;</button>
+    <img class="lightbox-img" id="lb-img" src="" alt="" onclick="event.stopPropagation()">
+    <button class="lightbox-btn lightbox-next" id="lb-next" onclick="event.stopPropagation();lightboxNav(1)">&#8250;</button>
+    <button class="lightbox-close" onclick="event.stopPropagation();closeLightbox()">&#10005;</button>
+    <div class="lightbox-counter" id="lb-counter"></div>
+  </div>
+
   <script>
     const STORAGE_KEY = 'nexum360_pautas_v9';
 
     const defaultData = [
-      { id:1, tema:"A IA não vai te substituir — vai substituir quem não a usa", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Dark", picah:["P","I"], status:"Publicado", gancho:"A IA não vai te substituir. Vai substituir quem não a usa.", angulo_nexum:"Posiciona a Nexum360 como parceira de transformação, não de substituição.", fonte:"", arquivo:"/public/posts/post1-transformacao-digital.html", slide_preview:"/public/images/post1-slide-01.png", legenda_ig:"A IA não vai te substituir.\nA pessoa que sabe usar IA, vai.\n\nE essa pessoa pode ser você — ou o seu concorrente.\n\nA transformação digital chegou para separar quem evolui de quem fica parado esperando a tempestade passar.\n\nFerramenta não demite ninguém. Quem demite é o gestor que percebeu que uma ferramenta faz o que você faz — mais rápido, mais barato, sem reclamar.\n\nA pergunta certa não é \"vou ser substituído?\"\nÉ \"o que eu consigo fazer com tecnologia que ninguém mais consegue?\"\n\nArraste os slides e veja como essa virada acontece na prática. 👉\n\nQuer entender como aplicar isso no seu negócio?\nFale com a Nexum360. 🔗 nexum360.com.br\n\n#TransformaçãoDigital #InteligênciaArtificial #MarketingDigital #Nexum360 #EstratégiaDeNegócios #InovacaoEmpresarial #Branding #IA #Automacao #GestaoEmpresarial #Crescimento #MarketingB2B #FuturoDoTrabalho #Tecnologia #Negocios", legenda_li:"A tecnologia não substitui pessoas.\nA falta de domínio dela, sim.\n\nToda grande transformação digital tem um ponto em comum: as empresas e profissionais que saíram na frente não foram os que tinham mais budget ou mais equipe. Foram os que entenderam mais rápido como usar as novas ferramentas a seu favor.\n\nIA, automação e dados não são ameaças — são vantagens competitivas para quem sabe operá-las estrategicamente.\n\nQual é o seu próximo movimento?\n\nNa Nexum360, ajudamos, treinamos e posicionamos empresas para dominar a tecnologia que gera resultado.\n\n📩 nexum360.com.br\n\n#TransformacaoDigital #InteligenciaArtificial #Estrategia #Negocios #Inovacao #Nexum360 #Marketing #Automacao #LiderancaEmpresarial #GestaoDeNegócios #IA #FuturoDigital #Crescimento #B2B", data_criacao:"2026-04-13", data_planejada:"2026-04-13", data_publicacao:"2026-04-13", notas:"Carrossel de 8 slides." },
+      { id:1, tema:"A IA não vai te substituir — vai substituir quem não a usa", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Dark", picah:["P","I"], status:"Publicado", gancho:"A IA não vai te substituir. Vai substituir quem não a usa.", angulo_nexum:"Posiciona a Nexum360 como parceira de transformação, não de substituição.", fonte:"", arquivo:"/public/posts/post1-transformacao-digital.html", slide_preview:"/public/images/post1-slide-01.png", legenda_ig:"A IA não vai te substituir.\nA pessoa que sabe usar IA, vai.\n\nE essa pessoa pode ser você — ou o seu concorrente.\n\nA transformação digital chegou para separar quem evolui de quem fica parado esperando a tempestade passar.\n\nFerramenta não demite ninguém. Quem demite é o gestor que percebeu que uma ferramenta faz o que você faz — mais rápido, mais barato, sem reclamar.\n\nA pergunta certa não é \"vou ser substituído?\"\nÉ \"o que eu consigo fazer com tecnologia que ninguém mais consegue?\"\n\nArraste os slides e veja como essa virada acontece na prática. 👉\n\nQuer entender como aplicar isso no seu negócio?\nFale com a Nexum360. 🔗 nexum360.com.br\n\n#TransformaçãoDigital #InteligênciaArtificial #MarketingDigital #Nexum360 #EstratégiaDeNegócios #InovacaoEmpresarial #Branding #IA #Automacao #GestaoEmpresarial #Crescimento #MarketingB2B #FuturoDoTrabalho #Tecnologia #Negocios", legenda_li:"A tecnologia não substitui pessoas.\nA falta de domínio dela, sim.\n\nToda grande transformação digital tem um ponto em comum: as empresas e profissionais que saíram na frente não foram os que tinham mais budget ou mais equipe. Foram os que entenderam mais rápido como usar as novas ferramentas a seu favor.\n\nIA, automação e dados não são ameaças — são vantagens competitivas para quem sabe operá-las estrategicamente.\n\nQual é o seu próximo movimento?\n\nNa Nexum360, ajudamos, treinamos e posicionamos empresas para dominar a tecnologia que gera resultado.\n\n📩 nexum360.com.br\n\n#TransformacaoDigital #InteligenciaArtificial #Estrategia #Negocios #Inovacao #Nexum360 #Marketing #Automacao #LiderancaEmpresarial #GestaoDeNegócios #IA #FuturoDigital #Crescimento #B2B", data_criacao:"2026-04-13", data_planejada:"2026-04-13", data_publicacao:"2026-04-13", notas:"Carrossel de 8 slides.", slides:["/public/images/post1-slide-01.png","/public/images/post1-slide-02.png","/public/images/post1-slide-03.png","/public/images/post1-slide-04.png","/public/images/post1-slide-05.png","/public/images/post1-slide-06.png","/public/images/post1-slide-07.png","/public/images/post1-slide-08.png"] },
       { id:2, tema:"Apenas 1 em cada 50 investimentos em IA entrega resultado real (Gartner 2025)", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Post Único", variante:"Blue", picah:["A","P"], status:"Publicado", gancho:"Ferramenta sem método é despesa disfarçada de inovação.", angulo_nexum:"Estratégia antes de ferramenta. A ordem importa.", fonte:"Gartner Research, 2025", arquivo:"/public/posts/post2-ia-sem-estrategia.html", slide_preview:"/public/images/post2-card.png", legenda_ig:"Apenas 1 em cada 50 investimentos em IA entrega transformação real.\n\nO Gartner acaba de confirmar o que a gente já via acontecer nas empresas:\n\n→ 2% geram transformação real\n→ 18% têm algum retorno, mas nada que mude o negócio\n→ 80% não geram absolutamente nada mensurável\n\nO problema não é a IA. O problema é que a maioria das empresas compra ferramenta sem ter estratégia, processo ou método por trás.\n\nFerramenta sem método é despesa disfarçada de inovação.\n\nAntes de investir em tecnologia, a sua empresa sabe responder:\n— Qual problema específico isso resolve?\n— Como vai ser medido?\n— Quem vai operar e com qual processo?\n\nSe não tem resposta, o investimento já começou errado.\n\n📌 Fonte: Gartner Research, 2025 — via Seu Dinheiro\n\nQuer estruturar uma estratégia de IA que realmente entregue resultado?\nFala com a Nexum360. 🔗 nexum360.com.br\n\n#InteligenciaArtificial #IA #Gartner #TransformacaoDigital #Nexum360 #Estrategia #Inovacao #MarketingDigital #GestaoEmpresarial #Tecnologia #Negocios #ROI #AIStrategy #Crescimento", legenda_li:"O Gartner publicou um dado que todo gestor precisa ver:\n\nApenas 1 em cada 50 investimentos em IA entrega transformação real.\n\n• 2% — transformação real\n• 18% — algum retorno mensurável, sem transformação\n• 80% — nenhum retorno mensurável\n\nIsso não é falha da tecnologia. É falha de estratégia.\n\nA maioria das empresas está comprando IA como quem compra software: instala, treina o time superficialmente, e espera resultado. Não funciona assim.\n\nIA entrega resultado quando está atrelada a um problema real, um processo definido e um método de medição claro.\n\nFerramenta sem método é despesa disfarçada de inovação.\n\nNa Nexum360, ajudamos empresas a construir a estratégia antes de escolher a ferramenta — porque a ordem importa.\n\n📌 Fonte: Gartner Research, 2025 — via Seu Dinheiro\n\n📩 nexum360.com.br\n\n#InteligenciaArtificial #Gartner #Estrategia #Inovacao #Nexum360 #TransformacaoDigital #GestaoEmpresarial #Tecnologia #IA #Negocios #LiderancaEmpresarial #ROI #AIStrategy #MarketingB2B", data_criacao:"2026-04-14", data_planejada:"2026-04-14", data_publicacao:"2026-04-14", notas:"Card único variante Blue." },
-      { id:3, tema:"Decidir branding com base no espelho é o erro mais caro da marca", pilar:"Estratégia de Marca", rede_social:"Ambos", formato:"Carrossel", variante:"White", picah:["P","H","C"], status:"Publicado", gancho:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.", angulo_nexum:"Marca feita pro dono conquista uma pessoa. Feita pro mercado, conquista milhares.", fonte:"", arquivo:"/public/posts/post3-branding-espelho.html", slide_preview:"/public/images/post3-slide-01.png", legenda_ig:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\n\"Eu não gostei da cor.\"\n\"Eu prefiro essa fonte.\"\n\"Eu não usaria isso.\"\n\nTudo bem ter opinião. Mas quando o gosto pessoal substitui a pesquisa, os dados e o comportamento real do público — o resultado é uma marca que fala sobre o dono, não sobre o cliente.\n\nBranding não é sobre o que você gosta.\nÉ sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você.\n\nMarca feita pro dono conquista uma pessoa.\nMarca feita pro mercado conquista milhares.\n\nArraste e veja como essa diferença funciona na prática. 👉\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n🔗 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #Nexum360 #EstrategiaQueGera #MarketingEstratégico #ConsultoriaDeMarca #GestaoEmpresarial #IdentidadeDeMarca #Marketing #Empreendedorismo #Negocios #MarcaForte", legenda_li:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\nCena clássica de reunião:\n— \"Eu não gostei da cor.\"\n— \"Mas o público-alvo testou e aprovou.\"\n— \"Não importa. É a minha empresa.\"\n\nO problema não é ter opinião. É quando ela substitui a estratégia.\n\nCor favorita, fonte bonita, layout copiado do concorrente — nada disso é branding. É decoração.\n\nBranding é sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você. Quando a marca é construída a partir do mercado, ela conquista milhares. Quando é construída a partir do espelho, conquista uma pessoa.\n\nO espelho mostra quem você é. Branding mostra quem a sua empresa precisa ser para o cliente.\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n📩 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #ConsultoriaEstratégica #Nexum360 #Marketing #IdentidadeDeMarca #GestaoDeNegocios #LiderancaEmpresarial #MarcaForte #Empreendedorismo #Negocios #MarketingB2B", data_criacao:"2026-04-14", data_planejada:"2026-04-14", data_publicacao:"2026-04-14", notas:"Carrossel 7 slides com imagens reais." },
+      { id:3, tema:"Decidir branding com base no espelho é o erro mais caro da marca", pilar:"Estratégia de Marca", rede_social:"Ambos", formato:"Carrossel", variante:"White", picah:["P","H","C"], status:"Publicado", gancho:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.", angulo_nexum:"Marca feita pro dono conquista uma pessoa. Feita pro mercado, conquista milhares.", fonte:"", arquivo:"/public/posts/post3-branding-espelho.html", slide_preview:"/public/images/post3-slide-01.png", legenda_ig:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\n\"Eu não gostei da cor.\"\n\"Eu prefiro essa fonte.\"\n\"Eu não usaria isso.\"\n\nTudo bem ter opinião. Mas quando o gosto pessoal substitui a pesquisa, os dados e o comportamento real do público — o resultado é uma marca que fala sobre o dono, não sobre o cliente.\n\nBranding não é sobre o que você gosta.\nÉ sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você.\n\nMarca feita pro dono conquista uma pessoa.\nMarca feita pro mercado conquista milhares.\n\nArraste e veja como essa diferença funciona na prática. 👉\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n🔗 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #Nexum360 #EstrategiaQueGera #MarketingEstratégico #ConsultoriaDeMarca #GestaoEmpresarial #IdentidadeDeMarca #Marketing #Empreendedorismo #Negocios #MarcaForte", legenda_li:"Decidir a estratégia da marca com base no espelho é o erro mais caro do branding.\n\nCena clássica de reunião:\n— \"Eu não gostei da cor.\"\n— \"Mas o público-alvo testou e aprovou.\"\n— \"Não importa. É a minha empresa.\"\n\nO problema não é ter opinião. É quando ela substitui a estratégia.\n\nCor favorita, fonte bonita, layout copiado do concorrente — nada disso é branding. É decoração.\n\nBranding é sobre o que o seu cliente precisa sentir para confiar, lembrar e escolher você. Quando a marca é construída a partir do mercado, ela conquista milhares. Quando é construída a partir do espelho, conquista uma pessoa.\n\nO espelho mostra quem você é. Branding mostra quem a sua empresa precisa ser para o cliente.\n\nNa Nexum360, a marca não é feita pro dono gostar. É feita pro mercado escolher.\n\n📩 nexum360.com.br\n\n#EstrategiaDeMarca #Branding #Posicionamento #ConsultoriaEstratégica #Nexum360 #Marketing #IdentidadeDeMarca #GestaoDeNegocios #LiderancaEmpresarial #MarcaForte #Empreendedorismo #Negocios #MarketingB2B", data_criacao:"2026-04-14", data_planejada:"2026-04-14", data_publicacao:"2026-04-14", notas:"Carrossel 7 slides com imagens reais.", slides:["/public/images/post3-slide-01.png","/public/images/post3-slide-02.png","/public/images/post3-slide-03.png","/public/images/post3-slide-04.png","/public/images/post3-slide-05.png","/public/images/post3-slide-06.png","/public/images/post3-slide-07.png"] },
       { id:4, tema:"75% dos ganhos com IA são capturados por apenas 20% das empresas (PwC 2026)", pilar:"Tecnologia e IA", rede_social:"LinkedIn", formato:"Carrossel", variante:"Blue", picah:["A","P"], status:"Ideia", gancho:"Não basta usar IA. Tem que decidir com ela.", angulo_nexum:"Líderes em IA tomam decisões sem intervenção humana 2,8x mais rápido.", fonte:"PwC AI Performance Study — abril 2026", arquivo:"", slide_preview:"", legenda_ig:"", legenda_li:"", data_criacao:"2026-04-14", data_planejada:null, data_publicacao:null, notas:"Notícia fresca 13/04/2026." },
       { id:5, tema:"Harvard Business Review: decisão por consenso não funciona na era da IA", pilar:"Mentalidade e Gestão Empresarial", rede_social:"LinkedIn", formato:"Post Único", variante:"Dark", picah:["P","C"], status:"Ideia", gancho:"O modelo de decisão que construiu sua empresa pode ser o que está te travando.", angulo_nexum:"Consenso é lento e distorce informação. Decisão ágil é vantagem competitiva.", fonte:"Harvard Business Review — abril 2026", arquivo:"", slide_preview:"", legenda_ig:"", legenda_li:"", data_criacao:"2026-04-14", data_planejada:null, data_publicacao:null, notas:"Provocação forte. Pode derivar em carrossel." },
-      { id:6, tema:"Em 2 anos, IA saiu de 32,8% para 95,2% das prioridades empresariais no Brasil", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Blue", picah:["A","P"], status:"Pronto", gancho:"Adotar IA sem estratégia de decisão é só trocar planilha por chatbot.", angulo_nexum:"Todos entraram na corrida. Poucos sabem onde está a chegada.", fonte:"Panorama 2026 — Amcham Brasil", arquivo:"/public/posts/post6-ia-prioridade.html", slide_preview:"/public/images/post6-slide-01.png", legenda_ig:"Em 2023, apenas 32,8% das empresas brasileiras tinham IA como prioridade estratégica.\n\nEm 2025: 95,2%.\n\nEm menos de 24 meses, o mercado virou de cabeça para baixo — sem aviso, sem esperar ninguém estar pronto.\n\nMas aqui está o ponto que ninguém está falando:\n\nPriorizar não é implementar.\nImplementar não é integrar.\nIntegrar sem estratégia não transforma negócio.\n\nO mercado está cheio de empresas com IA e sem resultado.\n\nComprar ferramenta de IA ≠ ter estratégia de IA.\nAutomatizar processo ruim = processo ruim mais rápido.\nIA sem dados de qualidade = decisões erradas em escala.\n\nA corrida não é de quem implementou primeiro.\nÉ de quem implementou com inteligência.\n\nA pergunta que você precisa responder hoje:\nVocê está usando IA para crescer — ou para se sentir moderno?\n\nA Nexum360 transforma IA em decisão, resultado e crescimento real. Não em projeto piloto.\n\n👇 Salva esse post. Compartilha com quem precisa ouvir isso.\n\n#InteligênciaArtificial #EstrategiaDeIA #TransformacaoDigital #Nexum360 #EstrategiaQueGera #NexumInteligencia #Negócios #IANasEmpresas #GestaoEmpresarial #Empreendedorismo #MarketingDigital #InovacaoEmpresarial", legenda_li:"Dois anos. 32,8% → 95,2%.\n\nEsse é o salto da IA nas prioridades estratégicas das empresas brasileiras.\n\nMas enquanto todo mundo fala do número, poucos estão fazendo a pergunta certa:\n\nDe quantas dessas empresas a IA está gerando resultado real?\n\nVejo empresas comprando plataformas de IA como se isso fosse estratégia. Implementando automações em processos mal desenhados. Gerando relatórios bonitos com dados ruins.\n\nIsso não é transformação. É ilusão de progresso.\n\nIA estratégica começa antes da tecnologia. Antes de qualquer implementação, três perguntas precisam ter resposta:\n\n→ Quais decisões do negócio se beneficiam de mais velocidade e menos viés?\n→ Onde estão os dados que você precisa — e estão estruturados?\n→ Qual resultado de negócio você espera em 90 dias?\n\nA corrida não é de quem chegou primeiro.\nÉ de quem chegou com inteligência.\n\nVocê está usando IA para crescer — ou para se sentir parte dos 95,2%?\n\n─────────────────────────\nNexum360 | Inteligência & Decisão com IA\nnexum360.com.br\n\n#InteligênciaArtificial #EstrategiaEmpresarial #TransformacaoDigital #LiderancaEmpresarial #Nexum360 #IANasEmpresas #DecisaoEstrategica #GestaoDeNegócios #InovacaoDigital #B2B", data_criacao:"2026-04-14", data_planejada:"2026-04-15", data_publicacao:null, notas:"Carrossel 8 slides variante Blue. Arte e legendas prontas." }
+      { id:6, tema:"Em 2 anos, IA saiu de 32,8% para 95,2% das prioridades empresariais no Brasil", pilar:"Tecnologia e IA", rede_social:"Ambos", formato:"Carrossel", variante:"Blue", picah:["A","P"], status:"Pronto", gancho:"Adotar IA sem estratégia de decisão é só trocar planilha por chatbot.", angulo_nexum:"Todos entraram na corrida. Poucos sabem onde está a chegada.", fonte:"Panorama 2026 — Amcham Brasil", arquivo:"/public/posts/post6-ia-prioridade.html", slide_preview:"/public/images/post6-slide-01.png", legenda_ig:"Em 2023, apenas 32,8% das empresas brasileiras tinham IA como prioridade estratégica.\n\nEm 2025: 95,2%.\n\nEm menos de 24 meses, o mercado virou de cabeça para baixo — sem aviso, sem esperar ninguém estar pronto.\n\nMas aqui está o ponto que ninguém está falando:\n\nPriorizar não é implementar.\nImplementar não é integrar.\nIntegrar sem estratégia não transforma negócio.\n\nO mercado está cheio de empresas com IA e sem resultado.\n\nComprar ferramenta de IA ≠ ter estratégia de IA.\nAutomatizar processo ruim = processo ruim mais rápido.\nIA sem dados de qualidade = decisões erradas em escala.\n\nA corrida não é de quem implementou primeiro.\nÉ de quem implementou com inteligência.\n\nA pergunta que você precisa responder hoje:\nVocê está usando IA para crescer — ou para se sentir moderno?\n\nA Nexum360 transforma IA em decisão, resultado e crescimento real. Não em projeto piloto.\n\n👇 Salva esse post. Compartilha com quem precisa ouvir isso.\n\n#InteligênciaArtificial #EstrategiaDeIA #TransformacaoDigital #Nexum360 #EstrategiaQueGera #NexumInteligencia #Negócios #IANasEmpresas #GestaoEmpresarial #Empreendedorismo #MarketingDigital #InovacaoEmpresarial", legenda_li:"Dois anos. 32,8% → 95,2%.\n\nEsse é o salto da IA nas prioridades estratégicas das empresas brasileiras.\n\nMas enquanto todo mundo fala do número, poucos estão fazendo a pergunta certa:\n\nDe quantas dessas empresas a IA está gerando resultado real?\n\nVejo empresas comprando plataformas de IA como se isso fosse estratégia. Implementando automações em processos mal desenhados. Gerando relatórios bonitos com dados ruins.\n\nIsso não é transformação. É ilusão de progresso.\n\nIA estratégica começa antes da tecnologia. Antes de qualquer implementação, três perguntas precisam ter resposta:\n\n→ Quais decisões do negócio se beneficiam de mais velocidade e menos viés?\n→ Onde estão os dados que você precisa — e estão estruturados?\n→ Qual resultado de negócio você espera em 90 dias?\n\nA corrida não é de quem chegou primeiro.\nÉ de quem chegou com inteligência.\n\nVocê está usando IA para crescer — ou para se sentir parte dos 95,2%?\n\n─────────────────────────\nNexum360 | Inteligência & Decisão com IA\nnexum360.com.br\n\n#InteligênciaArtificial #EstrategiaEmpresarial #TransformacaoDigital #LiderancaEmpresarial #Nexum360 #IANasEmpresas #DecisaoEstrategica #GestaoDeNegócios #InovacaoDigital #B2B", data_criacao:"2026-04-14", data_planejada:"2026-04-15", data_publicacao:null, notas:"Carrossel 8 slides variante Blue. Arte e legendas prontas.", slides:["/public/images/post6-slide-01.png","/public/images/post6-slide-02.png","/public/images/post6-slide-03.png","/public/images/post6-slide-04.png","/public/images/post6-slide-05.png","/public/images/post6-slide-06.png","/public/images/post6-slide-07.png","/public/images/post6-slide-08.png"] }
     ];
 
     let pautas = (() => {
@@ -750,12 +834,19 @@
       return defaultData;
     })();
 
+    const KNOWN_SLIDES = {
+      1: ['/public/images/post1-slide-01.png','/public/images/post1-slide-02.png','/public/images/post1-slide-03.png','/public/images/post1-slide-04.png','/public/images/post1-slide-05.png','/public/images/post1-slide-06.png','/public/images/post1-slide-07.png','/public/images/post1-slide-08.png'],
+      3: ['/public/images/post3-slide-01.png','/public/images/post3-slide-02.png','/public/images/post3-slide-03.png','/public/images/post3-slide-04.png','/public/images/post3-slide-05.png','/public/images/post3-slide-06.png','/public/images/post3-slide-07.png'],
+      6: ['/public/images/post6-slide-01.png','/public/images/post6-slide-02.png','/public/images/post6-slide-03.png','/public/images/post6-slide-04.png','/public/images/post6-slide-05.png','/public/images/post6-slide-06.png','/public/images/post6-slide-07.png','/public/images/post6-slide-08.png'],
+    };
+
     function migrate(p) {
       if (!p.rede_social)    p.rede_social   = 'Ambos';
       if (!p.data_planejada) p.data_planejada = p.data_publicacao || null;
       if (!p.slide_preview)  p.slide_preview  = '';
       if (!p.legenda_ig)     p.legenda_ig     = '';
       if (!p.legenda_li)     p.legenda_li     = '';
+      if (!p.slides)         p.slides = KNOWN_SLIDES[p.id] || (p.slide_preview ? [p.slide_preview] : []);
       return p;
     }
 
@@ -829,11 +920,22 @@
           ? `<span>📅 ${formatDate(p.data_planejada)}</span>`
           : '<span style="opacity:0.4">Sem data</span>';
 
-        const previewImg = p.slide_preview
-          ? `<img class="card-preview" src="${p.slide_preview}" alt="preview" onerror="this.style.display='none'">`
-          : p.arquivo
-            ? `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`
-            : '';
+        const slides = p.slides && p.slides.length ? p.slides : (p.slide_preview ? [p.slide_preview] : []);
+        let previewImg = '';
+        if (slides.length > 1) {
+          const dotHtml  = slides.map((_,i) => `<div class="carousel-dot${i===0?' active':''}"></div>`).join('');
+          const slideHtml = slides.map((src,i) => `<img class="carousel-slide${i===0?' active':''}" src="${src}" alt="Slide ${i+1}" onclick="openLightbox(${p.id},${i})" draggable="false">`).join('');
+          previewImg = `<div class="card-carousel" onclick="event.stopPropagation()" onmousedown="carouselDragStart(event,${p.id})" ontouchstart="carouselTouchStart(event,${p.id})" ontouchend="carouselTouchEnd(event,${p.id})">
+            <div class="carousel-track">${slideHtml}</div>
+            <button class="carousel-btn carousel-prev" onclick="event.stopPropagation();carouselNav(${p.id},-1)">&#8249;</button>
+            <button class="carousel-btn carousel-next" onclick="event.stopPropagation();carouselNav(${p.id},1)">&#8250;</button>
+            <div class="carousel-dots">${dotHtml}</div>
+          </div>`;
+        } else if (slides.length === 1) {
+          previewImg = `<img class="card-preview" src="${slides[0]}" alt="preview" onerror="this.style.display='none'" onclick="event.stopPropagation();openLightbox(${p.id},0)">`;
+        } else if (p.arquivo) {
+          previewImg = `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
+        }
 
         const hasLegenda = p.legenda_ig || p.legenda_li;
         const legendaSection = hasLegenda ? `
@@ -850,7 +952,7 @@
         grid.insertAdjacentHTML('beforeend', `
           <div class="card" id="card-${p.id}" onclick="openDetail(${p.id})">
             ${previewImg}
-            <div class="card-top" style="margin-top:${(p.slide_preview||p.arquivo)?'12px':'0'}">
+            <div class="card-top" style="margin-top:${(slides.length||p.arquivo)?'12px':'0'}">
               <div class="card-tema">${p.tema}</div>
               <div class="status-pill ${statusClass(p.status)}">${p.status}</div>
             </div>
@@ -1083,10 +1185,82 @@
           if (!iframe) return;
           const scale = wrap.offsetWidth / 1080;
           iframe.style.transform = `scale(${scale})`;
-          iframe.style.height    = `${150 / scale}px`;
+          iframe.style.height    = `${200 / scale}px`;
         });
       });
     }
+
+    // ── CAROUSEL ──────────────────────────────────────────────
+    const carouselState = {};
+
+    function getSlides(p) {
+      return p.slides && p.slides.length ? p.slides : (p.slide_preview ? [p.slide_preview] : []);
+    }
+
+    function carouselNav(id, dir) {
+      const p = pautas.find(x => x.id === id); if (!p) return;
+      const slides = getSlides(p); if (slides.length <= 1) return;
+      const cur = carouselState[id] || 0;
+      carouselGoTo(id, (cur + dir + slides.length) % slides.length);
+    }
+
+    function carouselGoTo(id, idx) {
+      carouselState[id] = idx;
+      const card = document.getElementById('card-' + id); if (!card) return;
+      card.querySelectorAll('.carousel-slide').forEach((el, i) => el.classList.toggle('active', i === idx));
+      card.querySelectorAll('.carousel-dot').forEach((el, i)  => el.classList.toggle('active', i === idx));
+    }
+
+    // Drag/swipe no carrossel
+    let _dragStartX = 0;
+    function carouselDragStart(e, id) {
+      _dragStartX = e.clientX;
+      const up = (ev) => {
+        const dx = ev.clientX - _dragStartX;
+        if (Math.abs(dx) > 40) carouselNav(id, dx < 0 ? 1 : -1);
+        window.removeEventListener('mouseup', up);
+      };
+      window.addEventListener('mouseup', up);
+    }
+    let _touchStartX = 0;
+    function carouselTouchStart(e, id) { _touchStartX = e.touches[0].clientX; }
+    function carouselTouchEnd(e, id) {
+      const dx = e.changedTouches[0].clientX - _touchStartX;
+      if (Math.abs(dx) > 40) carouselNav(id, dx < 0 ? 1 : -1);
+    }
+
+    // ── LIGHTBOX ──────────────────────────────────────────────
+    let lbSlides = [], lbIdx = 0;
+
+    function openLightbox(id, idx) {
+      const p = pautas.find(x => x.id === id); if (!p) return;
+      lbSlides = getSlides(p);
+      lbIdx = idx;
+      _updateLightbox();
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox() { document.getElementById('lightbox').classList.remove('open'); }
+
+    function lightboxNav(dir) {
+      if (!lbSlides.length) return;
+      lbIdx = (lbIdx + dir + lbSlides.length) % lbSlides.length;
+      _updateLightbox();
+    }
+
+    function _updateLightbox() {
+      document.getElementById('lb-img').src = lbSlides[lbIdx];
+      document.getElementById('lb-counter').textContent = lbSlides.length > 1 ? `${lbIdx + 1} / ${lbSlides.length}` : '';
+      document.getElementById('lb-prev').style.display = lbSlides.length > 1 ? '' : 'none';
+      document.getElementById('lb-next').style.display = lbSlides.length > 1 ? '' : 'none';
+    }
+
+    document.addEventListener('keydown', e => {
+      if (!document.getElementById('lightbox').classList.contains('open')) return;
+      if (e.key === 'ArrowLeft')  lightboxNav(-1);
+      if (e.key === 'ArrowRight') lightboxNav(1);
+      if (e.key === 'Escape')     closeLightbox();
+    });
 
     // ── SETTINGS ──────────────────────────────────────────────
     function toggleSettings() {
