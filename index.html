@@ -1534,6 +1534,7 @@
         const netLabel = net === 'instagram' ? 'Instagram' : net === 'facebook' ? 'Facebook' : 'LinkedIn';
 
         showProgress('loading');
+        showToast(`Publicando no ${netLabel}... aguarde`, 'loading', true);
 
         try {
           let body;
