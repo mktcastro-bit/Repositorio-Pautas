@@ -321,6 +321,31 @@
     .refine-result-msg { color: var(--text); font-size: 0.8rem; }
     .refine-apply-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
+    /* GERAR ARTE */
+    .gen-art-area { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .gen-art-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .gen-art-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .gen-art-select {
+      background: var(--s1); border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.7rem; padding: 7px 10px; border-radius: 6px; outline: none;
+      cursor: pointer; appearance: none; -webkit-appearance: none;
+    }
+    .gen-art-preview {
+      display: none; flex-direction: column; gap: 8px; margin-top: 4px;
+    }
+    .gen-art-preview.show { display: flex; }
+    .gen-art-iframe-wrap {
+      width: 100%; aspect-ratio: 1080/1350; overflow: hidden;
+      border-radius: 8px; border: 1px solid var(--border); background: #000;
+      position: relative;
+    }
+    .gen-art-iframe-wrap iframe {
+      width: 1080px; height: 1350px;
+      transform-origin: top left;
+      border: none; pointer-events: none; display: block;
+    }
+    .gen-art-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
     .detail-carousel {
       position: absolute; inset: 0;
     }
@@ -1042,6 +1067,74 @@
       return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    async function doGenArt(id) {
+      const p = pautas.find(x => x.id === id); if (!p) return;
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel primeiro.', 'error');
+
+      const slideSelect = document.getElementById(`gen-art-slide-${id}`);
+      const slideIndex  = slideSelect ? parseInt(slideSelect.value) : 0;
+
+      const btn     = document.getElementById(`gen-art-btn-${id}`);
+      const preview = document.getElementById(`gen-art-preview-${id}`);
+      const wrap    = document.getElementById(`gen-art-wrap-${id}`);
+      const actions = document.getElementById(`gen-art-actions-${id}`);
+
+      btn.disabled = true; btn.textContent = '✦ Gerando…';
+      preview.classList.remove('show');
+      showProgress('loading');
+      showToast('Gerando arte com IA... aguarde', 'loading', true);
+
+      try {
+        const r = await fetch(`${url}/api/generate-art`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ pauta: p, slideIndex }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        // Exibir HTML gerado num iframe via blob
+        const blob    = new Blob([d.html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        wrap.innerHTML = `<iframe src="${blobUrl}" id="gen-art-iframe-${id}"></iframe>`;
+
+        // Escalar iframe para caber no container
+        const iframeEl = wrap.querySelector('iframe');
+        iframeEl.onload = () => {
+          const scale = wrap.clientWidth / 1080;
+          iframeEl.style.transform = `scale(${scale})`;
+          wrap.style.height = `${1350 * scale}px`;
+        };
+
+        // Botões de ação
+        const dlBtn = document.createElement('a');
+        dlBtn.className   = 'detail-btn';
+        dlBtn.textContent = '↓ Baixar HTML';
+        dlBtn.href        = blobUrl;
+        const slideSuffix = p.slides?.length ? `-slide-${slideIndex + 1}` : '';
+        dlBtn.download    = `post-${p.id}${slideSuffix}.html`;
+        actions.innerHTML = '';
+        actions.appendChild(dlBtn);
+
+        const regenBtn = document.createElement('button');
+        regenBtn.className   = 'detail-btn';
+        regenBtn.textContent = '↺ Regerar';
+        regenBtn.onclick     = () => doGenArt(id);
+        actions.appendChild(regenBtn);
+
+        preview.classList.add('show');
+        showProgress('success');
+        hideToast();
+      } catch (e) {
+        showProgress('error');
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '✦ Gerar Arte';
+      }
+    }
+
     async function doRefine(id) {
       const p = pautas.find(x => x.id === id); if (!p) return;
       const url = getVercelUrl();
@@ -1284,6 +1377,20 @@
               <div class="refine-result" id="refine-result-${p.id}">
                 <div class="refine-result-msg" id="refine-msg-${p.id}"></div>
                 <div class="refine-apply-row" id="refine-apply-${p.id}"></div>
+              </div>
+            </div>
+            <div class="gen-art-area">
+              <div class="gen-art-label">Gerar Arte com IA</div>
+              <div class="gen-art-row">
+                ${p.slides?.length ? `
+                <select class="gen-art-select" id="gen-art-slide-${p.id}">
+                  ${p.slides.map((_,i) => `<option value="${i}">Slide ${i+1}</option>`).join('')}
+                </select>` : ''}
+                <button class="detail-btn" onclick="doGenArt(${p.id})" id="gen-art-btn-${p.id}">✦ Gerar Arte</button>
+              </div>
+              <div class="gen-art-preview" id="gen-art-preview-${p.id}">
+                <div class="gen-art-iframe-wrap" id="gen-art-wrap-${p.id}"></div>
+                <div class="gen-art-actions" id="gen-art-actions-${p.id}"></div>
               </div>
             </div>
           </div>
