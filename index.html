@@ -99,7 +99,7 @@
     .view-btn.active { background: var(--accent); color: #0a0a0a; }
 
     /* ── GRID ── */
-    .grid { padding: 28px 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 18px; }
+    .grid { padding: 28px 48px; display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 18px; }
 
     /* ── CARD ── */
     .card {
@@ -272,16 +272,54 @@
       background: var(--s2); border: 1px solid var(--border); border-radius: 16px;
       width: 100%; max-width: 1080px;
       height: 90vh;
-      display: grid; grid-template-columns: 380px 1fr; gap: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+      overflow: hidden;
+    }
+    .detail-right {
+      display: flex; flex-direction: column;
+      border-left: 1px solid var(--border);
       overflow: hidden;
     }
     .detail-preview {
       background: #000;
       display: flex; align-items: center; justify-content: center;
-      border-right: 1px solid var(--border);
-      height: 100%; position: relative; overflow: hidden;
+      flex: 0 0 58%; position: relative; overflow: hidden;
     }
-    .detail-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; cursor: zoom-in; }
+    .detail-preview img { width: 100%; height: 100%; object-fit: contain; display: block; cursor: zoom-in; }
+    .detail-actions-bar {
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 20px;
+      border-top: 1px solid var(--border);
+      background: var(--s2);
+      flex: 1; overflow-y: auto;
+    }
+    .detail-actions-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .refine-area { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .refine-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .refine-input-row { display: flex; gap: 8px; }
+    .refine-textarea {
+      flex: 1; background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.8rem; padding: 9px 12px; border-radius: 6px; outline: none;
+      resize: none; font-family: inherit; line-height: 1.5; min-height: 70px;
+      transition: border-color 0.2s;
+    }
+    .refine-textarea:focus { border-color: var(--accent); }
+    .refine-send {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 1rem; width: 38px; height: 38px; border-radius: 6px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; align-self: flex-end; transition: opacity 0.2s;
+    }
+    .refine-send:hover { opacity: 0.85; }
+    .refine-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .refine-result {
+      background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.2);
+      border-radius: 8px; padding: 12px; font-size: 0.78rem; color: var(--muted);
+      line-height: 1.55; display: none; flex-direction: column; gap: 10px;
+    }
+    .refine-result.show { display: flex; }
+    .refine-result-msg { color: var(--text); font-size: 0.8rem; }
+    .refine-apply-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
     .detail-carousel {
       position: absolute; inset: 0;
@@ -495,12 +533,6 @@
     .modal-save { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 26px; border-radius: 6px; cursor: pointer; }
     .modal-save:hover { opacity: 0.85; }
 
-    /* DETAIL MODAL */
-    .detail-modal { background: var(--s2); border: 1px solid var(--border); border-radius: 16px; padding: 36px; width: 100%; max-width: 520px; display: flex; flex-direction: column; gap: 16px; }
-    .detail-tema { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; color: var(--text); line-height: 1.35; }
-    .detail-row { display: flex; flex-direction: column; gap: 4px; }
-    .detail-row-label { font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-    .detail-row-value { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
 
     /* PICAH LEGEND */
     .picah-legend { display: flex; gap: 16px; padding: 0 48px 18px; font-size: 0.7rem; color: var(--muted); flex-wrap: wrap; }
@@ -1010,6 +1042,75 @@
       return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    async function doRefine(id) {
+      const p = pautas.find(x => x.id === id); if (!p) return;
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel primeiro.', 'error');
+
+      const instrucao = document.getElementById(`refine-prompt-${id}`)?.value.trim();
+      if (!instrucao) return showToast('Digite uma instrução antes de enviar.', 'error');
+
+      const btn    = document.getElementById(`refine-btn-${id}`);
+      const result = document.getElementById(`refine-result-${id}`);
+      const msg    = document.getElementById(`refine-msg-${id}`);
+      const apply  = document.getElementById(`refine-apply-${id}`);
+
+      btn.disabled = true; btn.textContent = '…';
+      result.classList.remove('show');
+      showProgress('loading');
+      showToast('Processando com IA... aguarde', 'loading', true);
+
+      try {
+        const r = await fetch(`${url}/api/refine`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pauta: p, instrucao }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const res = d.result;
+        msg.textContent = res.resposta || 'Alteração gerada com sucesso.';
+        apply.innerHTML = '';
+
+        const fields = { legenda_ig: 'Aplicar Legenda IG', legenda_li: 'Aplicar Legenda LinkedIn', tema: 'Aplicar Tema', gancho: 'Aplicar Gancho', slides: 'Aplicar Slides' };
+        let hasFields = false;
+        for (const [field, label] of Object.entries(fields)) {
+          if (res[field] !== undefined) {
+            hasFields = true;
+            const b = document.createElement('button');
+            b.className = 'detail-btn'; b.textContent = label;
+            b.onclick = () => {
+              p[field] = res[field];
+              save(); renderCards();
+              b.textContent = '✓ Aplicado'; b.disabled = true;
+              showToast(`${label} aplicado!`, 'success');
+            };
+            apply.appendChild(b);
+          }
+        }
+        if (!hasFields) msg.textContent = res.resposta || 'Nenhuma alteração retornada.';
+
+        result.classList.add('show');
+        showProgress('success');
+        hideToast();
+      } catch (e) {
+        showProgress('error');
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '→';
+      }
+    }
+
+    function detailSwitchTab(show, hide, id) {
+      document.getElementById(`dleg-${show}-${id}`).style.display = '';
+      const hideEl = document.getElementById(`dleg-${hide}-${id}`);
+      if (hideEl) hideEl.style.display = 'none';
+      document.getElementById(`dtab-${show}`).classList.add('active');
+      const hideTab = document.getElementById(`dtab-${hide}`);
+      if (hideTab) hideTab.classList.remove('active');
+    }
+
     function switchTab(btn, showId, hideId) {
       document.getElementById(showId).style.display = '';
       document.getElementById(hideId) && (document.getElementById(hideId).style.display = 'none');
@@ -1104,15 +1205,22 @@
         preview = `<div class="detail-preview-empty"><span>🖼</span><p>Sem prévia</p></div>`;
       }
 
-      const arteBtn = p.arquivo
-        ? `<a class="detail-btn primary" href="${p.arquivo}" target="_blank">↗ Ver Arte</a>`
-        : '';
       const legendaBtn = p.legenda_arquivo
         ? `<a class="detail-btn" href="${p.legenda_arquivo}" target="_blank">📄 Ver Legenda</a>`
         : '';
 
+      const legendaSection = (p.legenda_ig || p.legenda_li) ? `
+        <div class="detail-row">
+          <div class="detail-row-label" style="margin-bottom:6px">Texto do Post</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px">
+            ${p.legenda_ig ? `<button class="legenda-tab active" id="dtab-ig" onclick="detailSwitchTab('ig','li',${p.id})">Instagram</button>` : ''}
+            ${p.legenda_li ? `<button class="legenda-tab ${!p.legenda_ig?'active':''}" id="dtab-li" onclick="detailSwitchTab('li','ig',${p.id})">LinkedIn</button>` : ''}
+          </div>
+          ${p.legenda_ig ? `<div class="detail-row-value" id="dleg-ig-${p.id}" style="white-space:pre-wrap;font-size:0.8rem;color:var(--muted);line-height:1.6">${escHtml(p.legenda_ig)}</div>` : ''}
+          ${p.legenda_li ? `<div class="detail-row-value" id="dleg-li-${p.id}" style="white-space:pre-wrap;font-size:0.8rem;color:var(--muted);line-height:1.6;${p.legenda_ig?'display:none':''}">${escHtml(p.legenda_li)}</div>` : ''}
+        </div>` : '';
+
       document.getElementById('detailContent').innerHTML = `
-        <div class="detail-preview">${preview}</div>
         <div class="detail-body">
           <div class="detail-tema">${p.tema}</div>
 
@@ -1129,21 +1237,32 @@
           ${p.fonte ? `<div class="detail-row"><div class="detail-row-label">Fonte</div><div class="detail-row-value" style="opacity:0.7;font-size:0.8rem">${p.fonte}</div></div>` : ''}
           ${p.data_planejada ? `<div class="detail-row"><div class="detail-row-label">Data Planejada</div><div class="detail-row-value">${formatDate(p.data_planejada)}</div></div>` : ''}
           ${p.notas ? `<div class="detail-row"><div class="detail-row-label">Notas</div><div class="detail-row-value" style="opacity:0.7;font-size:0.8rem">${p.notas}</div></div>` : ''}
-
-          <div class="detail-row">
-            <div class="detail-row-label">Status</div>
-            <select class="status-select" style="flex:none;width:100%" onchange="setStatus(${p.id},this.value);document.querySelector('#detailContent .status-select').value=this.value">
-              <option value="Ideia"     ${p.status==='Ideia'    ?'selected':''}>Ideia</option>
-              <option value="Produção"  ${p.status==='Produção' ?'selected':''}>Em Produção</option>
-              <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
-            </select>
-          </div>
-
-          <div class="detail-actions">
-            ${arteBtn}
-            ${legendaBtn}
-            <button class="detail-btn publish" onclick="openPublish(${p.id})">↑ Publicar</button>
-            <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
+          ${legendaSection}
+        </div>
+        <div class="detail-right">
+          <div class="detail-preview">${preview}</div>
+          <div class="detail-actions-bar">
+            <div class="detail-actions-row">
+              <select class="status-select" style="flex:none" onchange="setStatus(${p.id},this.value)">
+                <option value="Ideia"     ${p.status==='Ideia'    ?'selected':''}>Ideia</option>
+                <option value="Produção"  ${p.status==='Produção' ?'selected':''}>Em Produção</option>
+                <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
+              </select>
+              ${legendaBtn}
+              <button class="detail-btn publish" onclick="openPublish(${p.id})">↑ Publicar</button>
+              <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
+            </div>
+            <div class="refine-area">
+              <div class="refine-label">Solicitar alteração com IA</div>
+              <div class="refine-input-row">
+                <textarea class="refine-textarea" id="refine-prompt-${p.id}" placeholder="Ex: Deixe a legenda do Instagram mais curta e direta. Reduza para metade do tamanho atual."></textarea>
+                <button class="refine-send" onclick="doRefine(${p.id})" id="refine-btn-${p.id}">→</button>
+              </div>
+              <div class="refine-result" id="refine-result-${p.id}">
+                <div class="refine-result-msg" id="refine-msg-${p.id}"></div>
+                <div class="refine-apply-row" id="refine-apply-${p.id}"></div>
+              </div>
+            </div>
           </div>
         </div>`;
       document.getElementById('detailOverlay').classList.add('open');
