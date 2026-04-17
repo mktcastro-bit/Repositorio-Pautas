@@ -1073,9 +1073,10 @@
         msg.textContent = res.resposta || 'Alteração gerada com sucesso.';
         apply.innerHTML = '';
 
-        const fields = { legenda_ig: 'Aplicar Legenda IG', legenda_li: 'Aplicar Legenda LinkedIn', tema: 'Aplicar Tema', gancho: 'Aplicar Gancho', slides: 'Aplicar Slides' };
+        const simpleFields = { legenda_ig: 'Aplicar Legenda IG', legenda_li: 'Aplicar Legenda LinkedIn', tema: 'Aplicar Tema', gancho: 'Aplicar Gancho' };
         let hasFields = false;
-        for (const [field, label] of Object.entries(fields)) {
+
+        for (const [field, label] of Object.entries(simpleFields)) {
           if (res[field] !== undefined) {
             hasFields = true;
             const b = document.createElement('button');
@@ -1089,6 +1090,28 @@
             apply.appendChild(b);
           }
         }
+
+        // Slides: botão individual por slide alterado
+        if (Array.isArray(res.slides)) {
+          res.slides.forEach((newSlide, i) => {
+            const orig = (p.slides || [])[i];
+            const changed = !orig || orig.titulo !== newSlide.titulo || orig.texto !== newSlide.texto;
+            if (!changed) return;
+            hasFields = true;
+            const b = document.createElement('button');
+            b.className = 'detail-btn';
+            b.textContent = `Aplicar Slide ${newSlide.numero || i + 1}`;
+            b.onclick = () => {
+              if (!p.slides) p.slides = [];
+              p.slides[i] = newSlide;
+              save(); renderCards();
+              b.textContent = `✓ Slide ${newSlide.numero || i + 1} aplicado`; b.disabled = true;
+              showToast(`Slide ${newSlide.numero || i + 1} aplicado!`, 'success');
+            };
+            apply.appendChild(b);
+          });
+        }
+
         if (!hasFields) msg.textContent = res.resposta || 'Nenhuma alteração retornada.';
 
         result.classList.add('show');
