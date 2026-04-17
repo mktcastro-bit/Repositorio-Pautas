@@ -271,6 +271,7 @@
     .detail-modal {
       background: var(--s2); border: 1px solid var(--border); border-radius: 16px;
       width: 100%; max-width: 1080px;
+      height: 90vh;
       display: grid; grid-template-columns: 380px 1fr; gap: 0;
       overflow: hidden;
     }
@@ -278,7 +279,7 @@
       background: #000;
       display: flex; align-items: center; justify-content: center;
       border-right: 1px solid var(--border);
-      min-height: 360px; position: relative; overflow: hidden;
+      height: 100%; position: relative; overflow: hidden;
     }
     .detail-preview img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; cursor: zoom-in; }
 
@@ -325,7 +326,7 @@
       transform-origin: top left;
       border: none; pointer-events: none; display: block;
     }
-    .detail-body { padding: 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; max-height: 85vh; }
+    .detail-body { padding: 32px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; height: 100%; }
     .detail-tema { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.35; }
     .detail-row { display: flex; flex-direction: column; gap: 4px; }
     .detail-row-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
@@ -418,6 +419,8 @@
     .pub-btn-ig:hover  { background: rgba(225,100,100,0.2); }
     .pub-btn-li  { background: rgba(77,143,218,0.1); border-color: rgba(77,143,218,0.3); color: var(--blue); }
     .pub-btn-li:hover  { background: rgba(77,143,218,0.2); }
+    .pub-btn-fb  { background: rgba(66,103,178,0.1); border-color: rgba(66,103,178,0.3); color: #6b9eff; }
+    .pub-btn-fb:hover  { background: rgba(66,103,178,0.2); }
     .pub-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
     /* ── CALENDAR ── */
@@ -1327,6 +1330,7 @@
 
       const canPublish = !!url;
       const hasIg = !!p.legenda_ig;
+      const hasFb = !!(p.legenda_fb || p.legenda_ig);
       const hasLi = !!p.legenda_li;
       const isCarousel = p.formato === 'Carrossel';
 
@@ -1375,11 +1379,14 @@
           ${hasIg ? `<button class="pub-btn pub-btn-ig" onclick="doPublish(${id},'instagram')" ${!canPublish?'disabled':''}>
             📸 Instagram
           </button>` : ''}
+          ${hasFb ? `<button class="pub-btn pub-btn-fb" onclick="doPublish(${id},'facebook')" ${!canPublish?'disabled':''}>
+            📘 Facebook
+          </button>` : ''}
           ${hasLi ? `<button class="pub-btn pub-btn-li" onclick="doPublish(${id},'linkedin')" ${!canPublish?'disabled':''}>
             💼 LinkedIn
           </button>` : ''}
-          ${(hasIg && hasLi) ? `<button class="pub-btn" style="background:rgba(200,169,110,0.1);border-color:rgba(200,169,110,0.3);color:var(--accent)" onclick="doPublish(${id},'ambos')" ${!canPublish?'disabled':''}>
-            ✦ Ambos
+          ${([hasIg, hasFb, hasLi].filter(Boolean).length > 1) ? `<button class="pub-btn" style="background:rgba(200,169,110,0.1);border-color:rgba(200,169,110,0.3);color:var(--accent)" onclick="doPublish(${id},'todos')" ${!canPublish?'disabled':''}>
+            ✦ Todos
           </button>` : ''}
         </div>
         <button class="modal-cancel" onclick="closeModal('publishOverlay')" style="align-self:flex-end">Cancelar</button>
@@ -1492,14 +1499,21 @@
         if (!imageUrl) return showToast('Informe a URL da imagem.', 'error');
       }
 
-      const networks = network === 'ambos' ? ['instagram','linkedin'] : [network];
+      const _hasIg = !!p.legenda_ig;
+      const _hasFb = !!(p.legenda_fb || p.legenda_ig);
+      const _hasLi = !!p.legenda_li;
+      const networks = network === 'todos'
+        ? ['instagram','facebook','linkedin'].filter(n => n==='instagram'?_hasIg : n==='facebook'?_hasFb : _hasLi)
+        : [network];
 
       // Desabilitar todos os botões de publicação durante o processo
       document.querySelectorAll('.pub-btn').forEach(b => b.classList.add('publishing'));
 
       for (const net of networks) {
-        const caption = net === 'linkedin' ? (p.legenda_li || p.legenda_ig) : (p.legenda_ig || p.legenda_li);
-        const netLabel = net === 'instagram' ? 'Instagram' : 'LinkedIn';
+        const caption = net === 'linkedin' ? (p.legenda_li || p.legenda_ig)
+                      : net === 'facebook' ? (p.legenda_fb || p.legenda_ig)
+                      : (p.legenda_ig || p.legenda_li);
+        const netLabel = net === 'instagram' ? 'Instagram' : net === 'facebook' ? 'Facebook' : 'LinkedIn';
 
         showToast(`Publicando no ${netLabel}... aguarde`, 'loading', true);
 
@@ -1510,6 +1524,9 @@
             else if (pubFormat === 'story')               body = { type: 'story',    imageUrl };
             else if (isCarousel)                          body = { type: 'carousel', caption, imageUrls };
             else                                          body = { type: 'single',   caption, imageUrl };
+          } else if (net === 'facebook') {
+            if (isCarousel) body = { type: 'carousel', caption, imageUrls };
+            else            body = { type: 'single',   caption, imageUrl: imageUrl || videoUrl };
           } else {
             // LinkedIn só suporta feed
             body = { caption, imageUrl: imageUrl || videoUrl };
