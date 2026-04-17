@@ -174,11 +174,23 @@ RETORNE EXATAMENTE este JSON (sem markdown, sem explicações):
 }
 
 function extractJson(text) {
-  // Remove possível markdown code fence
   const clean = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  // Encontra o JSON entre as primeiras chaves
   const start = clean.indexOf('{');
   const end   = clean.lastIndexOf('}');
   if (start === -1 || end === -1) throw new Error('Resposta não contém JSON válido.');
-  return clean.slice(start, end + 1);
+  const raw = clean.slice(start, end + 1);
+
+  // Sanitiza quebras de linha literais dentro de strings JSON
+  let sanitized = '';
+  let inString  = false;
+  let escape    = false;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw[i];
+    if (escape) { sanitized += ch; escape = false; continue; }
+    if (ch === '\\') { escape = true; sanitized += ch; continue; }
+    if (ch === '"') { inString = !inString; sanitized += ch; continue; }
+    if (inString && (ch === '\n' || ch === '\r')) { sanitized += '\\n'; continue; }
+    sanitized += ch;
+  }
+  return sanitized;
 }
