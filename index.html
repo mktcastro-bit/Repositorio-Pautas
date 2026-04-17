@@ -567,6 +567,82 @@
     .add-btn { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 22px; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
     .add-btn:hover { opacity: 0.85; }
 
+    /* ── WORKFLOW ── */
+    .workflow-modal {
+      background: var(--s2); border: 1px solid var(--border); border-radius: 16px;
+      width: 94vw; max-width: 1200px; height: 88vh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .workflow-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 28px; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .workflow-title { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .workflow-steps { display: flex; align-items: center; gap: 0; }
+    .wf-step {
+      display: flex; align-items: center; gap: 8px; padding: 6px 16px; border-radius: 20px;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted);
+      transition: all 0.2s;
+    }
+    .wf-step.active { background: rgba(200,169,110,0.12); color: var(--accent); }
+    .wf-step.done { color: var(--green); }
+    .wf-step-num {
+      width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor;
+      display: flex; align-items: center; justify-content: center; font-size: 0.65rem;
+    }
+    .wf-step-connector { width: 32px; height: 1px; background: var(--border); }
+    .workflow-close {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 0.78rem;
+      display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+    }
+    .workflow-close:hover { border-color: var(--accent); color: var(--accent); }
+    .workflow-body { flex: 1; overflow: hidden; }
+    .workflow-footer {
+      padding: 14px 28px; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-shrink: 0;
+    }
+    .wf-two-col { display: grid; grid-template-columns: 340px 1fr; height: 100%; overflow: hidden; }
+    .wf-left { padding: 24px 28px; border-right: 1px solid var(--border); overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
+    .wf-right { padding: 24px 28px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .wf-field-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); display: flex; flex-direction: column; gap: 5px; }
+    .wf-select, .wf-input {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.84rem; padding: 9px 12px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s; font-family: inherit; width: 100%;
+    }
+    .wf-select { appearance: none; -webkit-appearance: none; cursor: pointer; }
+    .wf-select:focus, .wf-input:focus { border-color: var(--accent); }
+    .wf-pub-btns { display: flex; gap: 6px; }
+    .wf-pub-btn {
+      flex: 1; padding: 8px 4px; border-radius: 7px; border: 1px solid var(--border);
+      background: transparent; color: var(--muted); font-size: 0.75rem; cursor: pointer; transition: all 0.2s;
+    }
+    .wf-pub-btn.active { border-color: var(--accent); background: rgba(200,169,110,0.1); color: var(--text); }
+    .wf-primary { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 22px; border-radius: 7px; cursor: pointer; transition: opacity 0.2s; }
+    .wf-primary:hover { opacity: 0.85; }
+    .wf-primary:disabled { opacity: 0.35; cursor: not-allowed; }
+    .wf-secondary { background: transparent; border: 1px solid var(--border); color: var(--muted); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 20px; border-radius: 7px; cursor: pointer; transition: all 0.2s; }
+    .wf-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .wf-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; color: var(--muted); opacity: 0.4; }
+    .wf-empty-icon { font-size: 2.2rem; }
+    .wf-empty p { font-size: 0.8rem; line-height: 1.6; max-width: 260px; }
+    .wf-result-tema { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .wf-result-gancho { font-size: 0.85rem; color: var(--muted); font-style: italic; border-left: 2px solid var(--accent); padding-left: 12px; line-height: 1.5; }
+    .wf-result-section { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .wf-result-label { font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
+    .wf-result-text { font-size: 0.82rem; color: var(--muted); line-height: 1.6; white-space: pre-wrap; }
+    .wf-result-text strong { color: var(--text); }
+    .wf-slide-item { background: var(--s1); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+    .wf-slide-num { font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+    .wf-slide-title { font-size: 0.88rem; font-weight: 700; color: var(--text); }
+    .wf-slide-text { font-size: 0.78rem; color: var(--muted); line-height: 1.5; }
+    .wf-art-slide-select { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .wf-art-iframe-wrap { width: 100%; overflow: hidden; border-radius: 10px; border: 1px solid var(--border); background: #000; }
+    .wf-art-iframe-wrap iframe { width: 1080px; height: 1350px; transform-origin: top left; border: none; pointer-events: none; display: block; }
+    .wf-art-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wf-info-row { display: flex; gap: 6px; flex-wrap: wrap; }
+
     /* GENERATE BTN */
     .gen-btn {
       background: transparent; border: 1px solid rgba(200,169,110,0.4); color: var(--accent);
@@ -650,7 +726,7 @@
         <button class="view-btn" id="btnCalendario" onclick="setView('calendario')">Calendário</button>
       </div>
       <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
-      <button class="gen-btn" onclick="openGenerate()">✦ Gerar</button>
+      <button class="gen-btn" onclick="openWorkflow()">✦ Gerar</button>
       <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
     </div>
   </header>
@@ -723,90 +799,29 @@
     <div class="cal-grid" id="calGrid"></div>
   </div>
 
-  <!-- MODAL GERAR CONTEÚDO IA -->
-  <div class="modal-overlay" id="generateOverlay" onclick="closeModalOutside(event)">
-    <div class="gen-modal">
-      <h2>✦ Gerar Conteúdo com IA</h2>
-
-      <!-- Parâmetros -->
-      <div class="modal-row">
-        <label class="modal" style="flex:1">Pilar
-          <select id="g-pilar" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-            <option>Estratégia de Marca</option>
-            <option>Marketing e Performance</option>
-            <option selected>Tecnologia e IA</option>
-            <option>Mentalidade e Gestão Empresarial</option>
-            <option>Bastidores e Diagnóstico</option>
-          </select>
-        </label>
-        <label class="modal" style="flex:1">Rede Social
-          <select id="g-rede" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-            <option value="Ambos" selected>Ambos</option>
-            <option value="Instagram">Instagram</option>
-            <option value="LinkedIn">LinkedIn</option>
-          </select>
-        </label>
-      </div>
-      <div class="modal-row">
-        <label class="modal" style="flex:1">Formato de conteúdo
-          <select id="g-formato" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-            <option>Carrossel</option>
-            <option>Post Único</option>
-            <option>Artigo</option>
-            <option>Notícia</option>
-          </select>
-        </label>
-        <label class="modal" style="flex:1">Variante Visual
-          <select id="g-variante" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-            <option>Dark</option>
-            <option>Blue</option>
-            <option>White</option>
-          </select>
-        </label>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:6px">
-        <label style="font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">Formato de publicação</label>
-        <div style="display:flex;gap:8px" id="g-pub-format-selector">
-          <button onclick="selectGenPubFormat(this,'feed')" data-format="feed"
-            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--accent);background:rgba(200,169,110,0.1);color:var(--text);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
-            📰 Feed
-          </button>
-          <button onclick="selectGenPubFormat(this,'story')" data-format="story"
-            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
-            📖 Story
-          </button>
-          <button onclick="selectGenPubFormat(this,'reels')" data-format="reels"
-            style="flex:1;padding:10px 6px;border-radius:8px;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:0.8rem;cursor:pointer;transition:all 0.2s">
-            🎬 Reels
-          </button>
+  <!-- WORKFLOW OVERLAY -->
+  <div class="modal-overlay" id="workflowOverlay">
+    <div class="workflow-modal">
+      <!-- HEADER -->
+      <div class="workflow-header">
+        <div class="workflow-title">✦ Gerar Conteúdo</div>
+        <div class="workflow-steps">
+          <div class="wf-step active" id="wf-step-1">
+            <span class="wf-step-num">1</span>
+            <span class="wf-step-label">Texto</span>
+          </div>
+          <div class="wf-step-connector"></div>
+          <div class="wf-step" id="wf-step-2">
+            <span class="wf-step-num">2</span>
+            <span class="wf-step-label">Arte</span>
+          </div>
         </div>
+        <button class="workflow-close" onclick="closeModal('workflowOverlay')">✕</button>
       </div>
-      <label style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Tema (opcional — deixe em branco para IA sugerir)
-        <input type="text" id="g-tema" placeholder="Ex: Como IA está mudando decisões empresariais em 2026" style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-      </label>
-      <label style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)">Gancho (opcional — frase de abertura)
-        <input type="text" id="g-gancho" placeholder="Ex: 80% das empresas que usam IA não sabem medir o resultado." style="background:var(--s1);border:1px solid var(--border);color:var(--text);font-size:0.88rem;padding:9px 13px;border-radius:6px;outline:none">
-      </label>
-
-      <!-- Opções de geração -->
-      <div class="gen-divider"><span>Como gerar</span></div>
-      <div class="gen-option-row">
-        <button class="gen-option-btn ai" onclick="doGenerateAI()">
-          <span class="gen-opt-icon">🤖</span>
-          <span class="gen-opt-label">Gerar com IA</span>
-          <span class="gen-opt-desc">Anthropic API direto<br>no painel</span>
-        </button>
-        <button class="gen-option-btn claude" onclick="doOpenClaude()">
-          <span class="gen-opt-icon">📋</span>
-          <span class="gen-opt-label">Abrir no Claude</span>
-          <span class="gen-opt-desc">Copia prompt e abre<br>claude.ai</span>
-        </button>
-      </div>
-
-      <!-- Área de resultado (oculta até gerar) -->
-      <div id="gen-result-area" style="display:none"></div>
-
-      <button class="modal-cancel" onclick="closeModal('generateOverlay')" style="align-self:flex-end;margin-top:4px">Fechar</button>
+      <!-- BODY: injected by JS -->
+      <div class="workflow-body" id="workflowBody"></div>
+      <!-- FOOTER: injected by JS -->
+      <div class="workflow-footer" id="workflowFooter"></div>
     </div>
   </div>
 
@@ -1437,6 +1452,7 @@
       if (e.target.id==='detailOverlay')   closeModal('detailOverlay');
       if (e.target.id==='publishOverlay')  closeModal('publishOverlay');
       if (e.target.id==='generateOverlay') closeModal('generateOverlay');
+      if (e.target.id==='workflowOverlay')  closeModal('workflowOverlay');
     }
 
     function savePauta() {
@@ -1861,6 +1877,312 @@
       if (!d) return '—';
       const [y,m,day] = d.split('-');
       return `${day}/${m}/${y}`;
+    }
+
+    // ── WORKFLOW ──────────────────────────────────────────────
+    let wfGenResult = null;
+    let wfGenParams = null;
+    let wfPubFormat = 'feed';
+
+    function openWorkflow() {
+      wfGenResult = null;
+      wfGenParams = null;
+      wfPubFormat = 'feed';
+      wfRenderStep1();
+      document.getElementById('workflowOverlay').classList.add('open');
+    }
+
+    function wfSetStep(active) {
+      [1,2].forEach(n => {
+        const el = document.getElementById(`wf-step-${n}`);
+        el.classList.remove('active','done');
+        if (n < active) el.classList.add('done');
+        else if (n === active) el.classList.add('active');
+      });
+    }
+
+    function wfRenderStep1() {
+      wfSetStep(1);
+      document.getElementById('workflowBody').innerHTML = `
+        <div class="wf-two-col">
+          <div class="wf-left">
+            <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Configurações</div>
+
+            <label class="wf-field-label">Pilar
+              <select class="wf-select" id="wf-pilar">
+                <option>Estratégia de Marca</option>
+                <option>Marketing e Performance</option>
+                <option selected>Tecnologia e IA</option>
+                <option>Mentalidade e Gestão Empresarial</option>
+                <option>Bastidores e Diagnóstico</option>
+              </select>
+            </label>
+            <label class="wf-field-label">Rede Social
+              <select class="wf-select" id="wf-rede">
+                <option value="Ambos" selected>Ambos</option>
+                <option value="Instagram">Instagram</option>
+                <option value="LinkedIn">LinkedIn</option>
+              </select>
+            </label>
+            <label class="wf-field-label">Formato de Conteúdo
+              <select class="wf-select" id="wf-formato">
+                <option>Carrossel</option>
+                <option>Post Único</option>
+                <option>Artigo</option>
+                <option>Notícia</option>
+              </select>
+            </label>
+            <label class="wf-field-label">Variante Visual
+              <select class="wf-select" id="wf-variante">
+                <option>Dark</option>
+                <option>Blue</option>
+                <option>White</option>
+              </select>
+            </label>
+            <div class="wf-field-label">Formato de Publicação
+              <div class="wf-pub-btns">
+                <button class="wf-pub-btn active" onclick="wfSetPub(this,'feed')">📰 Feed</button>
+                <button class="wf-pub-btn" onclick="wfSetPub(this,'story')">📖 Story</button>
+                <button class="wf-pub-btn" onclick="wfSetPub(this,'reels')">🎬 Reels</button>
+              </div>
+            </div>
+            <label class="wf-field-label">Tema <span style="opacity:0.5;font-size:0.58rem">(opcional)</span>
+              <input class="wf-input" id="wf-tema" placeholder="Ex: Como IA está mudando decisões empresariais em 2026">
+            </label>
+            <label class="wf-field-label">Gancho <span style="opacity:0.5;font-size:0.58rem">(opcional)</span>
+              <input class="wf-input" id="wf-gancho" placeholder="Ex: 80% das empresas que usam IA não sabem medir o resultado.">
+            </label>
+
+            <button class="wf-primary" style="margin-top:4px" onclick="doWfGenText()">✦ Gerar Texto</button>
+          </div>
+          <div class="wf-right" id="wf-text-result">
+            <div class="wf-empty">
+              <div class="wf-empty-icon">✦</div>
+              <p>Configure os parâmetros ao lado e clique em "Gerar Texto" para começar.</p>
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('workflowFooter').innerHTML = `
+        <button class="wf-secondary" onclick="closeModal('workflowOverlay')">Cancelar</button>
+        <button class="wf-primary" id="wf-approve-btn" disabled onclick="wfRenderStep2()">Aprovar e Gerar Arte →</button>`;
+    }
+
+    function wfSetPub(btn, fmt) {
+      wfPubFormat = fmt;
+      document.querySelectorAll('.wf-pub-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    async function doWfGenText() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
+
+      const params = {
+        pilar:       document.getElementById('wf-pilar').value,
+        rede_social: document.getElementById('wf-rede').value,
+        formato:     document.getElementById('wf-formato').value,
+        variante:    document.getElementById('wf-variante').value,
+        pub_formato: wfPubFormat,
+        tema:        document.getElementById('wf-tema').value.trim(),
+        gancho:      document.getElementById('wf-gancho').value.trim(),
+      };
+
+      const area = document.getElementById('wf-text-result');
+      area.innerHTML = `<div class="wf-empty"><div class="gen-spinner"></div><p>Gerando conteúdo com IA… aguarde alguns segundos.</p></div>`;
+      document.getElementById('wf-approve-btn').disabled = true;
+      showProgress('loading');
+
+      try {
+        const r = await fetch(`${url}/api/generate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(params),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha ao gerar conteúdo.');
+
+        wfGenResult = d.result;
+        wfGenParams = params;
+        wfRenderTextResult(d.result, params);
+        document.getElementById('wf-approve-btn').disabled = false;
+        showProgress('success');
+      } catch(e) {
+        area.innerHTML = `<div style="color:#e07070;font-size:0.82rem;padding:14px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px">⚠ Erro: ${e.message}</div>`;
+        showProgress('error');
+      }
+    }
+
+    function wfRenderTextResult(result, params) {
+      const area = document.getElementById('wf-text-result');
+      const isCarousel = params.formato === 'Carrossel';
+      const picahBadges = (result.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
+
+      const slidesHtml = (result.slides||[]).map((s,i)=>`
+        <div class="wf-slide-item">
+          <div class="wf-slide-num">Slide ${s.numero||i+1}</div>
+          <div class="wf-slide-title">${escHtml(s.titulo||'')}</div>
+          ${s.texto?`<div class="wf-slide-text">${escHtml(s.texto)}</div>`:''}
+        </div>`).join('');
+
+      area.innerHTML = `
+        <div class="wf-result-tema">${escHtml(result.tema||'')}</div>
+        ${result.gancho?`<div class="wf-result-gancho">${escHtml(result.gancho)}</div>`:''}
+        <div class="wf-info-row">
+          <span class="badge badge-pilar">${params.pilar}</span>
+          <span class="badge badge-formato">${params.formato}</span>
+          <span class="badge ${varianteBadgeClass(params.variante)}">${params.variante}</span>
+          <span class="badge ${redeBadgeClass(params.rede_social)}">${params.rede_social}</span>
+          ${picahBadges}
+        </div>
+        ${result.angulo_nexum?`<div class="wf-result-section"><div class="wf-result-label">Ângulo Nexum360</div><div class="wf-result-text">${escHtml(result.angulo_nexum)}</div></div>`:''}
+        ${slidesHtml?`<div class="wf-result-section"><div class="wf-result-label">${isCarousel?'Slides':'Conteúdo'}</div><div style="display:flex;flex-direction:column;gap:8px">${slidesHtml}</div></div>`:''}
+        ${result.legenda_ig?`<div class="wf-result-section"><div class="wf-result-label">Legenda Instagram</div><div class="wf-result-text">${escHtml(result.legenda_ig)}</div></div>`:''}
+        ${result.legenda_li?`<div class="wf-result-section"><div class="wf-result-label">Legenda LinkedIn</div><div class="wf-result-text">${escHtml(result.legenda_li)}</div></div>`:''}`;
+    }
+
+    function wfRenderStep2() {
+      if (!wfGenResult || !wfGenParams) return;
+      wfSetStep(2);
+      const result = wfGenResult;
+      const params = wfGenParams;
+      const isCarousel = params.formato === 'Carrossel';
+      const slides = result.slides || [];
+
+      const slideSelector = isCarousel && slides.length ? `
+        <div class="wf-art-slide-select">
+          <label class="wf-result-label" style="white-space:nowrap;align-self:center">Slide:</label>
+          <select class="wf-select" id="wf-art-slide" style="width:auto">
+            ${slides.map((s,i)=>`<option value="${i}">Slide ${i+1} — ${(s.titulo||'').substring(0,30)}${(s.titulo||'').length>30?'…':''}</option>`).join('')}
+          </select>
+        </div>` : '';
+
+      const picahBadges = (result.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
+
+      document.getElementById('workflowBody').innerHTML = `
+        <div class="wf-two-col">
+          <div class="wf-left">
+            <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Conteúdo Aprovado</div>
+            <div class="wf-result-tema">${escHtml(result.tema||'')}</div>
+            ${result.gancho?`<div class="wf-result-gancho">${escHtml(result.gancho)}</div>`:''}
+            <div class="wf-info-row">
+              <span class="badge badge-pilar">${params.pilar}</span>
+              <span class="badge badge-formato">${params.formato}</span>
+              <span class="badge ${varianteBadgeClass(params.variante)}">${params.variante}</span>
+              <span class="badge ${redeBadgeClass(params.rede_social)}">${params.rede_social}</span>
+              ${picahBadges}
+            </div>
+            ${result.angulo_nexum?`<div class="wf-result-section"><div class="wf-result-label">Ângulo Nexum360</div><div class="wf-result-text">${escHtml(result.angulo_nexum)}</div></div>`:''}
+            ${result.legenda_ig?`<div class="wf-result-section"><div class="wf-result-label">Legenda Instagram</div><div class="wf-result-text">${escHtml(result.legenda_ig)}</div></div>`:''}
+            ${result.legenda_li?`<div class="wf-result-section"><div class="wf-result-label">Legenda LinkedIn</div><div class="wf-result-text">${escHtml(result.legenda_li)}</div></div>`:''}
+          </div>
+          <div class="wf-right">
+            <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Gerar Arte Visual</div>
+            ${slideSelector}
+            <div class="wf-art-actions">
+              <button class="wf-primary" id="wf-gen-art-btn" onclick="doWfGenArt()">✦ Gerar Arte</button>
+            </div>
+            <div id="wf-art-preview" style="display:none;flex-direction:column;gap:10px">
+              <div class="wf-art-iframe-wrap" id="wf-art-wrap"></div>
+              <div class="wf-art-actions" id="wf-art-dl-row"></div>
+            </div>
+          </div>
+        </div>`;
+
+      document.getElementById('workflowFooter').innerHTML = `
+        <button class="wf-secondary" onclick="wfRenderStep1()">← Editar Texto</button>
+        <div style="display:flex;gap:8px">
+          <button class="wf-secondary" onclick="wfSavePauta()">Salvar no Repositório</button>
+          <button class="wf-primary" onclick="closeModal('workflowOverlay')">Concluir</button>
+        </div>`;
+    }
+
+    async function doWfGenArt() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel primeiro.', 'error');
+
+      const slideSelect = document.getElementById('wf-art-slide');
+      const slideIndex  = slideSelect ? parseInt(slideSelect.value) : 0;
+      const btn         = document.getElementById('wf-gen-art-btn');
+      const preview     = document.getElementById('wf-art-preview');
+      const wrap        = document.getElementById('wf-art-wrap');
+      const dlRow       = document.getElementById('wf-art-dl-row');
+
+      btn.disabled = true; btn.textContent = '✦ Gerando…';
+      preview.style.display = 'none';
+      showProgress('loading');
+      showToast('Gerando arte com IA... aguarde', 'loading', true);
+
+      const pauta = {
+        ...wfGenResult,
+        pilar:       wfGenParams.pilar,
+        variante:    wfGenParams.variante,
+        formato:     wfGenParams.formato,
+        rede_social: wfGenParams.rede_social,
+      };
+
+      try {
+        const r = await fetch(`${url}/api/generate-art`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ pauta, slideIndex }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const blob    = new Blob([d.html], { type: 'text/html' });
+        const blobUrl = URL.createObjectURL(blob);
+        wrap.innerHTML = `<iframe src="${blobUrl}" id="wf-art-iframe"></iframe>`;
+        const iframe = wrap.querySelector('iframe');
+        iframe.onload = () => {
+          const scale = wrap.clientWidth / 1080;
+          iframe.style.transform = `scale(${scale})`;
+          wrap.style.height = `${1350 * scale}px`;
+        };
+
+        const slideSuffix = wfGenParams.formato === 'Carrossel' ? `-slide-${slideIndex+1}` : '';
+        dlRow.innerHTML = '';
+        const dlBtn = document.createElement('a');
+        dlBtn.className = 'wf-secondary'; dlBtn.style.textDecoration = 'none';
+        dlBtn.textContent = '↓ Baixar HTML'; dlBtn.href = blobUrl;
+        dlBtn.download = `post-gerado${slideSuffix}.html`;
+        dlRow.appendChild(dlBtn);
+
+        const regenBtn = document.createElement('button');
+        regenBtn.className = 'wf-secondary'; regenBtn.textContent = '↺ Regerar';
+        regenBtn.onclick = () => doWfGenArt();
+        dlRow.appendChild(regenBtn);
+
+        preview.style.display = 'flex';
+        showProgress('success'); hideToast();
+      } catch(e) {
+        showProgress('error');
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '✦ Gerar Arte';
+      }
+    }
+
+    function wfSavePauta() {
+      if (!wfGenResult || !wfGenParams) return;
+      const result = wfGenResult;
+      const params  = wfGenParams;
+      const now     = new Date().toISOString().split('T')[0];
+      const newId   = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+      pautas.unshift({
+        id: newId, tema: result.tema || 'Conteúdo gerado por IA',
+        pilar: params.pilar, rede_social: params.rede_social,
+        formato: params.formato, variante: params.variante, status: 'Ideia',
+        gancho: result.gancho||'', angulo_nexum: result.angulo_nexum||'',
+        picah: result.picah||[], legenda_ig: result.legenda_ig||'',
+        legenda_li: result.legenda_li||'', slides: result.slides||[],
+        fonte: '', arquivo: '', slide_preview: '',
+        data_criacao: now, data_planejada: null, data_publicacao: null,
+        notas: `Gerado por IA em ${now}.`,
+      });
+      save(); renderCards(); scaleCardIframes();
+      closeModal('workflowOverlay');
+      showToast('Pauta adicionada ao repositório!', 'success');
     }
 
     // ── GERAÇÃO DE CONTEÚDO IA ────────────────────────────────
