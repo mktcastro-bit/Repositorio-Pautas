@@ -372,15 +372,32 @@
 
     /* Botão publicando */
     .pub-btn.publishing {
-      opacity: 0.6; cursor: not-allowed; pointer-events: none;
+      opacity: 0.4; cursor: not-allowed; pointer-events: none;
     }
-    .pub-btn.publishing::before {
-      content: ''; display: inline-block;
-      width: 12px; height: 12px; border-radius: 50%;
-      border: 2px solid rgba(255,255,255,0.3);
-      border-top-color: #fff;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px; vertical-align: middle;
+
+    /* BARRA DE PROGRESSO */
+    #pub-progress {
+      position: fixed; bottom: 0; left: 0; right: 0; height: 2px;
+      z-index: 600; overflow: hidden; opacity: 0;
+      transition: opacity 0.3s; pointer-events: none;
+      background: transparent;
+    }
+    #pub-progress.show { opacity: 1; }
+    #pub-progress::after {
+      content: ''; position: absolute; top: 0; left: -60%; width: 60%;
+      height: 100%; background: var(--accent);
+      animation: progress-sweep 1.2s ease-in-out infinite;
+    }
+    #pub-progress.success { background: transparent; }
+    #pub-progress.success::after {
+      left: 0; width: 100%; background: var(--green); animation: none;
+    }
+    #pub-progress.error::after {
+      left: 0; width: 100%; background: #c0392b; animation: none;
+    }
+    @keyframes progress-sweep {
+      0%   { left: -60%; }
+      100% { left: 110%; }
     }
 
     /* SETTINGS BAR */
@@ -824,6 +841,7 @@
 
   <!-- TOAST -->
   <div class="toast" id="toast"></div>
+  <div id="pub-progress"></div>
 
   <!-- LIGHTBOX -->
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -1515,7 +1533,7 @@
                       : (p.legenda_ig || p.legenda_li);
         const netLabel = net === 'instagram' ? 'Instagram' : net === 'facebook' ? 'Facebook' : 'LinkedIn';
 
-        showToast(`Publicando no ${netLabel}... aguarde`, 'loading', true);
+        showProgress('loading');
 
         try {
           let body;
@@ -1540,12 +1558,15 @@
           const d = await r.json();
 
           if (d.success) {
+            showProgress('success');
             showToast(`✓ Publicado no ${netLabel} com sucesso!`, 'success');
             setStatus(id, 'Publicado');
           } else {
+            showProgress('error');
             showToast(`Erro: ${d.error}`, 'error');
           }
         } catch (e) {
+          showProgress('error');
           showToast(`Erro de conexão com a API.`, 'error');
         }
       }
@@ -1553,6 +1574,17 @@
       // Reabilitar botões ao terminar
       document.querySelectorAll('.pub-btn').forEach(b => b.classList.remove('publishing'));
       closeModal('publishOverlay');
+    }
+
+    // ── PROGRESS BAR ──────────────────────────────────────────
+    let progressTimer;
+    function showProgress(state) {
+      const el = document.getElementById('pub-progress');
+      clearTimeout(progressTimer);
+      el.className = `show ${state}`;
+      if (state !== 'loading') {
+        progressTimer = setTimeout(() => { el.className = ''; }, 1800);
+      }
     }
 
     // ── TOAST ─────────────────────────────────────────────────
