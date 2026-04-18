@@ -2000,6 +2000,7 @@
       wfGenResult = null;
       wfGenParams = null;
       wfPubFormat = 'feed';
+      window._wfArtHtml = null;
       wfRenderStep1();
       document.getElementById('workflowOverlay').classList.add('open');
     }
@@ -2412,6 +2413,7 @@
         regenBtn.onclick = () => doWfGenArt();
         dlRow.appendChild(regenBtn);
 
+        window._wfArtHtml = d.html;
         preview.style.display = 'flex';
         showProgress('success'); hideToast();
       } catch(e) {
@@ -2448,6 +2450,7 @@
         picah: result.picah||[], legenda_ig: result.legenda_ig||'',
         legenda_li: result.legenda_li||'', slides: result.slides||[],
         fonte: '', arquivo: '', slide_preview: '',
+        art_html: window._wfArtHtml || '',
         data_criacao: now, data_planejada: null, data_publicacao: null,
         notas: `Gerado por IA em ${now}.`,
       });
