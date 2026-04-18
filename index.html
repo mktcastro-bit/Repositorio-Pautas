@@ -2333,6 +2333,7 @@
             ${slideSelector}
             <div class="wf-art-actions">
               <button class="wf-primary" id="wf-gen-art-btn" onclick="doWfGenArt()">✦ Gerar Arte</button>
+              <button class="wf-secondary" id="wf-gen-art-cancel" style="display:none" onclick="cancelWfGenArt()">✕ Cancelar</button>
             </div>
             <div id="wf-art-preview" style="display:none;flex-direction:column;gap:10px">
               <div class="wf-art-iframe-wrap" id="wf-art-wrap"></div>
@@ -2360,7 +2361,12 @@
       const wrap        = document.getElementById('wf-art-wrap');
       const dlRow       = document.getElementById('wf-art-dl-row');
 
-      btn.disabled = true; btn.textContent = '✦ Gerando…';
+      const cancelBtn = document.getElementById('wf-gen-art-cancel');
+      const controller = new AbortController();
+      window._wfGenArtController = controller;
+
+      btn.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = '';
       preview.style.display = 'none';
       showProgress('loading');
       showToast('Gerando arte com IA... aguarde', 'loading', true);
@@ -2378,6 +2384,7 @@
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ pauta, slideIndex }),
+          signal:  controller.signal,
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error);
@@ -2408,11 +2415,23 @@
         preview.style.display = 'flex';
         showProgress('success'); hideToast();
       } catch(e) {
-        showProgress('error');
-        showToast(`Erro: ${e.message}`, 'error');
+        if (e.name === 'AbortError') {
+          showProgress('error'); hideToast();
+          showToast('Geração cancelada.', 'error');
+        } else {
+          showProgress('error');
+          showToast(`Erro: ${e.message}`, 'error');
+        }
       } finally {
-        btn.disabled = false; btn.textContent = '✦ Gerar Arte';
+        const cancelBtn = document.getElementById('wf-gen-art-cancel');
+        btn.style.display = '';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        window._wfGenArtController = null;
       }
+    }
+
+    function cancelWfGenArt() {
+      window._wfGenArtController?.abort();
     }
 
     function wfSavePauta() {
