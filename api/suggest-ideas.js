@@ -29,16 +29,21 @@ export default async function handler(req, res) {
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada.' });
 
   const {
-    pilar       = 'Tecnologia e IA',
-    rede_social  = 'Ambos',
-    formato     = 'Carrossel',
-    variante    = 'Dark',
-    sugestao    = '',
+    pilar            = 'Tecnologia e IA',
+    rede_social       = 'Ambos',
+    formato          = 'Carrossel',
+    variante         = 'Dark',
+    sugestao         = '',
+    temas_existentes = [],
   } = req.body || {};
 
   const sugestaoTxt = sugestao
     ? `O usuário sugeriu a seguinte direção: "${sugestao}". Use como inspiração, mas explore variações.`
     : 'Sugira ideias variadas e relevantes para o posicionamento atual da Nexum360.';
+
+  const existentesTxt = temas_existentes.length
+    ? `\nCONTEÚDO JÁ EXISTENTE NO REPOSITÓRIO — não repita nem faça variações próximas destes temas:\n${temas_existentes.map(t => `- "${t}"`).join('\n')}\n`
+    : '';
 
   const userPrompt = `Gere 6 ideias de conteúdo distintas para a Nexum360.
 
@@ -48,7 +53,7 @@ PARÂMETROS:
 - Formato: ${formato}
 - Variante Visual: ${variante}
 - Direção: ${sugestaoTxt}
-
+${existentesTxt}
 Cada ideia deve ter:
 - "titulo": título direto e impactante (máx 12 palavras), que funcione como hook
 - "subtitulo": ângulo ou gancho estratégico (máx 20 palavras), que explica o porquê do post

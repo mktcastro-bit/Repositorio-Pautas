@@ -2082,12 +2082,13 @@
       if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
 
       wfGenParams = {
-        pilar:       document.getElementById('wf-pilar').value,
-        rede_social: document.getElementById('wf-rede').value,
-        formato:     document.getElementById('wf-formato').value,
-        variante:    document.getElementById('wf-variante').value,
-        pub_formato: wfPubFormat,
-        sugestao:    document.getElementById('wf-sugestao').value.trim(),
+        pilar:              document.getElementById('wf-pilar').value,
+        rede_social:        document.getElementById('wf-rede').value,
+        formato:            document.getElementById('wf-formato').value,
+        variante:           document.getElementById('wf-variante').value,
+        pub_formato:        wfPubFormat,
+        sugestao:           document.getElementById('wf-sugestao').value.trim(),
+        temas_existentes:   pautas.map(p => p.tema).filter(Boolean),
       };
 
       const area = document.getElementById('wf-ideas-area');
