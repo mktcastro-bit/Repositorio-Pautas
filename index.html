@@ -2188,6 +2188,52 @@
       }
     }
 
+    async function doWfRefine() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel.', 'error');
+
+      const instrucao = document.getElementById('wf-refine-prompt')?.value.trim();
+      if (!instrucao) return showToast('Digite uma instrução antes de enviar.', 'error');
+
+      const btn    = document.getElementById('wf-refine-btn');
+      const result = document.getElementById('wf-refine-result');
+      const msg    = document.getElementById('wf-refine-msg');
+
+      btn.disabled = true; btn.textContent = '…';
+      result.classList.remove('show');
+      showProgress('loading');
+      showToast('Ajustando com IA… aguarde', 'loading', true);
+
+      try {
+        const r = await fetch(`${url}/api/refine`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ pauta: wfGenResult, instrucao }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error);
+
+        const res = d.result;
+        // Aplica todos os campos retornados ao wfGenResult
+        const campos = ['tema','gancho','angulo_nexum','legenda_ig','legenda_li','slides'];
+        campos.forEach(f => { if (res[f] !== undefined) wfGenResult[f] = res[f]; });
+
+        msg.textContent = res.resposta || 'Ajuste aplicado.';
+        result.classList.add('show');
+        showProgress('success');
+        hideToast();
+
+        // Re-renderiza o resultado com o conteúdo atualizado
+        wfRenderTextResult(wfGenResult, wfGenParams);
+
+      } catch(e) {
+        showProgress('error');
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false; btn.textContent = '→';
+      }
+    }
+
     function doWfBackToIdeas() {
       if (window._wfIdeas?.length) {
         wfSetStep(1);
@@ -2234,7 +2280,17 @@
         ${result.angulo_nexum?`<div class="wf-result-section"><div class="wf-result-label">Ângulo Nexum360</div><div class="wf-result-text">${escHtml(result.angulo_nexum)}</div></div>`:''}
         ${slidesHtml?`<div class="wf-result-section"><div class="wf-result-label">${isCarousel?'Slides':'Conteúdo'}</div><div style="display:flex;flex-direction:column;gap:8px">${slidesHtml}</div></div>`:''}
         ${result.legenda_ig?`<div class="wf-result-section"><div class="wf-result-label">Legenda Instagram</div><div class="wf-result-text">${escHtml(result.legenda_ig)}</div></div>`:''}
-        ${result.legenda_li?`<div class="wf-result-section"><div class="wf-result-label">Legenda LinkedIn</div><div class="wf-result-text">${escHtml(result.legenda_li)}</div></div>`:''}`;
+        ${result.legenda_li?`<div class="wf-result-section"><div class="wf-result-label">Legenda LinkedIn</div><div class="wf-result-text">${escHtml(result.legenda_li)}</div></div>`:''}
+        <div style="padding-top:14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:8px">
+          <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Ajustar com IA</div>
+          <div class="refine-input-row">
+            <textarea class="refine-textarea" id="wf-refine-prompt" placeholder="Ex: Deixe o gancho mais provocativo. Reduza os slides para 6."></textarea>
+            <button class="refine-send" id="wf-refine-btn" onclick="doWfRefine()">→</button>
+          </div>
+          <div class="refine-result" id="wf-refine-result">
+            <div class="refine-result-msg" id="wf-refine-msg"></div>
+          </div>
+        </div>`;
     }
 
     function wfRenderStep2() {
