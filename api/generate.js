@@ -82,16 +82,17 @@ export default async function handler(req, res) {
   }
 
   const {
-    pilar       = 'Tecnologia e IA',
-    rede_social  = 'Ambos',
-    formato     = 'Carrossel',
-    variante    = 'Dark',
-    pub_formato = 'feed',
-    tema        = '',
-    gancho      = '',
+    pilar             = 'Tecnologia e IA',
+    rede_social        = 'Ambos',
+    formato           = 'Carrossel',
+    variante          = 'Dark',
+    pub_formato       = 'feed',
+    ideia_selecionada = null,
+    tema              = '',
+    gancho            = '',
   } = req.body || {};
 
-  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, tema, gancho });
+  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho });
 
   try {
     const r = await fetch(ANTHROPIC_API, {
@@ -138,11 +139,15 @@ const PUB_FORMAT_LABELS = {
   reels: 'Reels (vídeo curto — forneça roteiro/script e legenda dinâmica para o vídeo)',
 };
 
-function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, tema, gancho }) {
+function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho }) {
   const isCarrossel  = formato === 'Carrossel';
   const pubLabel     = PUB_FORMAT_LABELS[pub_formato] || pub_formato;
-  const temaTxt      = tema   ? `O tema é: "${tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
-  const ganchoTxt    = gancho ? `O gancho de abertura sugerido é: "${gancho}"` : 'Crie um gancho forte e original.';
+  const temaTxt  = ideia_selecionada?.titulo
+    ? `O tema é: "${ideia_selecionada.titulo}"`
+    : tema ? `O tema é: "${tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
+  const ganchoTxt = ideia_selecionada?.subtitulo
+    ? `O gancho de abertura é: "${ideia_selecionada.subtitulo}"`
+    : gancho ? `O gancho de abertura sugerido é: "${gancho}"` : 'Crie um gancho forte e original.';
 
   const slidesSchema = isCarrossel
     ? `"slides": [{ "numero": 1, "titulo": "...", "texto": "..." }, ... (8 slides)]`

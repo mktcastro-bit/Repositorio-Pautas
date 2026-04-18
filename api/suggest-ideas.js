@@ -1,0 +1,105 @@
+/**
+ * POST /api/suggest-ideas
+ *
+ * Gera 6 ideias de conteúdo (título + subtítulo) para o usuário escolher.
+ *
+ * Body: { pilar, rede_social, formato, variante, sugestao }
+ * Retorna: { success: true, ideas: [{ titulo, subtitulo }] }
+ */
+
+const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
+const MODEL         = 'claude-sonnet-4-6';
+
+const SYSTEM_PROMPT = `Você é um estrategista sênior de conteúdo da Nexum360, especialista em posicionamento de marca, marketing e inteligência artificial aplicada a negócios.
+
+TOM DE VOZ:
+- Direto, inteligente e provocativo
+- Sem clichês e sem frases motivacionais vazias
+- Linguagem de negócio, não de influencer
+- Fale com empresários, gestores e decisores
+
+Gere ideias de conteúdo com títulos fortes e subtítulos que explicam o ângulo estratégico.
+RESPONDA SEMPRE como JSON válido, sem markdown, sem explicações extras.`;
+
+export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') return res.status(200).end();
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
+
+  const { ANTHROPIC_API_KEY: apiKey } = process.env;
+  if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada.' });
+
+  const {
+    pilar       = 'Tecnologia e IA',
+    rede_social  = 'Ambos',
+    formato     = 'Carrossel',
+    variante    = 'Dark',
+    sugestao    = '',
+  } = req.body || {};
+
+  const sugestaoTxt = sugestao
+    ? `O usuário sugeriu a seguinte direção: "${sugestao}". Use como inspiração, mas explore variações.`
+    : 'Sugira ideias variadas e relevantes para o posicionamento atual da Nexum360.';
+
+  const userPrompt = `Gere 6 ideias de conteúdo distintas para a Nexum360.
+
+PARÂMETROS:
+- Pilar: ${pilar}
+- Rede Social: ${rede_social}
+- Formato: ${formato}
+- Variante Visual: ${variante}
+- Direção: ${sugestaoTxt}
+
+Cada ideia deve ter:
+- "titulo": título direto e impactante (máx 12 palavras), que funcione como hook
+- "subtitulo": ângulo ou gancho estratégico (máx 20 palavras), que explica o porquê do post
+
+As 6 ideias devem ser DISTINTAS entre si — variando abordagem, provocação ou público-alvo dentro do mesmo pilar.
+
+RETORNE EXATAMENTE este JSON (sem markdown):
+{
+  "ideas": [
+    { "titulo": "...", "subtitulo": "..." },
+    { "titulo": "...", "subtitulo": "..." },
+    { "titulo": "...", "subtitulo": "..." },
+    { "titulo": "...", "subtitulo": "..." },
+    { "titulo": "...", "subtitulo": "..." },
+    { "titulo": "...", "subtitulo": "..." }
+  ]
+}`;
+
+  try {
+    const r = await fetch(ANTHROPIC_API, {
+      method:  'POST',
+      headers: {
+        'x-api-key':         apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type':      'application/json',
+      },
+      body: JSON.stringify({
+        model:      MODEL,
+        max_tokens: 1024,
+        system:     SYSTEM_PROMPT,
+        messages:   [{ role: 'user', content: userPrompt }],
+      }),
+    });
+
+    if (!r.ok) {
+      const err = await r.text();
+      return res.status(502).json({ error: `Anthropic API error: ${r.status} — ${err}` });
+    }
+
+    const data   = await r.json();
+    const raw    = data.content?.[0]?.text || '';
+    const clean  = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const start  = clean.indexOf('{');
+    const end    = clean.lastIndexOf('}');
+    if (start === -1 || end === -1) throw new Error('Resposta não contém JSON válido.');
+    const result = JSON.parse(clean.slice(start, end + 1));
+
+    return res.status(200).json({ success: true, ideas: result.ideas || [] });
+
+  } catch (err) {
+    console.error('[suggest-ideas]', err.message);
+    return res.status(500).json({ error: err.message });
+  }
+}

@@ -294,7 +294,33 @@
       flex: 1; overflow-y: auto;
     }
     .detail-actions-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-    .refine-area { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; border-top: 1px solid var(--border); }
+    .refine-area { display: flex; flex-direction: column; gap: 8px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .refine-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 4px; }
+    .refine-title { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .refine-steps { display: flex; align-items: center; gap: 0; }
+    .refine-step { display: flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 20px; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .refine-step.active { background: rgba(200,169,110,0.12); color: var(--accent); }
+    .refine-step.done { color: var(--green); }
+    .refine-step-num { width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; }
+    .refine-step-connector { width: 24px; height: 1px; background: var(--border); }
+    .refine-step-block {
+      display: flex; flex-direction: column; gap: 8px;
+      background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+      border-radius: 8px; padding: 12px 14px;
+    }
+    .refine-step-block.step-1 { border-left: 2px solid var(--accent); }
+    .refine-step-block.step-2 { border-left: 2px solid var(--muted); }
+    .refine-step-heading { display: flex; align-items: center; gap: 8px; }
+    .refine-step-badge {
+      width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.6rem; font-weight: 700; flex-shrink: 0;
+    }
+    .step-1 .refine-step-badge { background: rgba(200,169,110,0.15); color: var(--accent); border: 1px solid rgba(200,169,110,0.4); }
+    .step-2 .refine-step-badge { background: rgba(255,255,255,0.06); color: var(--muted); border: 1px solid var(--border); }
+    .refine-step-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; }
+    .step-1 .refine-step-label { color: var(--accent); }
+    .step-2 .refine-step-label { color: var(--muted); }
+    .refine-step-arrow { text-align: center; color: var(--muted); font-size: 0.75rem; line-height: 1; }
     .refine-label { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
     .refine-input-row { display: flex; gap: 8px; }
     .refine-textarea {
@@ -641,6 +667,19 @@
     .wf-art-iframe-wrap { width: 100%; overflow: hidden; border-radius: 10px; border: 1px solid var(--border); background: #000; }
     .wf-art-iframe-wrap iframe { width: 1080px; height: 1350px; transform-origin: top left; border: none; pointer-events: none; display: block; }
     .wf-art-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .wf-ideas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .wf-idea-card {
+      border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+      cursor: pointer; transition: all 0.18s; display: flex; flex-direction: column; gap: 6px;
+      background: rgba(255,255,255,0.02);
+    }
+    .wf-idea-card:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+    .wf-idea-card.selected { border-color: var(--accent); background: rgba(200,169,110,0.1); box-shadow: 0 0 0 1px var(--accent); }
+    .wf-idea-num { font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .wf-idea-titulo { font-size: 0.88rem; font-weight: 700; color: var(--text); line-height: 1.35; }
+    .wf-idea-subtitulo { font-size: 0.75rem; color: var(--muted); line-height: 1.5; }
+    .wf-config-summary { display: flex; flex-wrap: wrap; gap: 6px; }
+    .wf-config-tag { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; color: var(--muted); }
     .wf-info-row { display: flex; gap: 6px; flex-wrap: wrap; }
 
     /* GENERATE BTN */
@@ -1032,6 +1071,8 @@
         let previewImg = '';
         if (slides.length >= 1) {
           previewImg = `<img class="card-preview" src="${slides[0]}" alt="preview" onerror="this.style.display='none'">`;
+        } else if (p.art_html) {
+          previewImg = `<div class="card-iframe-wrap"><iframe srcdoc="${p.art_html.replace(/"/g,'&quot;')}" scrolling="no" loading="lazy"></iframe></div>`;
         } else if (p.arquivo) {
           previewImg = `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
         }
@@ -1095,7 +1136,13 @@
       const wrap    = document.getElementById(`gen-art-wrap-${id}`);
       const actions = document.getElementById(`gen-art-actions-${id}`);
 
-      btn.disabled = true; btn.textContent = '✦ Gerando…';
+      const controller = new AbortController();
+      window._genArtControllers = window._genArtControllers || {};
+      window._genArtControllers[id] = controller;
+
+      const cancelBtn = document.getElementById(`gen-art-cancel-${id}`);
+      btn.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = '';
       preview.classList.remove('show');
       showProgress('loading');
       showToast('Gerando arte com IA... aguarde', 'loading', true);
@@ -1105,6 +1152,7 @@
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ pauta: p, slideIndex }),
+          signal:  controller.signal,
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error);
@@ -1124,13 +1172,26 @@
         };
 
         // Botões de ação
+        actions.innerHTML = '';
+
+        const applyBtn = document.createElement('button');
+        applyBtn.className   = 'detail-btn primary';
+        applyBtn.textContent = '✓ Usar esta Arte';
+        applyBtn.onclick     = () => {
+          p.art_html = d.html;
+          save();
+          render();
+          openDetail(id);
+          showToast('Arte aplicada ao post!', 'success');
+        };
+        actions.appendChild(applyBtn);
+
         const dlBtn = document.createElement('a');
         dlBtn.className   = 'detail-btn';
         dlBtn.textContent = '↓ Baixar HTML';
         dlBtn.href        = blobUrl;
         const slideSuffix = p.slides?.length ? `-slide-${slideIndex + 1}` : '';
         dlBtn.download    = `post-${p.id}${slideSuffix}.html`;
-        actions.innerHTML = '';
         actions.appendChild(dlBtn);
 
         const regenBtn = document.createElement('button');
@@ -1143,11 +1204,25 @@
         showProgress('success');
         hideToast();
       } catch (e) {
-        showProgress('error');
-        showToast(`Erro: ${e.message}`, 'error');
+        if (e.name === 'AbortError') {
+          showProgress('error');
+          hideToast();
+          showToast('Geração cancelada.', 'error');
+        } else {
+          showProgress('error');
+          showToast(`Erro: ${e.message}`, 'error');
+        }
       } finally {
-        btn.disabled = false; btn.textContent = '✦ Gerar Arte';
+        const cancelBtn = document.getElementById(`gen-art-cancel-${id}`);
+        btn.style.display = '';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+        delete window._genArtControllers?.[id];
       }
+    }
+
+    function cancelGenArt(id) {
+      const c = window._genArtControllers?.[id];
+      if (c) c.abort();
     }
 
     async function doRefine(id) {
@@ -1187,12 +1262,18 @@
         for (const [field, label] of Object.entries(simpleFields)) {
           if (res[field] !== undefined) {
             hasFields = true;
+
+            // Exibe o texto gerado para o usuário ler
+            const preview = document.createElement('div');
+            preview.style.cssText = 'font-size:0.78rem;color:var(--text);line-height:1.6;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;border-left:2px solid var(--accent);white-space:pre-wrap;';
+            preview.textContent = res[field];
+            apply.appendChild(preview);
+
             const b = document.createElement('button');
-            b.className = 'detail-btn'; b.textContent = label;
+            b.className = 'detail-btn primary'; b.textContent = label;
             b.onclick = () => {
               p[field] = res[field];
-              save(); renderCards();
-              b.textContent = '✓ Aplicado'; b.disabled = true;
+              save(); renderCards(); openDetail(id);
               showToast(`${label} aplicado!`, 'success');
             };
             apply.appendChild(b);
@@ -1206,14 +1287,19 @@
             const changed = !orig || orig.titulo !== newSlide.titulo || orig.texto !== newSlide.texto;
             if (!changed) return;
             hasFields = true;
+
+            const preview = document.createElement('div');
+            preview.style.cssText = 'font-size:0.78rem;color:var(--text);line-height:1.6;padding:8px 10px;background:rgba(255,255,255,0.04);border-radius:6px;border-left:2px solid var(--accent);white-space:pre-wrap;';
+            preview.textContent = `Slide ${newSlide.numero || i + 1}: ${newSlide.titulo || ''}\n${newSlide.texto || ''}`;
+            apply.appendChild(preview);
+
             const b = document.createElement('button');
             b.className = 'detail-btn';
             b.textContent = `Aplicar Slide ${newSlide.numero || i + 1}`;
             b.onclick = () => {
               if (!p.slides) p.slides = [];
               p.slides[i] = newSlide;
-              save(); renderCards();
-              b.textContent = `✓ Slide ${newSlide.numero || i + 1} aplicado`; b.disabled = true;
+              save(); renderCards(); openDetail(id);
               showToast(`Slide ${newSlide.numero || i + 1} aplicado!`, 'success');
             };
             apply.appendChild(b);
@@ -1330,6 +1416,8 @@
         </div>`;
       } else if (detailSlides.length === 1) {
         preview = `<img src="${detailSlides[0]}" alt="Preview" style="cursor:zoom-in" onclick="openLightbox(${p.id},0)" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`;
+      } else if (p.art_html) {
+        preview = `<div class="preview-iframe-wrap"><iframe srcdoc="${p.art_html.replace(/"/g,'&quot;')}" scrolling="no" loading="lazy"></iframe></div>`;
       } else if (p.arquivo) {
         preview = `<div class="preview-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
       } else {
@@ -1384,28 +1472,52 @@
               <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
             </div>
             <div class="refine-area">
-              <div class="refine-label">Solicitar alteração com IA</div>
-              <div class="refine-input-row">
-                <textarea class="refine-textarea" id="refine-prompt-${p.id}" placeholder="Ex: Deixe a legenda do Instagram mais curta e direta. Reduza para metade do tamanho atual."></textarea>
-                <button class="refine-send" onclick="doRefine(${p.id})" id="refine-btn-${p.id}">→</button>
+              <div class="refine-header">
+                <div class="refine-title">Refinar com IA</div>
+                <div class="refine-steps">
+                  <div class="refine-step active" id="refine-step-1-${p.id}">
+                    <span class="refine-step-num">1</span>
+                    <span>Texto</span>
+                  </div>
+                  <div class="refine-step-connector"></div>
+                  <div class="refine-step" id="refine-step-2-${p.id}">
+                    <span class="refine-step-num">2</span>
+                    <span>Arte</span>
+                  </div>
+                </div>
               </div>
-              <div class="refine-result" id="refine-result-${p.id}">
-                <div class="refine-result-msg" id="refine-msg-${p.id}"></div>
-                <div class="refine-apply-row" id="refine-apply-${p.id}"></div>
+              <div class="refine-step-block step-1">
+                <div class="refine-step-heading">
+                  <span class="refine-step-badge">1</span>
+                  <span class="refine-step-label">Alterar Texto</span>
+                </div>
+                <div class="refine-input-row">
+                  <textarea class="refine-textarea" id="refine-prompt-${p.id}" placeholder="Ex: Deixe a legenda do Instagram mais curta e direta. Reduza para metade do tamanho atual."></textarea>
+                  <button class="refine-send" onclick="doRefine(${p.id})" id="refine-btn-${p.id}">→</button>
+                </div>
+                <div class="refine-result" id="refine-result-${p.id}">
+                  <div class="refine-result-msg" id="refine-msg-${p.id}"></div>
+                  <div class="refine-apply-row" id="refine-apply-${p.id}"></div>
+                </div>
               </div>
-            </div>
-            <div class="gen-art-area">
-              <div class="gen-art-label">Gerar Arte com IA</div>
-              <div class="gen-art-row">
-                ${p.slides?.length ? `
-                <select class="gen-art-select" id="gen-art-slide-${p.id}">
-                  ${p.slides.map((_,i) => `<option value="${i}">Slide ${i+1}</option>`).join('')}
-                </select>` : ''}
-                <button class="detail-btn" onclick="doGenArt(${p.id})" id="gen-art-btn-${p.id}">✦ Gerar Arte</button>
-              </div>
-              <div class="gen-art-preview" id="gen-art-preview-${p.id}">
-                <div class="gen-art-iframe-wrap" id="gen-art-wrap-${p.id}"></div>
-                <div class="gen-art-actions" id="gen-art-actions-${p.id}"></div>
+              <div class="refine-step-arrow">↓</div>
+              <div class="refine-step-block step-2">
+                <div class="refine-step-heading">
+                  <span class="refine-step-badge">2</span>
+                  <span class="refine-step-label">Gerar Arte</span>
+                </div>
+                <div class="gen-art-row">
+                  ${p.slides?.length ? `
+                  <select class="gen-art-select" id="gen-art-slide-${p.id}">
+                    ${p.slides.map((_,i) => `<option value="${i}">Slide ${i+1}</option>`).join('')}
+                  </select>` : ''}
+                  <button class="detail-btn" onclick="doGenArt(${p.id})" id="gen-art-btn-${p.id}">✦ Gerar Arte</button>
+                  <button class="detail-btn" id="gen-art-cancel-${p.id}" style="display:none" onclick="cancelGenArt(${p.id})">✕ Cancelar</button>
+                </div>
+                <div class="gen-art-preview" id="gen-art-preview-${p.id}">
+                  <div class="gen-art-iframe-wrap" id="gen-art-wrap-${p.id}"></div>
+                  <div class="gen-art-actions" id="gen-art-actions-${p.id}"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -1946,26 +2058,87 @@
                 <button class="wf-pub-btn" onclick="wfSetPub(this,'reels')">🎬 Reels</button>
               </div>
             </div>
-            <label class="wf-field-label">Tema <span style="opacity:0.5;font-size:0.58rem">(opcional)</span>
-              <input class="wf-input" id="wf-tema" placeholder="Ex: Como IA está mudando decisões empresariais em 2026">
-            </label>
-            <label class="wf-field-label">Gancho <span style="opacity:0.5;font-size:0.58rem">(opcional)</span>
-              <input class="wf-input" id="wf-gancho" placeholder="Ex: 80% das empresas que usam IA não sabem medir o resultado.">
+            <label class="wf-field-label">Sugestão <span style="opacity:0.5;font-size:0.58rem">(opcional)</span>
+              <textarea class="wf-input" id="wf-sugestao" rows="3" placeholder="Ex: algo sobre empresas que usam IA mas não veem resultado..." style="resize:none;line-height:1.5"></textarea>
             </label>
 
-            <button class="wf-primary" style="margin-top:4px" onclick="doWfGenText()">✦ Gerar Texto</button>
+            <button class="wf-primary" style="margin-top:4px" onclick="doWfSuggestIdeas()">✦ Sugerir Ideias</button>
           </div>
-          <div class="wf-right" id="wf-text-result">
+          <div class="wf-right" id="wf-ideas-area">
             <div class="wf-empty">
               <div class="wf-empty-icon">✦</div>
-              <p>Configure os parâmetros ao lado e clique em "Gerar Texto" para começar.</p>
+              <p>Configure os parâmetros ao lado e clique em "Sugerir Ideias" para ver 6 opções de conteúdo.</p>
             </div>
           </div>
         </div>`;
 
       document.getElementById('workflowFooter').innerHTML = `
         <button class="wf-secondary" onclick="closeModal('workflowOverlay')">Cancelar</button>
-        <button class="wf-primary" id="wf-approve-btn" disabled onclick="wfRenderStep2()">Aprovar e Gerar Arte →</button>`;
+        <button class="wf-primary" id="wf-gen-text-btn" disabled onclick="doWfGenText()">Gerar Texto →</button>`;
+    }
+
+    async function doWfSuggestIdeas() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
+
+      wfGenParams = {
+        pilar:       document.getElementById('wf-pilar').value,
+        rede_social: document.getElementById('wf-rede').value,
+        formato:     document.getElementById('wf-formato').value,
+        variante:    document.getElementById('wf-variante').value,
+        pub_formato: wfPubFormat,
+        sugestao:    document.getElementById('wf-sugestao').value.trim(),
+      };
+
+      const area = document.getElementById('wf-ideas-area');
+      area.innerHTML = `<div class="wf-empty"><div class="gen-spinner"></div><p>Gerando ideias com IA… aguarde.</p></div>`;
+      document.getElementById('wf-gen-text-btn').disabled = true;
+      showProgress('loading');
+
+      try {
+        const r = await fetch(`${url}/api/suggest-ideas`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(wfGenParams),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha ao gerar ideias.');
+
+        wfRenderIdeas(d.ideas);
+        showProgress('success');
+        hideToast();
+      } catch (e) {
+        showProgress('error');
+        showToast(`Erro: ${e.message}`, 'error');
+        area.innerHTML = `<div class="wf-empty"><p>Erro ao gerar ideias. Tente novamente.</p></div>`;
+      }
+    }
+
+    function wfRenderIdeas(ideas) {
+      wfGenResult = null;
+      let selected = null;
+      const area = document.getElementById('wf-ideas-area');
+
+      const cards = ideas.map((idea, i) => `
+        <div class="wf-idea-card" id="wf-idea-${i}" onclick="wfSelectIdea(${i})">
+          <div class="wf-idea-num">Ideia ${i + 1}</div>
+          <div class="wf-idea-titulo">${idea.titulo}</div>
+          <div class="wf-idea-subtitulo">${idea.subtitulo}</div>
+        </div>`).join('');
+
+      area.innerHTML = `
+        <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px">Escolha uma ideia</div>
+        <div class="wf-ideas-grid">${cards}</div>`;
+
+      window._wfIdeas = ideas;
+      document.getElementById('wf-gen-text-btn').disabled = true;
+    }
+
+    function wfSelectIdea(i) {
+      document.querySelectorAll('.wf-idea-card').forEach(c => c.classList.remove('selected'));
+      document.getElementById(`wf-idea-${i}`).classList.add('selected');
+      window._wfSelectedIdea = window._wfIdeas[i];
+      document.getElementById('wf-gen-text-btn').disabled = false;
     }
 
     function wfSetPub(btn, fmt) {
@@ -1979,18 +2152,15 @@
       if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
 
       const params = {
-        pilar:       document.getElementById('wf-pilar').value,
-        rede_social: document.getElementById('wf-rede').value,
-        formato:     document.getElementById('wf-formato').value,
-        variante:    document.getElementById('wf-variante').value,
-        pub_formato: wfPubFormat,
-        tema:        document.getElementById('wf-tema').value.trim(),
-        gancho:      document.getElementById('wf-gancho').value.trim(),
+        ...wfGenParams,
+        ideia_selecionada: window._wfSelectedIdea || null,
       };
 
-      const area = document.getElementById('wf-text-result');
+      const area = document.getElementById('wf-ideas-area');
       area.innerHTML = `<div class="wf-empty"><div class="gen-spinner"></div><p>Gerando conteúdo com IA… aguarde alguns segundos.</p></div>`;
-      document.getElementById('wf-approve-btn').disabled = true;
+      document.getElementById('workflowFooter').innerHTML = `
+        <button class="wf-secondary" onclick="wfRenderStep1()">← Recomeçar</button>
+        <button class="wf-primary" id="wf-approve-btn" disabled onclick="wfRenderStep2()">Aprovar e Gerar Arte →</button>`;
       showProgress('loading');
 
       try {
@@ -2005,16 +2175,41 @@
         wfGenResult = d.result;
         wfGenParams = params;
         wfRenderTextResult(d.result, params);
-        document.getElementById('wf-approve-btn').disabled = false;
+        document.getElementById('workflowFooter').innerHTML = `
+          <button class="wf-secondary" onclick="doWfBackToIdeas()">← Escolher Outra Ideia</button>
+          <button class="wf-primary" onclick="wfRenderStep2()">Aprovar e Gerar Arte →</button>`;
         showProgress('success');
       } catch(e) {
         area.innerHTML = `<div style="color:#e07070;font-size:0.82rem;padding:14px;background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.3);border-radius:8px">⚠ Erro: ${e.message}</div>`;
+        document.getElementById('workflowFooter').innerHTML = `
+          <button class="wf-secondary" onclick="doWfBackToIdeas()">← Voltar às Ideias</button>`;
         showProgress('error');
       }
     }
 
+    function doWfBackToIdeas() {
+      if (window._wfIdeas?.length) {
+        wfSetStep(1);
+        const area = document.getElementById('wf-ideas-area');
+        const cards = window._wfIdeas.map((idea, i) => `
+          <div class="wf-idea-card${window._wfSelectedIdea === window._wfIdeas[i] ? ' selected' : ''}" id="wf-idea-${i}" onclick="wfSelectIdea(${i})">
+            <div class="wf-idea-num">Ideia ${i + 1}</div>
+            <div class="wf-idea-titulo">${idea.titulo}</div>
+            <div class="wf-idea-subtitulo">${idea.subtitulo}</div>
+          </div>`).join('');
+        area.innerHTML = `
+          <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px">Escolha uma ideia</div>
+          <div class="wf-ideas-grid">${cards}</div>`;
+        document.getElementById('workflowFooter').innerHTML = `
+          <button class="wf-secondary" onclick="wfRenderStep1()">← Recomeçar</button>
+          <button class="wf-primary" id="wf-gen-text-btn" ${window._wfSelectedIdea ? '' : 'disabled'} onclick="doWfGenText()">Gerar Texto →</button>`;
+      } else {
+        wfRenderStep1();
+      }
+    }
+
     function wfRenderTextResult(result, params) {
-      const area = document.getElementById('wf-text-result');
+      const area = document.getElementById('wf-ideas-area');
       const isCarousel = params.formato === 'Carrossel';
       const picahBadges = (result.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
 
