@@ -762,8 +762,9 @@
     .dna-field-info em { color: var(--accent); font-style: normal; }
 
     /* ── DNA VOZ INFO + AI ASSIST ── */
-    .dna-voz-header {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    .dna-voz-footer {
+      display: flex; flex-direction: column; gap: 8px;
+      border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px;
     }
     .dna-info-btn {
       background: transparent; border: 1px solid var(--border); color: var(--muted);
@@ -1268,39 +1269,6 @@
         <!-- PASSO 3 — VOZ -->
         <div class="dna-pane" data-pane="3">
 
-          <!-- Header da seção com botão info -->
-          <div class="dna-voz-header">
-            <div>
-              <div class="dna-help" style="margin:0">Como a marca fala — o seu jeito único de se comunicar.</div>
-            </div>
-            <button class="dna-info-btn" id="dnaVozInfoBtn" onclick="toggleVozInfo()">
-              ⓘ O que é a voz da marca?
-            </button>
-          </div>
-
-          <!-- Explicação colapsável -->
-          <div class="dna-voz-info" id="dnaVozInfo" style="display:none">
-            <div class="dna-voz-info-title">O que é a voz da marca?</div>
-            <p>A voz da marca é a <strong>personalidade consistente</strong> com que sua empresa se comunica — em posts, emails, apresentações, anúncios. Não é o que você diz. É <em>como</em> você diz.</p>
-            <p style="margin-top:8px">Pense assim: se sua marca fosse uma pessoa num evento de negócios, como ela se apresentaria? Uma consultoria premium fala diferente de uma startup descolada. Um escritório de advocacia fala diferente de uma marca de lifestyle.</p>
-            <ul class="dna-voz-info-list">
-              <li><strong>Direto</strong> — vai ao ponto, sem rodeios. Frases curtas, sem floreios.</li>
-              <li><strong>Provocativo</strong> — questiona o status quo, confronta crenças do mercado.</li>
-              <li><strong>Educativo</strong> — ensina, explica, aprofunda. Conteúdo que gera valor técnico.</li>
-              <li><strong>Inspirador</strong> — move o leitor, cria aspiração, foca em transformação.</li>
-              <li><strong>Técnico</strong> — usa linguagem especializada, fala com quem entende do assunto.</li>
-              <li><strong>Formal</strong> — linguagem institucional, cuidadosa, sem gírias nem informalidade.</li>
-            </ul>
-            <p style="margin-top:8px;font-size:0.75rem;color:var(--muted)">O <strong>tom</strong> pode variar por situação (mais sério numa crise, mais leve numa campanha). A <strong>voz</strong> nunca muda.</p>
-          </div>
-
-          <!-- Botão sugerir com IA -->
-          <div class="dna-ai-assist-row">
-            <span class="dna-ai-assist-label">Não sabe por onde começar?</span>
-            <button class="dna-ai-assist-btn" id="dnaVozAiBtn" onclick="doSuggestVoz()">✦ Sugerir com IA</button>
-          </div>
-          <div id="dnaVozAiResult" style="display:none"></div>
-
           <div class="dna-field">Tom de voz <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(múltipla escolha)</span>
             <div class="dna-chip-group" id="dna-tom-chips"></div>
           </div>
@@ -1326,6 +1294,32 @@
           <div class="dna-field">Evitar <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(Enter — clichês, emojis, palavras proibidas)</span>
             <div class="dna-tags-input" id="dna-evitar-box" onclick="document.getElementById('dna-evitar-input').focus()">
               <input type="text" id="dna-evitar-input" placeholder="clichês motivacionais, linguagem de influencer…">
+            </div>
+          </div>
+
+          <!-- Ajuda — aparece após os campos -->
+          <div class="dna-voz-footer">
+            <div class="dna-ai-assist-row">
+              <span class="dna-ai-assist-label">Não sabe o que preencher?</span>
+              <button class="dna-ai-assist-btn" id="dnaVozAiBtn" onclick="doSuggestVoz()">✦ Sugerir com IA</button>
+            </div>
+            <div id="dnaVozAiResult" style="display:none"></div>
+            <button class="dna-info-btn" id="dnaVozInfoBtn" onclick="toggleVozInfo()" style="align-self:flex-start">
+              ⓘ O que é a voz da marca?
+            </button>
+            <div class="dna-voz-info" id="dnaVozInfo" style="display:none">
+              <div class="dna-voz-info-title">O que é a voz da marca?</div>
+              <p>A voz da marca é a <strong>personalidade consistente</strong> com que sua empresa se comunica — em posts, emails, apresentações, anúncios. Não é o que você diz. É <em>como</em> você diz.</p>
+              <p style="margin-top:8px">Pense assim: se sua marca fosse uma pessoa num evento de negócios, como ela se apresentaria? Uma consultoria premium fala diferente de uma startup descolada. Um escritório de advocacia fala diferente de uma marca de lifestyle.</p>
+              <ul class="dna-voz-info-list">
+                <li><strong>Direto</strong> — vai ao ponto, sem rodeios. Frases curtas, sem floreios.</li>
+                <li><strong>Provocativo</strong> — questiona o status quo, confronta crenças do mercado.</li>
+                <li><strong>Educativo</strong> — ensina, explica, aprofunda. Conteúdo que gera valor técnico.</li>
+                <li><strong>Inspirador</strong> — move o leitor, cria aspiração, foca em transformação.</li>
+                <li><strong>Técnico</strong> — usa linguagem especializada, fala com quem entende do assunto.</li>
+                <li><strong>Formal</strong> — linguagem institucional, cuidadosa, sem gírias nem informalidade.</li>
+              </ul>
+              <p style="margin-top:8px;font-size:0.75rem;color:var(--muted)">O <strong>tom</strong> pode variar por situação (mais sério numa crise, mais leve numa campanha). A <strong>voz</strong> nunca muda.</p>
             </div>
           </div>
         </div>
