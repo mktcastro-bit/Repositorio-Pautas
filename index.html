@@ -696,6 +696,55 @@
     .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── DNA VOZ INFO + AI ASSIST ── */
+    /* ── PILAR EDITOR ── */
+    .pilar-editor-wrap { position: relative; }
+    .pilar-select-row { display: flex; align-items: center; gap: 6px; }
+    .pilar-select-row select { flex: 1; }
+    .pilar-edit-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.7rem; padding: 4px 9px; border-radius: 5px; cursor: pointer;
+      white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+    }
+    .pilar-edit-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .pilar-panel {
+      display: none; position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+      background: var(--s2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; z-index: 500; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      min-width: 260px;
+    }
+    .pilar-panel.open { display: block; }
+    .pilar-panel-title { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 10px; }
+    .pilar-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .pilar-tag {
+      background: rgba(200,169,110,0.1); border: 1px solid rgba(200,169,110,0.3);
+      color: var(--accent); font-size: 0.76rem; padding: 4px 10px; border-radius: 11px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pilar-tag button {
+      background: transparent; border: none; color: var(--accent);
+      cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0;
+    }
+    .pilar-tag button:hover { color: #e07070; }
+    .pilar-add-row { display: flex; gap: 6px; }
+    .pilar-add-input {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.84rem; padding: 7px 10px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s; flex: 1;
+    }
+    .pilar-add-input:focus { border-color: var(--accent); }
+    .pilar-add-confirm {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.78rem; font-weight: 700; padding: 7px 13px;
+      border-radius: 6px; cursor: pointer;
+    }
+    .pilar-panel-footer { display: flex; justify-content: flex-end; margin-top: 10px; border-top: 1px solid var(--border); padding-top: 10px; }
+    .pilar-panel-save {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 7px 16px; border-radius: 6px; cursor: pointer;
+    }
+    .pilar-panel-save:hover { opacity: 0.85; }
+
     /* ── DNA FIELD INLINE INFO ── */
     .dna-field-inline-header {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
@@ -1083,13 +1132,8 @@
     </div>
     <div class="filter-group">
       <span class="toolbar-label">Pilar</span>
-      <div class="filter-pills">
+      <div class="filter-pills" id="pilarFilterPills">
         <button class="filter-btn active" data-filter="pilar" data-value="todos" onclick="setFilter('pilar','todos',this)">Todos</button>
-        <button class="filter-btn" data-filter="pilar" data-value="Estratégia de Marca" onclick="setFilter('pilar','Estratégia de Marca',this)">Estratégia de Marca</button>
-        <button class="filter-btn" data-filter="pilar" data-value="Marketing e Performance" onclick="setFilter('pilar','Marketing e Performance',this)">Marketing e Performance</button>
-        <button class="filter-btn" data-filter="pilar" data-value="Tecnologia e IA" onclick="setFilter('pilar','Tecnologia e IA',this)">Tecnologia e IA</button>
-        <button class="filter-btn" data-filter="pilar" data-value="Mentalidade e Gestão Empresarial" onclick="setFilter('pilar','Mentalidade e Gestão Empresarial',this)">Mentalidade e Gestão</button>
-        <button class="filter-btn" data-filter="pilar" data-value="Bastidores e Diagnóstico" onclick="setFilter('pilar','Bastidores e Diagnóstico',this)">Bastidores</button>
       </div>
     </div>
     <div class="filter-group">
@@ -1387,15 +1431,26 @@
         <input type="text" id="f-tema" placeholder="Ex: IA generativa nos processos de vendas">
       </label>
       <div class="modal-row">
-        <label>Pilar
-          <select id="f-pilar">
-            <option>Estratégia de Marca</option>
-            <option>Marketing e Performance</option>
-            <option selected>Tecnologia e IA</option>
-            <option>Mentalidade e Gestão Empresarial</option>
-            <option>Bastidores e Diagnóstico</option>
-          </select>
-        </label>
+        <div style="display:flex;flex-direction:column;gap:5px;font-size:0.68rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);flex:1">
+          Pilar
+          <div class="pilar-editor-wrap" id="pilarWrapModal">
+            <div class="pilar-select-row">
+              <select id="f-pilar"></select>
+              <button class="pilar-edit-btn" onclick="togglePilarPanel('modal')">✏ Editar</button>
+            </div>
+            <div class="pilar-panel" id="pilarPanelModal">
+              <div class="pilar-panel-title">Pilares de conteúdo</div>
+              <div class="pilar-tags" id="pilarTagsModal"></div>
+              <div class="pilar-add-row">
+                <input class="pilar-add-input" id="pilarAddInputModal" placeholder="Novo pilar…" onkeydown="pilarAddKey(event,'modal')">
+                <button class="pilar-add-confirm" onclick="pilarAddNew('modal')">+</button>
+              </div>
+              <div class="pilar-panel-footer">
+                <button class="pilar-panel-save" onclick="savePilares('modal')">Salvar</button>
+              </div>
+            </div>
+          </div>
+        </div>
         <label>Rede Social
           <select id="f-rede">
             <option value="Ambos" selected>Ambos</option>
@@ -2540,9 +2595,25 @@
           <div class="wf-left">
             <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Configurações</div>
 
-            <label class="wf-field-label">Pilar
-              <select class="wf-select" id="wf-pilar">${pilarOpts}</select>
-            </label>
+            <div class="wf-field-label">Pilar
+              <div class="pilar-editor-wrap" id="pilarWrapWf">
+                <div class="pilar-select-row">
+                  <select class="wf-select" id="wf-pilar">${pilarOpts}</select>
+                  <button class="pilar-edit-btn" onclick="togglePilarPanel('wf')">✏ Editar</button>
+                </div>
+                <div class="pilar-panel" id="pilarPanelWf">
+                  <div class="pilar-panel-title">Pilares de conteúdo</div>
+                  <div class="pilar-tags" id="pilarTagsWf"></div>
+                  <div class="pilar-add-row">
+                    <input class="pilar-add-input" id="pilarAddInputWf" placeholder="Novo pilar…" onkeydown="pilarAddKey(event,'wf')">
+                    <button class="pilar-add-confirm" onclick="pilarAddNew('wf')">+</button>
+                  </div>
+                  <div class="pilar-panel-footer">
+                    <button class="pilar-panel-save" onclick="savePilares('wf')">Salvar</button>
+                  </div>
+                </div>
+              </div>
+            </div>
             <label class="wf-field-label">Rede Social
               <select class="wf-select" id="wf-rede">
                 <option value="Ambos" selected>Ambos</option>
@@ -3397,6 +3468,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       localStorage.setItem(BRAND_KEY, JSON.stringify(bp));
       updateDnaBanner();
       applyBrandToPilarFilters();
+      renderPilarSelects();
       closeModal('brandOverlay');
       showToast('DNA da marca salvo. Próximas gerações usarão essa identidade.', 'success');
     }
@@ -3438,6 +3510,124 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         const current = sel.value;
         sel.innerHTML = getPilares().map(p => `<option${p===current?' selected':''}>${p}</option>`).join('');
       }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // EDITOR DE PILARES (Workflow + Modal Nova Pauta)
+    // ═══════════════════════════════════════════════════════
+
+    // Popula os <select> de pilar e os filtros da toolbar dinamicamente
+    function renderPilarSelects() {
+      const pilares = getPilares();
+
+      // Selects (workflow + modal)
+      ['f-pilar', 'wf-pilar'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = pilares.map(p =>
+          `<option${p === current ? ' selected' : ''}>${p}</option>`
+        ).join('');
+      });
+
+      // Toolbar filter pills
+      const pills = document.getElementById('pilarFilterPills');
+      if (pills) {
+        const active = filters.pilar || 'todos';
+        // Mantém o botão "Todos"
+        const todosActive = active === 'todos' ? ' active' : '';
+        let html = `<button class="filter-btn${todosActive}" data-filter="pilar" data-value="todos" onclick="setFilter('pilar','todos',this)">Todos</button>`;
+        pilares.forEach(p => {
+          const isActive = p === active ? ' active' : '';
+          // Label curto: primeiras 2 palavras para não estourar a toolbar
+          const label = p.split(' ').slice(0, 3).join(' ');
+          html += `<button class="filter-btn${isActive}" data-filter="pilar" data-value="${escHtml(p)}" onclick="setFilter('pilar','${p.replace(/'/g,"\\'")}',this)">${escHtml(label)}</button>`;
+        });
+        pills.innerHTML = html;
+      }
+    }
+
+    // Abre/fecha painel e popula as tags
+    function togglePilarPanel(ctx) {
+      const panel = document.getElementById(`pilarPanel${ctx === 'modal' ? 'Modal' : 'Wf'}`);
+      const isOpen = panel.classList.contains('open');
+      // Fecha todos antes de abrir
+      document.querySelectorAll('.pilar-panel.open').forEach(p => p.classList.remove('open'));
+      if (isOpen) return;
+      renderPilarTags(ctx);
+      panel.classList.add('open');
+      // Fecha ao clicar fora
+      setTimeout(() => {
+        document.addEventListener('click', closePilarOnOutside, { once: true });
+      }, 0);
+    }
+
+    function closePilarOnOutside(e) {
+      const panels = document.querySelectorAll('.pilar-panel.open');
+      panels.forEach(p => {
+        if (!p.contains(e.target) && !e.target.classList.contains('pilar-edit-btn')) {
+          p.classList.remove('open');
+        } else {
+          // Re-registra se clicou dentro
+          setTimeout(() => document.addEventListener('click', closePilarOnOutside, { once: true }), 0);
+        }
+      });
+    }
+
+    function renderPilarTags(ctx) {
+      const tagsEl = document.getElementById(`pilarTags${ctx === 'modal' ? 'Modal' : 'Wf'}`);
+      const pilares = getPilares();
+      tagsEl.innerHTML = pilares.map((p, i) => `
+        <span class="pilar-tag">
+          ${escHtml(p)}
+          <button type="button" onclick="pilarRemove(${i},'${ctx}')" title="Remover">✕</button>
+        </span>`).join('');
+    }
+
+    function pilarRemove(idx, ctx) {
+      const pilares = getPilares();
+      pilares.splice(idx, 1);
+      savePilaresData(pilares);
+      renderPilarTags(ctx);
+      renderPilarSelects();
+    }
+
+    function pilarAddNew(ctx) {
+      const input = document.getElementById(`pilarAddInput${ctx === 'modal' ? 'Modal' : 'Wf'}`);
+      const val   = input.value.trim();
+      if (!val) return;
+      const pilares = getPilares();
+      if (!pilares.includes(val)) {
+        pilares.push(val);
+        savePilaresData(pilares);
+        renderPilarTags(ctx);
+        renderPilarSelects();
+        // Seleciona o novo pilar no dropdown
+        const sel = document.getElementById(ctx === 'modal' ? 'f-pilar' : 'wf-pilar');
+        if (sel) sel.value = val;
+      }
+      input.value = '';
+      input.focus();
+    }
+
+    function pilarAddKey(e, ctx) {
+      if (e.key === 'Enter') { e.preventDefault(); pilarAddNew(ctx); }
+    }
+
+    function savePilares(ctx) {
+      const pilares = getPilares();
+      savePilaresData(pilares);
+      document.getElementById(`pilarPanel${ctx === 'modal' ? 'Modal' : 'Wf'}`).classList.remove('open');
+      showToast('Pilares salvos.', 'success');
+    }
+
+    // Persiste no brand_profile.areas_atuacao
+    function savePilaresData(pilares) {
+      if (!brandProfile) {
+        brandProfile = { versao: 1, identidade: {}, areas_atuacao: [], publico: {}, voz: {}, visual: {} };
+      }
+      brandProfile.areas_atuacao = [...pilares];
+      localStorage.setItem(BRAND_KEY, JSON.stringify(brandProfile));
     }
 
     // ── Info toggles (campo genérico) ─────────────────────
@@ -3590,6 +3780,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
     }
 
     updateDnaBanner();
+    renderPilarSelects();
 
     // ── Color picker sync ──────────────────────────────────
     function syncColorPicker(pickerId, hexVal) {
