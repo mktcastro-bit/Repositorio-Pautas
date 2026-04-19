@@ -696,6 +696,22 @@
     .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
     /* ── DNA VOZ INFO + AI ASSIST ── */
+    /* ── DNA FIELD INLINE INFO ── */
+    .dna-field-inline-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--muted); font-weight: 600; margin-bottom: 5px;
+    }
+    .dna-field-inline-header .dna-info-btn { margin: 0; text-transform: none; letter-spacing: 0; }
+    .dna-field-info {
+      background: rgba(200,169,110,0.05); border: 1px solid rgba(200,169,110,0.18);
+      border-radius: 8px; padding: 12px 14px; font-size: 0.8rem; color: var(--muted);
+      line-height: 1.55; margin-bottom: 6px;
+    }
+    .dna-field-info strong { color: var(--text); }
+    .dna-field-info em { color: var(--accent); font-style: normal; }
+
+    /* ── DNA VOZ INFO + AI ASSIST ── */
     .dna-voz-header {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
     }
@@ -1156,23 +1172,49 @@
                 <option>B2B e B2C</option>
               </select>
             </label>
-            <label class="dna-field">Maturidade
+            <div class="dna-field">
+              <div class="dna-field-inline-header">
+                <span>Maturidade</span>
+                <button class="dna-info-btn" id="dnaMaturidadeInfoBtn" onclick="toggleFieldInfo('maturidade')">ⓘ O que é isso?</button>
+              </div>
+              <div class="dna-field-info" id="dnaMaturidadeInfo" style="display:none">
+                <p>É o <strong>nível de conhecimento do seu público sobre o assunto</strong> — não a idade nem o porte da empresa.</p>
+                <ul class="dna-voz-info-list" style="margin-top:6px">
+                  <li><strong>Iniciante</strong> — descobre o tema agora. A IA explica conceitos, evita jargão, usa exemplos do dia a dia.</li>
+                  <li><strong>Intermediário</strong> — já entende o básico, quer aprofundar. Vocabulário técnico com contexto.</li>
+                  <li><strong>Avançado</strong> — especialista ou decisor experiente. Vai direto ao estratégico, sem explicar o óbvio.</li>
+                </ul>
+              </div>
               <select id="dna-maturidade">
                 <option value="">—</option>
                 <option value="iniciante">Iniciante</option>
                 <option value="intermediário">Intermediário</option>
                 <option value="avançado">Avançado</option>
               </select>
-            </label>
+            </div>
           </div>
           <div class="dna-field">Cargo / papel <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(Enter para adicionar)</span>
             <div class="dna-tags-input" id="dna-cargo-box" onclick="document.getElementById('dna-cargo-input').focus()">
               <input type="text" id="dna-cargo-input" placeholder="empresários, gestores, decisores…">
             </div>
           </div>
-          <label class="dna-field">Dor principal
-            <textarea id="dna-dor" rows="2" placeholder="Ex: crescer sem depender de sorte ou achismo"></textarea>
-          </label>
+          <div class="dna-field">
+            <div class="dna-field-inline-header">
+              <span>Dor principal</span>
+              <button class="dna-info-btn" id="dnaDorInfoBtn" onclick="toggleFieldInfo('dor')">ⓘ O que é isso?</button>
+            </div>
+            <div class="dna-field-info" id="dnaDorInfo" style="display:none">
+              <p>A <strong>dor principal</strong> é o problema real que faz seu cliente buscar a sua solução — a frustração, o risco ou o custo que ele quer eliminar.</p>
+              <p style="margin-top:6px">Não é o que o cliente <em>pede</em>. É o que ele <em>sente</em>.</p>
+              <ul class="dna-voz-info-list" style="margin-top:6px">
+                <li>❌ Genérico: <em>"quer crescer"</em></li>
+                <li>✓ Específico: <em>"perde vendas por não ter processo comercial definido"</em></li>
+                <li>✓ Específico: <em>"investe em marketing mas não sabe o que gera resultado"</em></li>
+              </ul>
+              <p style="margin-top:6px;font-size:0.75rem;color:var(--muted)">Quanto mais específica a dor, mais cirúrgico o conteúdo que a IA gera.</p>
+            </div>
+            <textarea id="dna-dor" rows="2" placeholder="Ex: cresce sem depender de sorte ou achismo"></textarea>
+          </div>
         </div>
 
         <!-- PASSO 3 — VOZ -->
@@ -3396,6 +3438,16 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         const current = sel.value;
         sel.innerHTML = getPilares().map(p => `<option${p===current?' selected':''}>${p}</option>`).join('');
       }
+    }
+
+    // ── Info toggles (campo genérico) ─────────────────────
+    function toggleFieldInfo(id) {
+      const box = document.getElementById(`dna${id.charAt(0).toUpperCase() + id.slice(1)}Info`);
+      const btn = document.getElementById(`dna${id.charAt(0).toUpperCase() + id.slice(1)}InfoBtn`);
+      if (!box) return;
+      const visible = box.style.display !== 'none';
+      box.style.display = visible ? 'none' : 'block';
+      if (btn) btn.classList.toggle('active', !visible);
     }
 
     // ── Voz info toggle ───────────────────────────────────
