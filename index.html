@@ -695,6 +695,76 @@
     .dna-btn-primary:hover { opacity: 0.85; }
     .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ── DNA VOZ INFO + AI ASSIST ── */
+    .dna-voz-header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .dna-info-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.04em;
+      padding: 5px 11px; border-radius: 20px; cursor: pointer; white-space: nowrap;
+      transition: all 0.18s; flex-shrink: 0;
+    }
+    .dna-info-btn:hover, .dna-info-btn.active { border-color: var(--accent); color: var(--accent); }
+    .dna-voz-info {
+      background: rgba(200,169,110,0.05); border: 1px solid rgba(200,169,110,0.2);
+      border-radius: 10px; padding: 16px 18px; font-size: 0.82rem; color: var(--muted);
+      line-height: 1.6;
+    }
+    .dna-voz-info-title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .dna-voz-info strong { color: var(--text); }
+    .dna-voz-info em { color: var(--accent); font-style: normal; }
+    .dna-voz-info-list { list-style: none; padding: 0; margin-top: 8px; display: flex; flex-direction: column; gap: 5px; }
+    .dna-voz-info-list li { padding-left: 14px; position: relative; font-size: 0.8rem; }
+    .dna-voz-info-list li::before { content: '–'; position: absolute; left: 0; color: var(--accent); }
+
+    .dna-ai-assist-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--s1); border: 1px dashed var(--border);
+      border-radius: 8px; padding: 10px 14px;
+    }
+    .dna-ai-assist-label { font-size: 0.76rem; color: var(--muted); flex: 1; }
+    .dna-ai-assist-btn {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    }
+    .dna-ai-assist-btn:hover { background: rgba(200,169,110,0.12); }
+    .dna-ai-assist-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Resultado da sugestão de voz */
+    .dna-voz-suggestion {
+      background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.25);
+      border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .dna-voz-sug-title { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .dna-voz-sug-racional { font-size: 0.8rem; color: var(--muted); line-height: 1.5; }
+    .dna-voz-sug-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .dna-voz-sug-apply {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.72rem; font-weight: 700; padding: 7px 16px; border-radius: 6px; cursor: pointer;
+    }
+    .dna-voz-sug-apply:hover { opacity: 0.85; }
+    .dna-voz-sug-dismiss {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.72rem; padding: 7px 14px; border-radius: 6px; cursor: pointer;
+    }
+
+    /* Proposta de valor */
+    .dna-proposta-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .dna-proposta-options { display: flex; flex-direction: column; gap: 8px; }
+    .dna-proposta-option {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
+      padding: 11px 14px; font-size: 0.84rem; color: var(--text); line-height: 1.45;
+      cursor: pointer; transition: all 0.18s; display: flex; align-items: flex-start; gap: 10px;
+    }
+    .dna-proposta-option:hover { border-color: var(--accent); background: rgba(200,169,110,0.06); }
+    .dna-proposta-option .opt-icon { font-size: 0.7rem; color: var(--accent); flex-shrink: 0; padding-top: 3px; }
+
     /* ── DNA COLOR PICKERS ── */
     .dna-analyze-box {
       display: flex; align-items: flex-end; gap: 10px;
@@ -1051,32 +1121,30 @@
         <button class="dna-close" onclick="closeModal('brandOverlay')">✕</button>
       </div>
       <div class="dna-steps">
-        <button class="dna-step-tab active" data-step="1" onclick="dnaGoStep(1)"><span class="dna-step-num">1</span> Identidade</button>
+        <button class="dna-step-tab active" data-step="1" onclick="dnaGoStep(1)"><span class="dna-step-num">1</span> Marca</button>
         <button class="dna-step-tab" data-step="2" onclick="dnaGoStep(2)"><span class="dna-step-num">2</span> Público</button>
         <button class="dna-step-tab" data-step="3" onclick="dnaGoStep(3)"><span class="dna-step-num">3</span> Voz</button>
-        <button class="dna-step-tab" data-step="4" onclick="dnaGoStep(4)"><span class="dna-step-num">4</span> Visual</button>
+        <button class="dna-step-tab" data-step="4" onclick="dnaGoStep(4)"><span class="dna-step-num">4</span> Identidade</button>
       </div>
       <div class="dna-body" id="dnaBody">
-        <!-- PASSO 1 -->
+
+        <!-- PASSO 1 — MARCA -->
         <div class="dna-pane active" data-pane="1">
-          <div class="dna-help">Como a marca se apresenta. Isso define a base de tudo que a IA vai escrever.</div>
+          <div class="dna-help">O básico da marca. Preencha nome, o que faz e as áreas que atua — a proposta de valor você define no final, quando tivermos contexto suficiente.</div>
           <label class="dna-field">Nome da marca
             <input type="text" id="dna-nome" placeholder="Ex: Nexum360">
           </label>
           <label class="dna-field">Descrição curta
             <textarea id="dna-descricao" rows="2" placeholder="Ex: Consultoria de marca, marketing e IA para empresas"></textarea>
           </label>
-          <label class="dna-field">Proposta de valor
-            <textarea id="dna-proposta" rows="2" placeholder="Ex: Transformamos estratégia em crescimento mensurável"></textarea>
-          </label>
           <div class="dna-field">Áreas de atuação <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(viram os pilares de conteúdo — Enter para adicionar)</span>
             <div class="dna-tags-input" id="dna-areas-box" onclick="document.getElementById('dna-areas-input').focus()">
-              <input type="text" id="dna-areas-input" placeholder="Digite e pressione Enter">
+              <input type="text" id="dna-areas-input" placeholder="Ex: Estratégia de Marca, Tecnologia e IA…">
             </div>
           </div>
         </div>
 
-        <!-- PASSO 2 -->
+        <!-- PASSO 2 — PÚBLICO -->
         <div class="dna-pane" data-pane="2">
           <div class="dna-help">Para quem a marca fala. Quanto mais específico, menos genérico o conteúdo fica.</div>
           <div class="dna-row">
@@ -1107,9 +1175,42 @@
           </label>
         </div>
 
-        <!-- PASSO 3 -->
+        <!-- PASSO 3 — VOZ -->
         <div class="dna-pane" data-pane="3">
-          <div class="dna-help">O jeito de falar. Inclua o que EVITAR — guardrails poderosos contra output genérico.</div>
+
+          <!-- Header da seção com botão info -->
+          <div class="dna-voz-header">
+            <div>
+              <div class="dna-help" style="margin:0">Como a marca fala — o seu jeito único de se comunicar.</div>
+            </div>
+            <button class="dna-info-btn" id="dnaVozInfoBtn" onclick="toggleVozInfo()">
+              ⓘ O que é a voz da marca?
+            </button>
+          </div>
+
+          <!-- Explicação colapsável -->
+          <div class="dna-voz-info" id="dnaVozInfo" style="display:none">
+            <div class="dna-voz-info-title">O que é a voz da marca?</div>
+            <p>A voz da marca é a <strong>personalidade consistente</strong> com que sua empresa se comunica — em posts, emails, apresentações, anúncios. Não é o que você diz. É <em>como</em> você diz.</p>
+            <p style="margin-top:8px">Pense assim: se sua marca fosse uma pessoa num evento de negócios, como ela se apresentaria? Uma consultoria premium fala diferente de uma startup descolada. Um escritório de advocacia fala diferente de uma marca de lifestyle.</p>
+            <ul class="dna-voz-info-list">
+              <li><strong>Direto</strong> — vai ao ponto, sem rodeios. Frases curtas, sem floreios.</li>
+              <li><strong>Provocativo</strong> — questiona o status quo, confronta crenças do mercado.</li>
+              <li><strong>Educativo</strong> — ensina, explica, aprofunda. Conteúdo que gera valor técnico.</li>
+              <li><strong>Inspirador</strong> — move o leitor, cria aspiração, foca em transformação.</li>
+              <li><strong>Técnico</strong> — usa linguagem especializada, fala com quem entende do assunto.</li>
+              <li><strong>Formal</strong> — linguagem institucional, cuidadosa, sem gírias nem informalidade.</li>
+            </ul>
+            <p style="margin-top:8px;font-size:0.75rem;color:var(--muted)">O <strong>tom</strong> pode variar por situação (mais sério numa crise, mais leve numa campanha). A <strong>voz</strong> nunca muda.</p>
+          </div>
+
+          <!-- Botão sugerir com IA -->
+          <div class="dna-ai-assist-row">
+            <span class="dna-ai-assist-label">Não sabe por onde começar?</span>
+            <button class="dna-ai-assist-btn" id="dnaVozAiBtn" onclick="doSuggestVoz()">✦ Sugerir com IA</button>
+          </div>
+          <div id="dnaVozAiResult" style="display:none"></div>
+
           <div class="dna-field">Tom de voz <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(múltipla escolha)</span>
             <div class="dna-chip-group" id="dna-tom-chips"></div>
           </div>
@@ -1139,47 +1240,53 @@
           </div>
         </div>
 
-        <!-- PASSO 4 -->
+        <!-- PASSO 4 — IDENTIDADE FINAL -->
         <div class="dna-pane" data-pane="4">
-          <div class="dna-help">Estética. Alimenta futuras variações visuais e orienta a geração de artes.</div>
+          <div class="dna-help">A síntese da marca. Agora que temos contexto suficiente — o que faz, para quem, como fala — é hora de definir a proposta de valor e a identidade visual.</div>
 
-          <!-- Análise por URL -->
+          <!-- Proposta de valor -->
+          <div class="dna-field">
+            <div class="dna-proposta-header">
+              <span>Proposta de valor <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional)</span></span>
+              <button class="dna-ai-assist-btn" id="dnaPropostaAiBtn" onclick="doSuggestProposta()">✦ Gerar com IA</button>
+            </div>
+            <textarea id="dna-proposta" rows="2" placeholder="Ex: Transformamos estratégia em crescimento mensurável"></textarea>
+          </div>
+          <div id="dnaPropostaOptions" style="display:none"></div>
+
+          <!-- URL de análise -->
           <div class="dna-analyze-box">
             <div class="dna-field" style="flex:1">
               <label for="dna-url" style="font-size:0.66rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
-                URL do site <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional — extrai cores e sugestões automaticamente)</span>
+                URL do site <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional — extrai cores e sugestões)</span>
               </label>
               <input type="url" id="dna-url" placeholder="https://suamarca.com.br">
             </div>
             <button class="dna-analyze-btn" id="dnaAnalyzeBtn" onclick="doAnalyzeBrand()">🔍 Analisar</button>
           </div>
-
-          <!-- Sugestões da análise -->
           <div id="dnaAnalyzeSuggestions" style="display:none"></div>
 
+          <!-- Cores -->
           <div class="dna-color-row">
             <div class="dna-color-field">
               <div class="dna-field-label-sm">Cor Primária</div>
               <div class="dna-color-input-wrap">
                 <input type="color" id="dna-cor1-picker" value="#c8a96e" oninput="document.getElementById('dna-cor1-hex').value=this.value">
-                <input type="text" id="dna-cor1-hex" placeholder="#c8a96e" maxlength="7"
-                  oninput="syncColorPicker('dna-cor1-picker',this.value)">
+                <input type="text" id="dna-cor1-hex" placeholder="#c8a96e" maxlength="7" oninput="syncColorPicker('dna-cor1-picker',this.value)">
               </div>
             </div>
             <div class="dna-color-field">
               <div class="dna-field-label-sm">Cor Secundária</div>
               <div class="dna-color-input-wrap">
                 <input type="color" id="dna-cor2-picker" value="#4d8fda" oninput="document.getElementById('dna-cor2-hex').value=this.value">
-                <input type="text" id="dna-cor2-hex" placeholder="#4d8fda" maxlength="7"
-                  oninput="syncColorPicker('dna-cor2-picker',this.value)">
+                <input type="text" id="dna-cor2-hex" placeholder="#4d8fda" maxlength="7" oninput="syncColorPicker('dna-cor2-picker',this.value)">
               </div>
             </div>
             <div class="dna-color-field">
               <div class="dna-field-label-sm">Cor Terciária</div>
               <div class="dna-color-input-wrap">
                 <input type="color" id="dna-cor3-picker" value="#f0f0f0" oninput="document.getElementById('dna-cor3-hex').value=this.value">
-                <input type="text" id="dna-cor3-hex" placeholder="#f0f0f0" maxlength="7"
-                  oninput="syncColorPicker('dna-cor3-picker',this.value)">
+                <input type="text" id="dna-cor3-hex" placeholder="#f0f0f0" maxlength="7" oninput="syncColorPicker('dna-cor3-picker',this.value)">
               </div>
             </div>
           </div>
@@ -3151,7 +3258,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       dnaCurrentStep = n;
       document.querySelectorAll('.dna-step-tab').forEach(t => t.classList.toggle('active', Number(t.dataset.step) === n));
       document.querySelectorAll('.dna-pane').forEach(p => p.classList.toggle('active', Number(p.dataset.pane) === n));
-      const labels = ['Identidade','Público','Voz','Visual'];
+      const labels = ['Marca','Público','Voz','Identidade Final'];
       document.getElementById('dnaFooterHint').textContent = `Passo ${n} de 4 — ${labels[n-1]}`;
       document.getElementById('dnaPrevBtn').style.display = n > 1 ? '' : 'none';
       document.getElementById('dnaNextBtn').style.display = n < 4 ? '' : 'none';
@@ -3289,6 +3396,145 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         const current = sel.value;
         sel.innerHTML = getPilares().map(p => `<option${p===current?' selected':''}>${p}</option>`).join('');
       }
+    }
+
+    // ── Voz info toggle ───────────────────────────────────
+    function toggleVozInfo() {
+      const box = document.getElementById('dnaVozInfo');
+      const btn = document.getElementById('dnaVozInfoBtn');
+      const visible = box.style.display !== 'none';
+      box.style.display = visible ? 'none' : 'block';
+      btn.classList.toggle('active', !visible);
+    }
+
+    // ── Sugerir voz da marca com IA ───────────────────────
+    async function doSuggestVoz() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
+
+      const ctx = getDnaContext();
+      if (!ctx.nome) return showToast('Preencha ao menos o nome da marca no Passo 1.', 'error');
+
+      const btn    = document.getElementById('dnaVozAiBtn');
+      const result = document.getElementById('dnaVozAiResult');
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando…';
+      result.style.display = 'none';
+
+      try {
+        const r = await fetch(`${url}/api/suggest-brand-field`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ field: 'tom_de_voz', context: ctx }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha ao gerar sugestão.');
+
+        const s = d.suggestion;
+        result.innerHTML = `
+          <div class="dna-voz-suggestion">
+            <div class="dna-voz-sug-title">✦ Sugestão de voz para ${escHtml(ctx.nome)}</div>
+            <div class="dna-voz-sug-racional">${escHtml(s.racional)}</div>
+            <div class="dna-voz-sug-actions">
+              <button class="dna-voz-sug-dismiss" onclick="document.getElementById('dnaVozAiResult').style.display='none'">Descartar</button>
+              <button class="dna-voz-sug-apply" onclick="applyVozSuggestion(${JSON.stringify(s).replace(/"/g,'&quot;')})">Aplicar sugestão</button>
+            </div>
+          </div>`;
+        result.style.display = 'block';
+        window._dnaVozSuggestion = s;
+        showToast('Sugestão gerada. Revise e aplique se quiser.', 'success');
+      } catch(e) {
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✦ Sugerir com IA';
+      }
+    }
+
+    function applyVozSuggestion(s) {
+      // Ativa os chips de tom
+      if (Array.isArray(s.tom)) {
+        document.querySelectorAll('#dna-tom-chips .dna-chip').forEach(c => {
+          c.classList.toggle('active', s.tom.includes(c.dataset.val));
+        });
+      }
+      if (s.sofisticacao) document.getElementById('dna-sofisticacao').value = s.sofisticacao;
+      if (s.linguagem)    document.getElementById('dna-linguagem').value    = s.linguagem;
+      if (Array.isArray(s.evitar) && s.evitar.length) {
+        _dnaTagsBuffer.evitar = [...s.evitar];
+        dnaRenderTags('evitar');
+      }
+      document.getElementById('dnaVozAiResult').style.display = 'none';
+      showToast('Voz da marca aplicada. Edite à vontade.', 'success');
+    }
+
+    // ── Sugerir proposta de valor com IA ─────────────────
+    async function doSuggestProposta() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
+
+      const ctx = getDnaContext();
+      if (!ctx.nome) return showToast('Preencha ao menos o nome da marca no Passo 1.', 'error');
+
+      const btn    = document.getElementById('dnaPropostaAiBtn');
+      const optBox = document.getElementById('dnaPropostaOptions');
+      btn.disabled = true;
+      btn.textContent = '⏳ Gerando…';
+      optBox.style.display = 'none';
+
+      try {
+        const r = await fetch(`${url}/api/suggest-brand-field`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ field: 'proposta_valor', context: ctx }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha ao gerar proposta.');
+
+        const opts = d.suggestion.opcoes || [];
+        optBox.innerHTML = `<div class="dna-proposta-options">
+          ${opts.map(o => `
+            <div class="dna-proposta-option" onclick="selectProposta(this, '${o.replace(/'/g,'&#39;').replace(/"/g,'&quot;')}')">
+              <span class="opt-icon">→</span>
+              <span>${escHtml(o)}</span>
+            </div>`).join('')}
+        </div>`;
+        optBox.style.display = 'block';
+      } catch(e) {
+        showToast(`Erro: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✦ Gerar com IA';
+      }
+    }
+
+    function selectProposta(el, val) {
+      document.getElementById('dna-proposta').value = val;
+      document.querySelectorAll('.dna-proposta-option').forEach(o => o.style.borderColor = '');
+      el.style.borderColor = 'var(--accent)';
+      showToast('Proposta selecionada. Edite se quiser.', 'success');
+    }
+
+    // Coleta contexto atual do DNA para enviar à IA
+    function getDnaContext() {
+      const flush = k => {
+        const inp = document.getElementById(`dna-${k}-input`);
+        if (inp?.value.trim()) { dnaAddTag(k, inp.value); inp.value = ''; }
+      };
+      flush('areas'); flush('cargo'); flush('evitar');
+      return {
+        nome:          document.getElementById('dna-nome')?.value.trim()       || '',
+        descricao:     document.getElementById('dna-descricao')?.value.trim()  || '',
+        areas:         [..._dnaTagsBuffer.areas],
+        perfil:        document.getElementById('dna-perfil')?.value            || '',
+        cargo:         [..._dnaTagsBuffer.cargo],
+        maturidade:    document.getElementById('dna-maturidade')?.value        || '',
+        dor_principal: document.getElementById('dna-dor')?.value.trim()        || '',
+        tom:           [...document.querySelectorAll('#dna-tom-chips .dna-chip.active')].map(c => c.dataset.val),
+        sofisticacao:  document.getElementById('dna-sofisticacao')?.value      || '',
+        linguagem:     document.getElementById('dna-linguagem')?.value         || '',
+        evitar:        [..._dnaTagsBuffer.evitar],
+      };
     }
 
     updateDnaBanner();
