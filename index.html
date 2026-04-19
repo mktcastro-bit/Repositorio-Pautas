@@ -695,6 +695,62 @@
     .dna-btn-primary:hover { opacity: 0.85; }
     .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ── DNA COLOR PICKERS ── */
+    .dna-analyze-box {
+      display: flex; align-items: flex-end; gap: 10px;
+    }
+    .dna-analyze-box .dna-field { flex: 1; }
+    .dna-analyze-box input[type="url"] {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.88rem; padding: 9px 13px; border-radius: 6px; outline: none;
+      transition: border-color 0.2s; width: 100%;
+    }
+    .dna-analyze-box input[type="url"]:focus { border-color: var(--accent); }
+    .dna-analyze-btn {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.78rem; font-weight: 600; padding: 9px 16px; border-radius: 6px;
+      cursor: pointer; white-space: nowrap; transition: all 0.18s; flex-shrink: 0;
+    }
+    .dna-analyze-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .dna-analyze-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .dna-color-row { display: flex; gap: 12px; }
+    .dna-color-field { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .dna-field-label-sm { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .dna-color-input-wrap { display: flex; align-items: center; gap: 8px; }
+    .dna-color-input-wrap input[type="color"] {
+      width: 38px; height: 38px; border-radius: 6px; border: 1px solid var(--border);
+      background: none; cursor: pointer; padding: 2px; flex-shrink: 0;
+    }
+    .dna-color-input-wrap input[type="text"] {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.84rem; font-family: monospace; padding: 8px 10px;
+      border-radius: 6px; outline: none; transition: border-color 0.2s; width: 100%;
+    }
+    .dna-color-input-wrap input[type="text"]:focus { border-color: var(--accent); }
+
+    /* Sugestões da análise */
+    .dna-suggest-block {
+      background: rgba(200,169,110,0.06); border: 1px solid rgba(200,169,110,0.25);
+      border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .dna-suggest-title { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .dna-suggest-item { display: flex; align-items: flex-start; gap: 10px; }
+    .dna-suggest-label { font-size: 0.72rem; color: var(--muted); min-width: 110px; flex-shrink: 0; padding-top: 2px; }
+    .dna-suggest-value { font-size: 0.82rem; color: var(--text); flex: 1; line-height: 1.4; }
+    .dna-suggest-apply {
+      background: transparent; border: 1px solid var(--accent); color: var(--accent);
+      font-size: 0.68rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 5px; cursor: pointer; flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .dna-suggest-apply:hover { background: rgba(200,169,110,0.15); }
+    .dna-suggest-apply.applied { background: var(--green); border-color: var(--green); color: #0a0a0a; }
+    .dna-suggest-color-swatch {
+      width: 18px; height: 18px; border-radius: 4px; border: 1px solid var(--border);
+      flex-shrink: 0; margin-top: 2px;
+    }
+
     /* ── DNA SUMMARY (no workflow) ── */
     .dna-summary {
       background: linear-gradient(90deg, rgba(200,169,110,0.08), transparent);
@@ -1086,16 +1142,50 @@
         <!-- PASSO 4 -->
         <div class="dna-pane" data-pane="4">
           <div class="dna-help">Estética. Alimenta futuras variações visuais e orienta a geração de artes.</div>
+
+          <!-- Análise por URL -->
+          <div class="dna-analyze-box">
+            <div class="dna-field" style="flex:1">
+              <label for="dna-url" style="font-size:0.66rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted)">
+                URL do site <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional — extrai cores e sugestões automaticamente)</span>
+              </label>
+              <input type="url" id="dna-url" placeholder="https://suamarca.com.br">
+            </div>
+            <button class="dna-analyze-btn" id="dnaAnalyzeBtn" onclick="doAnalyzeBrand()">🔍 Analisar</button>
+          </div>
+
+          <!-- Sugestões da análise -->
+          <div id="dnaAnalyzeSuggestions" style="display:none"></div>
+
+          <div class="dna-color-row">
+            <div class="dna-color-field">
+              <div class="dna-field-label-sm">Cor Primária</div>
+              <div class="dna-color-input-wrap">
+                <input type="color" id="dna-cor1-picker" value="#c8a96e" oninput="document.getElementById('dna-cor1-hex').value=this.value">
+                <input type="text" id="dna-cor1-hex" placeholder="#c8a96e" maxlength="7"
+                  oninput="syncColorPicker('dna-cor1-picker',this.value)">
+              </div>
+            </div>
+            <div class="dna-color-field">
+              <div class="dna-field-label-sm">Cor Secundária</div>
+              <div class="dna-color-input-wrap">
+                <input type="color" id="dna-cor2-picker" value="#4d8fda" oninput="document.getElementById('dna-cor2-hex').value=this.value">
+                <input type="text" id="dna-cor2-hex" placeholder="#4d8fda" maxlength="7"
+                  oninput="syncColorPicker('dna-cor2-picker',this.value)">
+              </div>
+            </div>
+            <div class="dna-color-field">
+              <div class="dna-field-label-sm">Cor Terciária</div>
+              <div class="dna-color-input-wrap">
+                <input type="color" id="dna-cor3-picker" value="#f0f0f0" oninput="document.getElementById('dna-cor3-hex').value=this.value">
+                <input type="text" id="dna-cor3-hex" placeholder="#f0f0f0" maxlength="7"
+                  oninput="syncColorPicker('dna-cor3-picker',this.value)">
+              </div>
+            </div>
+          </div>
+
           <label class="dna-field">Estilo visual
             <input type="text" id="dna-estilo" placeholder="Ex: minimalista moderno, tipografia forte, muito respiro">
-          </label>
-          <label class="dna-field">Paleta preferida
-            <select id="dna-paleta">
-              <option value="">—</option>
-              <option value="Dark">Dark</option>
-              <option value="Blue">Blue</option>
-              <option value="White">White</option>
-            </select>
           </label>
           <label class="dna-field">Referências visuais <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional)</span>
             <textarea id="dna-referencias" rows="2" placeholder="Ex: contraste alto, tipografia serifada nos títulos"></textarea>
@@ -3033,8 +3123,19 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       document.getElementById('dna-sofisticacao').value= voz.sofisticacao || '';
       document.getElementById('dna-linguagem').value   = voz.linguagem || '';
       document.getElementById('dna-estilo').value      = vis.estilo || '';
-      document.getElementById('dna-paleta').value      = vis.paleta_preferida || '';
       document.getElementById('dna-referencias').value = vis.referencias || '';
+      document.getElementById('dna-url').value          = bp.fontes_enriquecimento?.site || '';
+      const cor1 = vis.cor_primaria   || '#c8a96e';
+      const cor2 = vis.cor_secundaria || '#4d8fda';
+      const cor3 = vis.cor_terciaria  || '#f0f0f0';
+      document.getElementById('dna-cor1-picker').value = cor1;
+      document.getElementById('dna-cor1-hex').value    = cor1;
+      document.getElementById('dna-cor2-picker').value = cor2;
+      document.getElementById('dna-cor2-hex').value    = cor2;
+      document.getElementById('dna-cor3-picker').value = cor3;
+      document.getElementById('dna-cor3-hex').value    = cor3;
+      document.getElementById('dnaAnalyzeSuggestions').style.display = 'none';
+      document.getElementById('dnaAnalyzeSuggestions').innerHTML = '';
 
       _dnaTagsBuffer.areas  = Array.isArray(bp.areas_atuacao) ? [...bp.areas_atuacao] : [];
       _dnaTagsBuffer.cargo  = Array.isArray(pub.cargo)         ? [...pub.cargo]        : [];
@@ -3126,9 +3227,14 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
           evitar:        [..._dnaTagsBuffer.evitar],
         },
         visual: {
-          estilo:            document.getElementById('dna-estilo').value.trim(),
-          paleta_preferida:  document.getElementById('dna-paleta').value,
-          referencias:       document.getElementById('dna-referencias').value.trim(),
+          estilo:          document.getElementById('dna-estilo').value.trim(),
+          cor_primaria:    document.getElementById('dna-cor1-hex').value.trim() || '#c8a96e',
+          cor_secundaria:  document.getElementById('dna-cor2-hex').value.trim() || '#4d8fda',
+          cor_terciaria:   document.getElementById('dna-cor3-hex').value.trim() || '#f0f0f0',
+          referencias:     document.getElementById('dna-referencias').value.trim(),
+        },
+        fontes_enriquecimento: {
+          site: document.getElementById('dna-url').value.trim(),
         },
       };
 
@@ -3186,6 +3292,109 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
     }
 
     updateDnaBanner();
+
+    // ── Color picker sync ──────────────────────────────────
+    function syncColorPicker(pickerId, hexVal) {
+      if (/^#[0-9a-fA-F]{6}$/.test(hexVal.trim())) {
+        document.getElementById(pickerId).value = hexVal.trim();
+      }
+    }
+
+    // ── Analyze brand by URL ───────────────────────────────
+    async function doAnalyzeBrand() {
+      const url = getVercelUrl();
+      if (!url) return showToast('Configure a URL do Vercel nas configurações (⚙ API).', 'error');
+
+      const siteUrl = document.getElementById('dna-url').value.trim();
+      if (!siteUrl) { showToast('Informe a URL do site para analisar.', 'error'); return; }
+
+      const btn   = document.getElementById('dnaAnalyzeBtn');
+      const box   = document.getElementById('dnaAnalyzeSuggestions');
+      btn.disabled = true;
+      btn.textContent = '⏳ Analisando…';
+      box.style.display = 'none';
+      box.innerHTML = '';
+
+      try {
+        const r = await fetch(`${url}/api/analyze-brand`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ site_url: siteUrl }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha na análise.');
+        renderBrandSuggestions(d.suggestions);
+        showToast('Análise concluída. Revise as sugestões e aplique as que quiser.', 'success');
+      } catch(e) {
+        showToast(`Erro na análise: ${e.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '🔍 Analisar';
+      }
+    }
+
+    function renderBrandSuggestions(s) {
+      const box = document.getElementById('dnaAnalyzeSuggestions');
+      if (!s || !Object.keys(s).length) {
+        box.innerHTML = '<div style="font-size:0.8rem;color:var(--muted)">Não foi possível extrair sugestões desta URL.</div>';
+        box.style.display = 'block';
+        return;
+      }
+
+      const FIELD_MAP = [
+        { key: 'nome',          label: 'Nome',           step: 1, apply: v => { document.getElementById('dna-nome').value = v; } },
+        { key: 'descricao',     label: 'Descrição',      step: 1, apply: v => { document.getElementById('dna-descricao').value = v; } },
+        { key: 'proposta_valor',label: 'Proposta valor', step: 1, apply: v => { document.getElementById('dna-proposta').value = v; } },
+        { key: 'dor_principal', label: 'Dor do público', step: 2, apply: v => { document.getElementById('dna-dor').value = v; } },
+        { key: 'estilo',        label: 'Estilo visual',  step: 4, apply: v => { document.getElementById('dna-estilo').value = v; } },
+        { key: 'cor_primaria',  label: 'Cor primária',   step: 4, isColor: true, apply: v => { setColor(1, v); } },
+        { key: 'cor_secundaria',label: 'Cor secundária', step: 4, isColor: true, apply: v => { setColor(2, v); } },
+        { key: 'cor_terciaria', label: 'Cor terciária',  step: 4, isColor: true, apply: v => { setColor(3, v); } },
+      ];
+
+      function setColor(n, v) {
+        document.getElementById(`dna-cor${n}-picker`).value = v;
+        document.getElementById(`dna-cor${n}-hex`).value    = v;
+      }
+
+      let rows = '';
+      FIELD_MAP.forEach(f => {
+        if (!s[f.key]) return;
+        const swatch = f.isColor
+          ? `<span class="dna-suggest-color-swatch" style="background:${s[f.key]}"></span>`
+          : '';
+        rows += `
+          <div class="dna-suggest-item">
+            <span class="dna-suggest-label">${f.label}</span>
+            ${swatch}
+            <span class="dna-suggest-value">${escHtml(s[f.key])}</span>
+            <button class="dna-suggest-apply" data-field="${f.key}" onclick="dnaApplySuggestion(this)">Aplicar</button>
+          </div>`;
+      });
+
+      // Armazena as sugestões no scope para poder aplicar por campo
+      window._dnaSuggestions = s;
+      window._dnaFieldMap    = FIELD_MAP;
+
+      box.innerHTML = rows
+        ? `<div class="dna-suggest-block"><div class="dna-suggest-title">✦ Sugestões extraídas da URL</div>${rows}</div>`
+        : '<div style="font-size:0.8rem;color:var(--muted)">Nenhuma sugestão identificada.</div>';
+      box.style.display = 'block';
+    }
+
+    function dnaApplySuggestion(btn) {
+      const key  = btn.dataset.field;
+      const s    = window._dnaSuggestions || {};
+      const map  = window._dnaFieldMap    || [];
+      const f    = map.find(x => x.key === key);
+      if (f && s[key]) {
+        f.apply(s[key]);
+        if (f.step && f.step !== dnaCurrentStep) dnaGoStep(f.step);
+      }
+      btn.textContent = '✓ Aplicado';
+      btn.classList.add('applied');
+      btn.disabled = true;
+    }
 
     // Init
     loadVercelUrl();

@@ -36,6 +36,8 @@ export function brandContextBlock(bp) {
     lines.push(`- EVITAR: ${voz.evitar.join(' · ')}`);
 
   if (visual.estilo) lines.push(`- Estilo visual: ${visual.estilo}`);
+  const cores = [visual.cor_primaria, visual.cor_secundaria, visual.cor_terciaria].filter(Boolean);
+  if (cores.length) lines.push(`- Paleta de cores da marca: ${cores.join(' · ')}`);
 
   lines.push('');
   lines.push('DIRETRIZ: gere conteúdo que SÓ essa marca poderia assinar. Se o output couber em qualquer consultoria do mesmo nicho, reescreva.');
