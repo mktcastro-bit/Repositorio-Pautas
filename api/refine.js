@@ -15,19 +15,16 @@
  * Variável necessária: ANTHROPIC_API_KEY
  */
 
+import { brandContextBlock } from './_lib/brand.js';
+
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
 
-const SYSTEM_PROMPT = `Você é um estrategista sênior de marketing e branding da Nexum360.
-
-Tom de voz da Nexum360:
-- Direto, inteligente e provocativo
-- Sem clichês e sem frases motivacionais vazias
-- Linguagem de negócio, foco em clareza, profundidade e impacto
-- Público-alvo: empresários, gestores e decisores
+const SYSTEM_PROMPT = `Você é um estrategista sênior de marketing e branding.
 
 Você receberá os dados de uma pauta existente e uma instrução de alteração.
 Aplique APENAS o que foi solicitado. Mantenha o restante intacto.
+Respeite sempre o DNA da marca fornecido no contexto.
 
 RESPONDA SEMPRE como JSON válido, sem markdown, sem explicações extras.`;
 
@@ -40,12 +37,15 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no Vercel.' });
   }
 
-  const { pauta, instrucao } = req.body || {};
+  const { pauta, instrucao, brand_profile = null } = req.body || {};
   if (!pauta || !instrucao) {
     return res.status(400).json({ error: 'pauta e instrucao são obrigatórios.' });
   }
 
-  const userPrompt = `PAUTA ATUAL:
+  const brandBlock = brandContextBlock(brand_profile);
+
+  const userPrompt = `${brandBlock}
+PAUTA ATUAL:
 Tema: ${pauta.tema || ''}
 Gancho: ${pauta.gancho || ''}
 Pilar: ${pauta.pilar || ''}

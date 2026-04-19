@@ -7,10 +7,12 @@
  * Retorna: { success: true, ideas: [{ titulo, subtitulo }] }
  */
 
+import { brandContextBlock } from './_lib/brand.js';
+
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
 
-const SYSTEM_PROMPT = `Você é um estrategista sênior de conteúdo da Nexum360, especialista em posicionamento de marca, marketing e inteligência artificial aplicada a negócios.
+const SYSTEM_PROMPT = `Você é um estrategista sênior de conteúdo, especialista em posicionamento de marca, marketing e inteligência artificial aplicada a negócios.
 
 TOM DE VOZ:
 - Direto, inteligente e provocativo
@@ -35,18 +37,23 @@ export default async function handler(req, res) {
     variante         = 'Dark',
     sugestao         = '',
     temas_existentes = [],
+    brand_profile    = null,
   } = req.body || {};
+
+  const brandBlock = brandContextBlock(brand_profile);
+  const marcaNome  = brand_profile?.identidade?.nome || 'a marca';
 
   const sugestaoTxt = sugestao
     ? `O usuário sugeriu a seguinte direção: "${sugestao}". Use como inspiração, mas explore variações.`
-    : 'Sugira ideias variadas e relevantes para o posicionamento atual da Nexum360.';
+    : `Sugira ideias variadas e relevantes para o posicionamento atual de ${marcaNome}.`;
 
   const existentesTxt = temas_existentes.length
     ? `\nCONTEÚDO JÁ EXISTENTE NO REPOSITÓRIO — não repita nem faça variações próximas destes temas:\n${temas_existentes.map(t => `- "${t}"`).join('\n')}\n`
     : '';
 
-  const userPrompt = `Gere 6 ideias de conteúdo distintas para a Nexum360.
+  const userPrompt = `Gere 6 ideias de conteúdo distintas para ${marcaNome}.
 
+${brandBlock}
 PARÂMETROS:
 - Pilar: ${pilar}
 - Rede Social: ${rede_social}

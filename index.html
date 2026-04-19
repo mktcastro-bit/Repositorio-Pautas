@@ -584,6 +584,138 @@
     .modal-save { background: var(--accent); border: none; color: #0a0a0a; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 9px 26px; border-radius: 6px; cursor: pointer; }
     .modal-save:hover { opacity: 0.85; }
 
+    /* ── DNA BANNER ── */
+    .dna-banner {
+      background: linear-gradient(90deg, rgba(200,169,110,0.08), rgba(77,143,218,0.06));
+      border-bottom: 1px solid var(--border);
+      padding: 14px 48px;
+    }
+    .dna-banner-content {
+      display: flex; align-items: center; gap: 16px; max-width: 1400px; margin: 0 auto;
+    }
+    .dna-banner-icon { font-size: 1.6rem; }
+    .dna-banner-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+    .dna-banner-sub { font-size: 0.76rem; color: var(--muted); margin-top: 2px; }
+    .dna-banner-btn {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 9px 18px; border-radius: 6px; cursor: pointer; margin-left: auto;
+    }
+    .dna-banner-btn:hover { opacity: 0.85; }
+    .dna-banner-close {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: 0.85rem;
+    }
+    .dna-banner-close:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── DNA MODAL ── */
+    .dna-modal { background: var(--s2); border: 1px solid var(--border); border-radius: 16px; padding: 0; width: 100%; max-width: 820px; display: flex; flex-direction: column; max-height: 92vh; }
+    .dna-header {
+      padding: 22px 32px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 14px;
+    }
+    .dna-header-title { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: var(--text); }
+    .dna-header-sub { font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+    .dna-close {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 0.9rem; margin-left: auto;
+    }
+    .dna-close:hover { color: var(--text); border-color: var(--muted); }
+
+    .dna-steps { display: flex; gap: 4px; padding: 14px 32px 0; border-bottom: 1px solid var(--border); }
+    .dna-step-tab {
+      flex: 1; background: transparent; border: none; color: var(--muted);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 10px 8px 14px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.18s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .dna-step-tab:hover { color: var(--text); }
+    .dna-step-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .dna-step-tab .dna-step-num {
+      width: 20px; height: 20px; border-radius: 50%; background: var(--s1);
+      display: inline-flex; align-items: center; justify-content: center; font-size: 0.7rem;
+    }
+    .dna-step-tab.active .dna-step-num { background: var(--accent); color: #0a0a0a; }
+
+    .dna-body { padding: 26px 32px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 16px; }
+    .dna-pane { display: none; flex-direction: column; gap: 14px; }
+    .dna-pane.active { display: flex; }
+    .dna-section-title { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .dna-help { font-size: 0.76rem; color: var(--muted); line-height: 1.55; margin-bottom: 4px; }
+    .dna-field { display: flex; flex-direction: column; gap: 5px; font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .dna-field input, .dna-field select, .dna-field textarea {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.88rem;
+      padding: 9px 13px; border-radius: 6px; outline: none; transition: border-color 0.2s;
+      text-transform: none; letter-spacing: normal;
+    }
+    .dna-field input:focus, .dna-field select:focus, .dna-field textarea:focus { border-color: var(--accent); }
+    .dna-field textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+    .dna-row { display: flex; gap: 14px; }
+    .dna-row .dna-field { flex: 1; }
+    .dna-chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dna-chip {
+      background: var(--s1); border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.74rem; padding: 6px 12px; border-radius: 14px; cursor: pointer; transition: all 0.15s;
+      text-transform: none; letter-spacing: normal;
+    }
+    .dna-chip:hover { color: var(--text); border-color: var(--muted); }
+    .dna-chip.active { background: rgba(200,169,110,0.15); border-color: var(--accent); color: var(--accent); font-weight: 700; }
+    .dna-tags-input {
+      display: flex; flex-wrap: wrap; gap: 6px; background: var(--s1);
+      border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; min-height: 40px;
+    }
+    .dna-tag {
+      background: rgba(200,169,110,0.12); border: 1px solid rgba(200,169,110,0.3);
+      color: var(--accent); font-size: 0.76rem; padding: 3px 9px; border-radius: 11px;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .dna-tag button { background: transparent; border: none; color: var(--accent); cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0; }
+    .dna-tags-input input {
+      background: transparent; border: none; outline: none; color: var(--text);
+      font-size: 0.85rem; flex: 1; min-width: 120px; padding: 4px;
+    }
+
+    .dna-footer {
+      padding: 18px 32px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .dna-footer-hint { font-size: 0.72rem; color: var(--muted); }
+    .dna-footer-actions { display: flex; gap: 10px; margin-left: auto; }
+    .dna-btn-secondary {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.78rem; font-weight: 600; padding: 9px 18px; border-radius: 6px; cursor: pointer;
+    }
+    .dna-btn-secondary:hover { border-color: var(--muted); color: var(--text); }
+    .dna-btn-primary {
+      background: var(--accent); border: none; color: #0a0a0a;
+      font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 9px 22px; border-radius: 6px; cursor: pointer;
+    }
+    .dna-btn-primary:hover { opacity: 0.85; }
+    .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── DNA SUMMARY (no workflow) ── */
+    .dna-summary {
+      background: linear-gradient(90deg, rgba(200,169,110,0.08), transparent);
+      border: 1px solid rgba(200,169,110,0.25); border-radius: 8px;
+      padding: 10px 14px; font-size: 0.78rem; color: var(--text);
+      display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+    }
+    .dna-summary-icon { font-size: 1rem; }
+    .dna-summary-text { flex: 1; color: var(--muted); line-height: 1.45; }
+    .dna-summary-text strong { color: var(--accent); font-weight: 700; }
+    .dna-summary-edit {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.7rem; padding: 4px 10px; border-radius: 5px; cursor: pointer;
+    }
+    .dna-summary-edit:hover { border-color: var(--accent); color: var(--accent); }
+    .dna-summary.missing {
+      background: rgba(232,184,75,0.08);
+      border-color: rgba(232,184,75,0.3);
+    }
+    .dna-summary.missing .dna-summary-text strong { color: var(--yellow); }
+
 
     /* PICAH LEGEND */
     .picah-legend { display: flex; gap: 16px; padding: 0 48px 18px; font-size: 0.7rem; color: var(--muted); flex-wrap: wrap; }
@@ -765,10 +897,24 @@
         <button class="view-btn" id="btnCalendario" onclick="setView('calendario')">Calendário</button>
       </div>
       <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
+      <button class="settings-btn" id="dnaBtn" onclick="openBrandModal()" style="border-color:var(--border)">🧬 DNA</button>
       <button class="gen-btn" onclick="openWorkflow()">✦ Gerar</button>
       <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
     </div>
   </header>
+
+  <!-- DNA BANNER -->
+  <div id="dnaBanner" class="dna-banner" style="display:none">
+    <div class="dna-banner-content">
+      <div class="dna-banner-icon">🧬</div>
+      <div>
+        <div class="dna-banner-title">Configure o DNA da sua marca</div>
+        <div class="dna-banner-sub">Sem DNA configurado, o conteúdo gerado fica genérico. Configure uma vez e toda geração herda a identidade.</div>
+      </div>
+      <button class="dna-banner-btn" onclick="openBrandModal()">Configurar DNA</button>
+      <button class="dna-banner-close" onclick="dismissDnaBanner()" title="Dispensar">✕</button>
+    </div>
+  </div>
 
   <!-- SETTINGS BAR -->
   <div class="settings-bar" id="settingsBar">
@@ -836,6 +982,136 @@
       <button class="cal-nav-btn" onclick="calNav(1)">Próximo →</button>
     </div>
     <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <!-- DNA DA MARCA MODAL -->
+  <div class="modal-overlay" id="brandOverlay" onclick="closeModalOutside(event)">
+    <div class="dna-modal">
+      <div class="dna-header">
+        <div>
+          <div class="dna-header-title">🧬 DNA da Marca</div>
+          <div class="dna-header-sub">Configure uma vez — toda geração herda a identidade</div>
+        </div>
+        <button class="dna-close" onclick="closeModal('brandOverlay')">✕</button>
+      </div>
+      <div class="dna-steps">
+        <button class="dna-step-tab active" data-step="1" onclick="dnaGoStep(1)"><span class="dna-step-num">1</span> Identidade</button>
+        <button class="dna-step-tab" data-step="2" onclick="dnaGoStep(2)"><span class="dna-step-num">2</span> Público</button>
+        <button class="dna-step-tab" data-step="3" onclick="dnaGoStep(3)"><span class="dna-step-num">3</span> Voz</button>
+        <button class="dna-step-tab" data-step="4" onclick="dnaGoStep(4)"><span class="dna-step-num">4</span> Visual</button>
+      </div>
+      <div class="dna-body" id="dnaBody">
+        <!-- PASSO 1 -->
+        <div class="dna-pane active" data-pane="1">
+          <div class="dna-help">Como a marca se apresenta. Isso define a base de tudo que a IA vai escrever.</div>
+          <label class="dna-field">Nome da marca
+            <input type="text" id="dna-nome" placeholder="Ex: Nexum360">
+          </label>
+          <label class="dna-field">Descrição curta
+            <textarea id="dna-descricao" rows="2" placeholder="Ex: Consultoria de marca, marketing e IA para empresas"></textarea>
+          </label>
+          <label class="dna-field">Proposta de valor
+            <textarea id="dna-proposta" rows="2" placeholder="Ex: Transformamos estratégia em crescimento mensurável"></textarea>
+          </label>
+          <div class="dna-field">Áreas de atuação <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(viram os pilares de conteúdo — Enter para adicionar)</span>
+            <div class="dna-tags-input" id="dna-areas-box" onclick="document.getElementById('dna-areas-input').focus()">
+              <input type="text" id="dna-areas-input" placeholder="Digite e pressione Enter">
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 2 -->
+        <div class="dna-pane" data-pane="2">
+          <div class="dna-help">Para quem a marca fala. Quanto mais específico, menos genérico o conteúdo fica.</div>
+          <div class="dna-row">
+            <label class="dna-field">Perfil
+              <select id="dna-perfil">
+                <option value="">—</option>
+                <option>B2B</option>
+                <option>B2C</option>
+                <option>B2B e B2C</option>
+              </select>
+            </label>
+            <label class="dna-field">Maturidade
+              <select id="dna-maturidade">
+                <option value="">—</option>
+                <option value="iniciante">Iniciante</option>
+                <option value="intermediário">Intermediário</option>
+                <option value="avançado">Avançado</option>
+              </select>
+            </label>
+          </div>
+          <div class="dna-field">Cargo / papel <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(Enter para adicionar)</span>
+            <div class="dna-tags-input" id="dna-cargo-box" onclick="document.getElementById('dna-cargo-input').focus()">
+              <input type="text" id="dna-cargo-input" placeholder="empresários, gestores, decisores…">
+            </div>
+          </div>
+          <label class="dna-field">Dor principal
+            <textarea id="dna-dor" rows="2" placeholder="Ex: crescer sem depender de sorte ou achismo"></textarea>
+          </label>
+        </div>
+
+        <!-- PASSO 3 -->
+        <div class="dna-pane" data-pane="3">
+          <div class="dna-help">O jeito de falar. Inclua o que EVITAR — guardrails poderosos contra output genérico.</div>
+          <div class="dna-field">Tom de voz <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(múltipla escolha)</span>
+            <div class="dna-chip-group" id="dna-tom-chips"></div>
+          </div>
+          <div class="dna-row">
+            <label class="dna-field">Sofisticação
+              <select id="dna-sofisticacao">
+                <option value="">—</option>
+                <option value="premium">Premium</option>
+                <option value="popular">Popular</option>
+                <option value="técnica">Técnica</option>
+              </select>
+            </label>
+            <label class="dna-field">Linguagem
+              <select id="dna-linguagem">
+                <option value="">—</option>
+                <option value="direta">Direta</option>
+                <option value="emocional">Emocional</option>
+                <option value="educativa">Educativa</option>
+                <option value="provocativa">Provocativa</option>
+              </select>
+            </label>
+          </div>
+          <div class="dna-field">Evitar <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(Enter — clichês, emojis, palavras proibidas)</span>
+            <div class="dna-tags-input" id="dna-evitar-box" onclick="document.getElementById('dna-evitar-input').focus()">
+              <input type="text" id="dna-evitar-input" placeholder="clichês motivacionais, linguagem de influencer…">
+            </div>
+          </div>
+        </div>
+
+        <!-- PASSO 4 -->
+        <div class="dna-pane" data-pane="4">
+          <div class="dna-help">Estética. Alimenta futuras variações visuais e orienta a geração de artes.</div>
+          <label class="dna-field">Estilo visual
+            <input type="text" id="dna-estilo" placeholder="Ex: minimalista moderno, tipografia forte, muito respiro">
+          </label>
+          <label class="dna-field">Paleta preferida
+            <select id="dna-paleta">
+              <option value="">—</option>
+              <option value="Dark">Dark</option>
+              <option value="Blue">Blue</option>
+              <option value="White">White</option>
+            </select>
+          </label>
+          <label class="dna-field">Referências visuais <span style="opacity:0.5;font-size:0.58rem;letter-spacing:0.06em">(opcional)</span>
+            <textarea id="dna-referencias" rows="2" placeholder="Ex: contraste alto, tipografia serifada nos títulos"></textarea>
+          </label>
+        </div>
+      </div>
+      <div class="dna-footer">
+        <div class="dna-footer-hint" id="dnaFooterHint">Passo 1 de 4 — Identidade</div>
+        <div class="dna-footer-actions">
+          <button class="dna-btn-secondary" id="dnaPrevBtn" onclick="dnaGoStep(dnaCurrentStep-1)" style="display:none">← Anterior</button>
+          <button class="dna-btn-secondary" id="dnaSkipBtn" onclick="closeModal('brandOverlay')">Fechar sem salvar</button>
+          <button class="dna-btn-primary" id="dnaNextBtn" onclick="dnaGoStep(dnaCurrentStep+1)">Próximo →</button>
+          <button class="dna-btn-primary" id="dnaSaveBtn" onclick="saveBrandProfile()" style="display:none">Salvar DNA</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- WORKFLOW OVERLAY -->
@@ -1247,7 +1523,7 @@
         const r = await fetch(`${url}/api/refine`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pauta: p, instrucao }),
+          body: JSON.stringify({ pauta: p, instrucao, brand_profile: brandProfile }),
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error);
@@ -1565,6 +1841,7 @@
       if (e.target.id==='publishOverlay')  closeModal('publishOverlay');
       if (e.target.id==='generateOverlay') closeModal('generateOverlay');
       if (e.target.id==='workflowOverlay')  closeModal('workflowOverlay');
+      if (e.target.id==='brandOverlay')     closeModal('brandOverlay');
     }
 
     function savePauta() {
@@ -2016,19 +2293,16 @@
 
     function wfRenderStep1() {
       wfSetStep(1);
+      const pilares = getPilares();
+      const pilarOpts = pilares.map((p,i) => `<option${i===0?' selected':''}>${p}</option>`).join('');
       document.getElementById('workflowBody').innerHTML = `
+        <div style="padding:0 2px">${brandSummaryHtml()}</div>
         <div class="wf-two-col">
           <div class="wf-left">
             <div style="font-size:0.62rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);font-weight:700">Configurações</div>
 
             <label class="wf-field-label">Pilar
-              <select class="wf-select" id="wf-pilar">
-                <option>Estratégia de Marca</option>
-                <option>Marketing e Performance</option>
-                <option selected>Tecnologia e IA</option>
-                <option>Mentalidade e Gestão Empresarial</option>
-                <option>Bastidores e Diagnóstico</option>
-              </select>
+              <select class="wf-select" id="wf-pilar">${pilarOpts}</select>
             </label>
             <label class="wf-field-label">Rede Social
               <select class="wf-select" id="wf-rede">
@@ -2090,6 +2364,7 @@
         pub_formato:        wfPubFormat,
         sugestao:           document.getElementById('wf-sugestao').value.trim(),
         temas_existentes:   pautas.map(p => p.tema).filter(Boolean),
+        brand_profile:      brandProfile,
       };
 
       const area = document.getElementById('wf-ideas-area');
@@ -2156,6 +2431,7 @@
       const params = {
         ...wfGenParams,
         ideia_selecionada: window._wfSelectedIdea || null,
+        brand_profile:     brandProfile,
       };
 
       const area = document.getElementById('wf-ideas-area');
@@ -2209,7 +2485,7 @@
         const r = await fetch(`${url}/api/refine`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ pauta: wfGenResult, instrucao }),
+          body:    JSON.stringify({ pauta: wfGenResult, instrucao, brand_profile: brandProfile }),
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error);
@@ -2695,6 +2971,221 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         showToast('Abriu Claude.ai. Cole o prompt manualmente.', '');
       });
     }
+
+    // ═══════════════════════════════════════════════════════
+    // DNA DA MARCA
+    // ═══════════════════════════════════════════════════════
+    const BRAND_KEY         = 'nexum360_brand_profile_v1';
+    const BRAND_BANNER_KEY  = 'nexum360_brand_banner_dismissed';
+    const TOM_OPCOES        = ['direto','provocativo','inteligente','inspirador','educativo','humorado','formal','descontraído','técnico','emocional'];
+
+    let brandProfile  = loadBrandProfile();
+    let dnaCurrentStep = 1;
+    let _dnaTagsBuffer = { areas: [], cargo: [], evitar: [] };
+
+    function loadBrandProfile() {
+      try {
+        const raw = localStorage.getItem(BRAND_KEY);
+        if (!raw) return null;
+        const bp = JSON.parse(raw);
+        return bp && typeof bp === 'object' ? bp : null;
+      } catch { return null; }
+    }
+
+    function hasBrandProfile() {
+      return !!(brandProfile && brandProfile.identidade && brandProfile.identidade.nome);
+    }
+
+    function updateDnaBanner() {
+      const banner   = document.getElementById('dnaBanner');
+      const dismissed = localStorage.getItem(BRAND_BANNER_KEY) === '1';
+      banner.style.display = (!hasBrandProfile() && !dismissed) ? 'block' : 'none';
+      const btn = document.getElementById('dnaBtn');
+      if (btn) btn.style.color = hasBrandProfile() ? 'var(--accent)' : '';
+    }
+
+    function dismissDnaBanner() {
+      localStorage.setItem(BRAND_BANNER_KEY, '1');
+      updateDnaBanner();
+    }
+
+    function openBrandModal() {
+      // popula tom chips
+      const tomBox = document.getElementById('dna-tom-chips');
+      const tomSel = new Set((brandProfile?.voz?.tom) || []);
+      tomBox.innerHTML = TOM_OPCOES.map(t =>
+        `<button class="dna-chip${tomSel.has(t)?' active':''}" onclick="dnaToggleChip(this)" data-val="${t}">${t}</button>`
+      ).join('');
+
+      // preenche campos
+      const bp = brandProfile || {};
+      const ident = bp.identidade || {};
+      const pub   = bp.publico    || {};
+      const voz   = bp.voz        || {};
+      const vis   = bp.visual     || {};
+
+      document.getElementById('dna-nome').value        = ident.nome || '';
+      document.getElementById('dna-descricao').value   = ident.descricao || '';
+      document.getElementById('dna-proposta').value    = ident.proposta_valor || '';
+      document.getElementById('dna-perfil').value      = pub.perfil || '';
+      document.getElementById('dna-maturidade').value  = pub.maturidade || '';
+      document.getElementById('dna-dor').value         = pub.dor_principal || '';
+      document.getElementById('dna-sofisticacao').value= voz.sofisticacao || '';
+      document.getElementById('dna-linguagem').value   = voz.linguagem || '';
+      document.getElementById('dna-estilo').value      = vis.estilo || '';
+      document.getElementById('dna-paleta').value      = vis.paleta_preferida || '';
+      document.getElementById('dna-referencias').value = vis.referencias || '';
+
+      _dnaTagsBuffer.areas  = Array.isArray(bp.areas_atuacao) ? [...bp.areas_atuacao] : [];
+      _dnaTagsBuffer.cargo  = Array.isArray(pub.cargo)         ? [...pub.cargo]        : [];
+      _dnaTagsBuffer.evitar = Array.isArray(voz.evitar)        ? [...voz.evitar]       : [];
+      dnaRenderTags('areas');  dnaRenderTags('cargo');  dnaRenderTags('evitar');
+
+      dnaGoStep(1);
+      document.getElementById('brandOverlay').classList.add('open');
+    }
+
+    function dnaGoStep(n) {
+      n = Math.max(1, Math.min(4, n));
+      dnaCurrentStep = n;
+      document.querySelectorAll('.dna-step-tab').forEach(t => t.classList.toggle('active', Number(t.dataset.step) === n));
+      document.querySelectorAll('.dna-pane').forEach(p => p.classList.toggle('active', Number(p.dataset.pane) === n));
+      const labels = ['Identidade','Público','Voz','Visual'];
+      document.getElementById('dnaFooterHint').textContent = `Passo ${n} de 4 — ${labels[n-1]}`;
+      document.getElementById('dnaPrevBtn').style.display = n > 1 ? '' : 'none';
+      document.getElementById('dnaNextBtn').style.display = n < 4 ? '' : 'none';
+      document.getElementById('dnaSaveBtn').style.display = n === 4 ? '' : 'none';
+    }
+
+    function dnaToggleChip(btn) { btn.classList.toggle('active'); }
+
+    // Tags genéricas (areas, cargo, evitar)
+    function dnaRenderTags(kind) {
+      const box    = document.getElementById(`dna-${kind}-box`);
+      const input  = document.getElementById(`dna-${kind}-input`);
+      const items  = _dnaTagsBuffer[kind];
+      box.querySelectorAll('.dna-tag').forEach(el => el.remove());
+      items.forEach((val, i) => {
+        const tag = document.createElement('span');
+        tag.className = 'dna-tag';
+        tag.innerHTML = `${val}<button type="button" onclick="dnaRemoveTag('${kind}',${i})">✕</button>`;
+        box.insertBefore(tag, input);
+      });
+    }
+    function dnaAddTag(kind, val) {
+      val = (val||'').trim().replace(/^,|,$/g,'').trim();
+      if (!val) return;
+      if (!_dnaTagsBuffer[kind].includes(val)) _dnaTagsBuffer[kind].push(val);
+      dnaRenderTags(kind);
+    }
+    function dnaRemoveTag(kind, i) {
+      _dnaTagsBuffer[kind].splice(i,1);
+      dnaRenderTags(kind);
+    }
+    ['areas','cargo','evitar'].forEach(kind => {
+      document.addEventListener('keydown', e => {
+        if (e.target.id !== `dna-${kind}-input`) return;
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          dnaAddTag(kind, e.target.value);
+          e.target.value = '';
+        } else if (e.key === 'Backspace' && !e.target.value && _dnaTagsBuffer[kind].length) {
+          dnaRemoveTag(kind, _dnaTagsBuffer[kind].length - 1);
+        }
+      });
+    });
+
+    function saveBrandProfile() {
+      // Flush último texto sem Enter
+      ['areas','cargo','evitar'].forEach(k => {
+        const inp = document.getElementById(`dna-${k}-input`);
+        if (inp?.value.trim()) { dnaAddTag(k, inp.value); inp.value = ''; }
+      });
+
+      const tomSelected = [...document.querySelectorAll('#dna-tom-chips .dna-chip.active')].map(b => b.dataset.val);
+
+      const bp = {
+        versao: 1,
+        atualizado_em: new Date().toISOString(),
+        identidade: {
+          nome:           document.getElementById('dna-nome').value.trim(),
+          descricao:      document.getElementById('dna-descricao').value.trim(),
+          proposta_valor: document.getElementById('dna-proposta').value.trim(),
+        },
+        areas_atuacao: [..._dnaTagsBuffer.areas],
+        publico: {
+          perfil:        document.getElementById('dna-perfil').value,
+          cargo:         [..._dnaTagsBuffer.cargo],
+          maturidade:    document.getElementById('dna-maturidade').value,
+          dor_principal: document.getElementById('dna-dor').value.trim(),
+        },
+        voz: {
+          tom:           tomSelected,
+          sofisticacao:  document.getElementById('dna-sofisticacao').value,
+          linguagem:     document.getElementById('dna-linguagem').value,
+          evitar:        [..._dnaTagsBuffer.evitar],
+        },
+        visual: {
+          estilo:            document.getElementById('dna-estilo').value.trim(),
+          paleta_preferida:  document.getElementById('dna-paleta').value,
+          referencias:       document.getElementById('dna-referencias').value.trim(),
+        },
+      };
+
+      if (!bp.identidade.nome) {
+        showToast('Informe ao menos o nome da marca (Passo 1).', 'error');
+        dnaGoStep(1);
+        return;
+      }
+
+      brandProfile = bp;
+      localStorage.setItem(BRAND_KEY, JSON.stringify(bp));
+      updateDnaBanner();
+      applyBrandToPilarFilters();
+      closeModal('brandOverlay');
+      showToast('DNA da marca salvo. Próximas gerações usarão essa identidade.', 'success');
+    }
+
+    // Resumo do DNA exibido no topo do workflow
+    function brandSummaryHtml() {
+      if (!hasBrandProfile()) {
+        return `<div class="dna-summary missing">
+          <span class="dna-summary-icon">⚠️</span>
+          <span class="dna-summary-text"><strong>DNA da marca não configurado.</strong> O conteúdo ficará genérico.</span>
+          <button class="dna-summary-edit" onclick="openBrandModal()">Configurar</button>
+        </div>`;
+      }
+      const bp = brandProfile;
+      const parts = [];
+      parts.push(`<strong>${escHtml(bp.identidade.nome)}</strong>`);
+      if (bp.voz?.tom?.length)    parts.push(`tom ${escHtml(bp.voz.tom.slice(0,3).join('/'))}`);
+      if (bp.publico?.perfil)     parts.push(escHtml(bp.publico.perfil));
+      if (bp.voz?.sofisticacao)   parts.push(escHtml(bp.voz.sofisticacao));
+      if (bp.visual?.estilo)      parts.push(`visual ${escHtml(bp.visual.estilo.split(' ').slice(0,2).join(' '))}`);
+      return `<div class="dna-summary">
+        <span class="dna-summary-icon">🧬</span>
+        <span class="dna-summary-text">Gerando como ${parts.join(' · ')}</span>
+        <button class="dna-summary-edit" onclick="openBrandModal()">Editar</button>
+      </div>`;
+    }
+
+    // Pilares dinâmicos (se o DNA tiver areas_atuacao, usa-as; senão mantém defaults)
+    const DEFAULT_PILARES = ['Estratégia de Marca','Marketing e Performance','Tecnologia e IA','Mentalidade e Gestão Empresarial','Bastidores e Diagnóstico'];
+    function getPilares() {
+      const ar = brandProfile?.areas_atuacao;
+      return (Array.isArray(ar) && ar.length) ? ar : DEFAULT_PILARES;
+    }
+
+    function applyBrandToPilarFilters() {
+      // Atualiza o <select id="wf-pilar"> se estiver aberto
+      const sel = document.getElementById('wf-pilar');
+      if (sel) {
+        const current = sel.value;
+        sel.innerHTML = getPilares().map(p => `<option${p===current?' selected':''}>${p}</option>`).join('');
+      }
+    }
+
+    updateDnaBanner();
 
     // Init
     loadVercelUrl();

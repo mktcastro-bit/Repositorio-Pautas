@@ -19,6 +19,8 @@
  * Variável necessária: ANTHROPIC_API_KEY
  */
 
+import { brandContextBlock } from './_lib/brand.js';
+
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
 
@@ -90,9 +92,10 @@ export default async function handler(req, res) {
     ideia_selecionada = null,
     tema              = '',
     gancho            = '',
+    brand_profile     = null,
   } = req.body || {};
 
-  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho });
+  const userPrompt = buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho, brand_profile });
 
   try {
     const r = await fetch(ANTHROPIC_API, {
@@ -139,9 +142,10 @@ const PUB_FORMAT_LABELS = {
   reels: 'Reels (vídeo curto — forneça roteiro/script e legenda dinâmica para o vídeo)',
 };
 
-function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho }) {
+function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, ideia_selecionada, tema, gancho, brand_profile }) {
   const isCarrossel  = formato === 'Carrossel';
   const pubLabel     = PUB_FORMAT_LABELS[pub_formato] || pub_formato;
+  const brandBlock   = brandContextBlock(brand_profile);
   const temaTxt  = ideia_selecionada?.titulo
     ? `O tema é: "${ideia_selecionada.titulo}"`
     : tema ? `O tema é: "${tema}"` : 'Sugira um tema relevante e atual para o posicionamento da Nexum360.';
@@ -153,8 +157,9 @@ function buildUserPrompt({ pilar, rede_social, formato, variante, pub_formato, i
     ? `"slides": [{ "numero": 1, "titulo": "...", "texto": "..." }, ... (8 slides)]`
     : `"slides": [{ "numero": 1, "titulo": "Frase principal", "texto": "Subtexto de apoio" }]`;
 
-  return `Crie um conteúdo completo para a Nexum360 com os parâmetros abaixo.
+  return `Crie um conteúdo completo para esta marca com os parâmetros abaixo.
 
+${brandBlock}
 PARÂMETROS:
 - Pilar: ${pilar}
 - Rede Social: ${rede_social}
