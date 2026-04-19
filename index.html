@@ -509,6 +509,17 @@
       padding: 7px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .settings-btn.mock-on { border-color: #e8b84b; color: #e8b84b; background: rgba(232,184,75,0.1); }
+    .mock-badge {
+      position: fixed; bottom: 18px; right: 18px; z-index: 9999;
+      background: #e8b84b; color: #0a0a0a;
+      font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase;
+      padding: 7px 14px; border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(232,184,75,0.4);
+      display: none; align-items: center; gap: 6px;
+      cursor: pointer;
+    }
+    .mock-badge.visible { display: flex; }
     .api-status { font-size: 0.72rem; display: flex; align-items: center; gap: 6px; }
     .api-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
     .api-dot.ok  { background: var(--green); }
@@ -1094,6 +1105,7 @@
         <button class="view-btn" id="btnCalendario" onclick="setView('calendario')">Calendário</button>
       </div>
       <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
+      <button class="settings-btn" id="mockBtn" onclick="toggleMockMode()" style="border-color:var(--border)">🧪 Mock</button>
       <button class="settings-btn" id="dnaBtn" onclick="openBrandModal()" style="border-color:var(--border)">🧬 DNA</button>
       <button class="gen-btn" onclick="openWorkflow()">✦ Gerar</button>
       <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
@@ -1395,6 +1407,9 @@
       </div>
     </div>
   </div>
+
+  <!-- MOCK BADGE -->
+  <div class="mock-badge" id="mockBadge" onclick="toggleMockMode()" title="Clique para desativar o modo mock">🧪 MOCK ATIVO — sem custos de API</div>
 
   <!-- WORKFLOW OVERLAY -->
   <div class="modal-overlay" id="workflowOverlay">
@@ -3883,6 +3898,165 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       btn.classList.add('applied');
       btn.disabled = true;
     }
+
+    // ═══════════════════════════════════════════════════════
+    // MOCK MODE — intercepta fetch, sem chamadas reais à API
+    // ═══════════════════════════════════════════════════════
+    const MOCK_KEY      = 'nexum360_mock_mode';
+    const _realFetch    = window.fetch.bind(window);
+    let   mockMode      = localStorage.getItem(MOCK_KEY) === '1';
+
+    function toggleMockMode() {
+      mockMode = !mockMode;
+      localStorage.setItem(MOCK_KEY, mockMode ? '1' : '0');
+      applyMockUI();
+      showToast(mockMode
+        ? '🧪 Modo Mock ATIVADO — nenhuma chamada real à API.'
+        : 'Modo Mock desativado — usando API real.',
+        mockMode ? 'success' : '');
+    }
+
+    function applyMockUI() {
+      document.getElementById('mockBtn')?.classList.toggle('mock-on', mockMode);
+      document.getElementById('mockBadge')?.classList.toggle('visible', mockMode);
+    }
+
+    // Intercepta fetch quando mock ativo
+    window.fetch = async function(url, opts) {
+      if (!mockMode || typeof url !== 'string') return _realFetch(url, opts);
+      const path = url.replace(/^https?:\/\/[^/]+/, '');
+      const body = opts?.body ? (() => { try { return JSON.parse(opts.body); } catch { return {}; } })() : {};
+      const delay = ms => new Promise(r => setTimeout(r, ms));
+      const respond = (data, ms = 900) => delay(ms).then(() =>
+        new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      );
+
+      // ── /api/health ──────────────────────────────────────
+      if (path.includes('/api/health')) return respond({ status: 'ok', mock: true }, 200);
+
+      // ── /api/suggest-ideas ───────────────────────────────
+      if (path.includes('/api/suggest-ideas')) {
+        const pilar = body.pilar || 'Tecnologia e IA';
+        return respond({ success: true, ideas: [
+          { titulo: `${pilar}: o erro que custa mais caro do que parece`,       subtitulo: 'Como a maioria das empresas falha na adoção e paga o preço depois.' },
+          { titulo: 'Automatizar sem estratégia é caro e ineficiente',           subtitulo: 'O que acontece quando você terceiriza o pensamento para a ferramenta.' },
+          { titulo: '3 decisões que separam empresas que escalam das que estagnaram', subtitulo: 'Padrão observado em mais de 40 diagnósticos empresariais.' },
+          { titulo: 'Seu concorrente já faz isso. Você ainda está avaliando.',   subtitulo: 'A janela de vantagem competitiva fecha mais rápido do que parece.' },
+          { titulo: 'Dado sem contexto é só número. Contexto sem dado é achismo.',subtitulo: 'Como equilibrar intuição e evidência nas decisões de negócio.' },
+          { titulo: 'O problema não é falta de ferramenta. É falta de processo.', subtitulo: 'Por que a maioria das implementações falha antes de começar.' },
+        ]});
+      }
+
+      // ── /api/generate ────────────────────────────────────
+      if (path.includes('/api/generate')) {
+        const tema     = body.ideia_selecionada?.titulo || body.tema || 'Automatizar sem estratégia é caro e ineficiente';
+        const gancho   = body.ideia_selecionada?.subtitulo || body.gancho || 'O que acontece quando você terceiriza o pensamento para a ferramenta.';
+        const pilar    = body.pilar || 'Tecnologia e IA';
+        const formato  = body.formato || 'Carrossel';
+        const isCarrossel = formato === 'Carrossel';
+        const slides = isCarrossel ? [
+          { numero: 1, titulo: tema, texto: '' },
+          { numero: 2, titulo: 'O problema real', texto: 'Empresas compram ferramentas pensando que compram resultados. Mas ferramenta sem processo é despesa, não investimento.' },
+          { numero: 3, titulo: 'O que vemos na prática', texto: 'Times que automatizam tarefas sem antes mapear o fluxo criam o caos em alta velocidade. Mais rápido no caminho errado.' },
+          { numero: 4, titulo: 'O custo invisível', texto: 'Retrabalho, dados inconsistentes, decisões baseadas em relatórios errados. Tudo gerado por automação sem fundamento.' },
+          { numero: 5, titulo: 'A ordem correta', texto: 'Primeiro entenda o processo. Meça o que importa. Depois automatize. Nessa ordem — sem exceção.' },
+          { numero: 6, titulo: 'Quem escala certo faz diferente', texto: 'Define KPIs antes de contratar ferramenta. Documenta o fluxo antes de automatizar. Testa antes de escalar.' },
+          { numero: 7, titulo: 'A virada de chave', texto: 'Estratégia não é o que você faz depois que tudo está funcionando. É o que define se vai funcionar.' },
+          { numero: 8, titulo: 'Você está no caminho certo?', texto: 'Se sua operação depende mais da ferramenta do que do processo, está na hora de rever. Vamos conversar. nexum360.com.br' },
+        ] : [
+          { numero: 1, titulo: tema, texto: gancho },
+        ];
+        return respond({ success: true, result: {
+          tema, gancho,
+          angulo_nexum: `Posiciona a Nexum360 como especialista em ${pilar.toLowerCase()} com visão estratégica antes de qualquer implementação.`,
+          picah: ['P', 'I'],
+          slides,
+          legenda_ig: `${tema}\n\nA maioria das empresas erra aqui — e paga caro.\n\nNão é falta de tecnologia. É falta de ordem.\n\nAntes de qualquer ferramenta: processo, métrica, critério.\n\nDepois sim: automatize, escale, cresça.\n\nQual erro você já cometeu nessa ordem? 👇\n\n#Nexum360 #Estrategia #Automacao #Gestao #Marketing #Tecnologia #IA #Negocios #Crescimento #Empreendedorismo #B2B #Processos`,
+          legenda_li: `${tema}\n\nDepois de analisar dezenas de operações, o padrão é claro: empresas que escalam fazem na ordem certa.\n\n1. Mapeiam o processo\n2. Definem o que medir\n3. Automatizam com critério\n\nAs que falham pulam direto para o passo 3.\n\nO resultado? Caos em alta velocidade.\n\nFerramenta não substitui pensamento estratégico. Nunca.\n\nComo está a ordem na sua operação?\n\nNexum360 — Estratégia que gera resultado. nexum360.com.br\n\n#Estrategia #Automacao #Gestao #Negocios #B2B #Tecnologia #IA #Processos #Liderança`,
+          hashtags_ig: ['#Nexum360','#Estrategia','#Automacao','#Gestao','#Marketing','#Tecnologia','#IA','#Negocios','#Crescimento','#Empreendedorismo','#B2B','#Processos'],
+          hashtags_li: ['#Estrategia','#Automacao','#Gestao','#Negocios','#B2B','#Tecnologia','#IA','#Processos','#Liderança','#Nexum360'],
+        }});
+      }
+
+      // ── /api/refine ──────────────────────────────────────
+      if (path.includes('/api/refine')) {
+        const instrucao = body.instrucao || '';
+        return respond({ success: true, result: {
+          resposta: `Ajuste aplicado: "${instrucao}". Tom mantido, ângulo reforçado conforme solicitado.`,
+          legenda_ig: `[Versão ajustada] ${body.pauta?.legenda_ig || ''}`.slice(0, 300) + '\n\n(ajustado via mock)',
+          legenda_li: `[Versão ajustada] ${body.pauta?.legenda_li || ''}`.slice(0, 300) + '\n\n(ajustado via mock)',
+        }}, 1200);
+      }
+
+      // ── /api/generate-art ────────────────────────────────
+      if (path.includes('/api/generate-art')) {
+        const tema = body.tema || 'Conteúdo Nexum360';
+        const variante = body.variante || 'Dark';
+        const bg = variante === 'White' ? '#f5f5f0' : variante === 'Blue' ? '#0d1f3c' : '#0a0a0a';
+        const fg = variante === 'White' ? '#111111' : '#f0f0f0';
+        const acc = '#c8a96e';
+        const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<style>*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;font-family:'Segoe UI',sans-serif}
+.label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:${acc};margin-bottom:24px}
+h1{font-size:52px;font-weight:700;color:${fg};line-height:1.15;text-align:center;max-width:900px}
+.line{width:60px;height:3px;background:${acc};margin:32px auto}
+.sub{font-size:18px;color:${fg};opacity:.6;text-align:center;margin-top:8px}
+.brand{position:absolute;bottom:48px;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:${acc}}
+</style></head><body>
+<div class="label">🧪 Mock — Nexum360</div>
+<h1>${tema}</h1>
+<div class="line"></div>
+<div class="sub">nexum360.com.br</div>
+<div class="brand">nexum360</div>
+</body></html>`;
+        return respond({ success: true, html }, 1500);
+      }
+
+      // ── /api/analyze-brand ───────────────────────────────
+      if (path.includes('/api/analyze-brand')) {
+        const site = body.site_url || 'suamarca.com.br';
+        return respond({ success: true, suggestions: {
+          nome:           'Marca Exemplo',
+          descricao:      'Empresa de consultoria estratégica e tecnologia para negócios.',
+          proposta_valor: 'Transformamos complexidade em crescimento mensurável.',
+          dor_principal:  'Dificuldade em converter estratégia em resultados concretos.',
+          estilo:         'Minimalista moderno, tipografia forte, muito respiro.',
+          cor_primaria:   '#c8a96e',
+          cor_secundaria: '#1a2744',
+          cor_terciaria:  '#f0f0f0',
+        }}, 2000);
+      }
+
+      // ── /api/suggest-brand-field ─────────────────────────
+      if (path.includes('/api/suggest-brand-field')) {
+        const field = body.field;
+        const nome  = body.context?.nome || 'sua marca';
+        if (field === 'tom_de_voz') {
+          return respond({ success: true, suggestion: {
+            tom:          ['direto', 'provocativo', 'inteligente'],
+            sofisticacao: 'premium',
+            linguagem:    'direta',
+            evitar:       ['clichês motivacionais', 'linguagem de influencer', 'emojis em excesso', 'frases genéricas'],
+            racional:     `Para ${nome}, o tom direto e provocativo funciona porque o público é composto por decisores experientes que não têm paciência para rodeios. A sofisticação premium reforça o posicionamento de autoridade sem arrogância.`,
+          }}, 1400);
+        }
+        if (field === 'proposta_valor') {
+          return respond({ success: true, suggestion: {
+            opcoes: [
+              `Transformamos estratégia em crescimento mensurável para ${nome}.`,
+              `${nome}: onde decisão inteligente vira resultado concreto.`,
+              `Menos achismo, mais resultado. Esse é o método ${nome}.`,
+            ],
+          }}, 1400);
+        }
+      }
+
+      // Fallback — deixa passar para a API real
+      return _realFetch(url, opts);
+    };
+
+    applyMockUI();
 
     // Init
     loadVercelUrl();
