@@ -2992,13 +2992,26 @@
 
         const blob    = new Blob([d.html], { type: 'text/html' });
         const blobUrl = URL.createObjectURL(blob);
-        wrap.innerHTML = `<iframe src="${blobUrl}" id="wf-art-iframe"></iframe>`;
+
+        // Mostrar preview ANTES do iframe para garantir clientWidth válido
+        window._wfArtHtml = d.html;
+        preview.style.display = 'flex';
+
+        // srcdoc é síncrono e mais confiável que blob URL para renderização
+        const srcdocAttr = d.html.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+        wrap.innerHTML = `<iframe id="wf-art-iframe" srcdoc="${srcdocAttr}"></iframe>`;
         const iframe = wrap.querySelector('iframe');
-        iframe.onload = () => {
+        const scaleIframe = () => {
           const scale = wrap.clientWidth / 1080;
-          iframe.style.transform = `scale(${scale})`;
-          wrap.style.height = `${1350 * scale}px`;
+          if (scale > 0) {
+            iframe.style.transform = `scale(${scale})`;
+            wrap.style.height = `${1350 * scale}px`;
+          }
         };
+        iframe.onload = scaleIframe;
+        // Aplica escala imediatamente (srcdoc pode já estar renderizado) e também via rAF
+        scaleIframe();
+        requestAnimationFrame(scaleIframe);
 
         const slideSuffix = wfGenParams.formato === 'Carrossel' ? `-slide-${slideIndex+1}` : '';
         dlRow.innerHTML = '';
@@ -3012,9 +3025,6 @@
         regenBtn.className = 'wf-secondary'; regenBtn.textContent = '↺ Regerar';
         regenBtn.onclick = () => doWfGenArt();
         dlRow.appendChild(regenBtn);
-
-        window._wfArtHtml = d.html;
-        preview.style.display = 'flex';
         showProgress('success'); hideToast();
       } catch(e) {
         if (e.name === 'AbortError') {
@@ -3931,11 +3941,14 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         new Response(JSON.stringify(data), { status: 200, headers: { 'Content-Type': 'application/json' } })
       );
 
+      // Normaliza rota: remove query string/trailing slash para permitir match exato
+      const route = path.split('?')[0].replace(/\/$/, '');
+
       // ── /api/health ──────────────────────────────────────
-      if (path.includes('/api/health')) return respond({ status: 'ok', mock: true }, 200);
+      if (route === '/api/health') return respond({ status: 'ok', mock: true }, 200);
 
       // ── /api/suggest-ideas ───────────────────────────────
-      if (path.includes('/api/suggest-ideas')) {
+      if (route === '/api/suggest-ideas') {
         const pilar = body.pilar || 'Tecnologia e IA';
         return respond({ success: true, ideas: [
           { titulo: `${pilar}: o erro que custa mais caro do que parece`,       subtitulo: 'Como a maioria das empresas falha na adoção e paga o preço depois.' },
@@ -3948,7 +3961,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       }
 
       // ── /api/generate ────────────────────────────────────
-      if (path.includes('/api/generate')) {
+      if (route === '/api/generate') {
         const tema     = body.ideia_selecionada?.titulo || body.tema || 'Automatizar sem estratégia é caro e ineficiente';
         const gancho   = body.ideia_selecionada?.subtitulo || body.gancho || 'O que acontece quando você terceiriza o pensamento para a ferramenta.';
         const pilar    = body.pilar || 'Tecnologia e IA';
@@ -3979,7 +3992,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       }
 
       // ── /api/refine ──────────────────────────────────────
-      if (path.includes('/api/refine')) {
+      if (route === '/api/refine') {
         const instrucao = body.instrucao || '';
         return respond({ success: true, result: {
           resposta: `Ajuste aplicado: "${instrucao}". Tom mantido, ângulo reforçado conforme solicitado.`,
@@ -3989,33 +4002,37 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       }
 
       // ── /api/generate-art ────────────────────────────────
-      if (path.includes('/api/generate-art')) {
-        const tema = body.tema || 'Conteúdo Nexum360';
-        const variante = body.variante || 'Dark';
+      if (route === '/api/generate-art') {
+        const pauta = body.pauta || body;
+        const slideIndex = body.slideIndex ?? 0;
+        const slide = pauta.slides?.[slideIndex];
+        const tema = slide?.titulo || pauta.tema || 'Conteúdo Nexum360';
+        const subtexto = slide?.texto || pauta.gancho || '';
+        const variante = pauta.variante || 'Dark';
         const bg = variante === 'White' ? '#f5f5f0' : variante === 'Blue' ? '#0d1f3c' : '#0a0a0a';
         const fg = variante === 'White' ? '#111111' : '#f0f0f0';
         const acc = '#c8a96e';
         const _c = '</';
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
 <style>*{margin:0;padding:0;box-sizing:border-box}
-body{width:1080px;height:1080px;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;font-family:'Segoe UI',sans-serif}
+body{width:1080px;height:1350px;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;font-family:'Segoe UI',sans-serif;position:relative}
 .label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:${acc};margin-bottom:24px}
 h1{font-size:52px;font-weight:700;color:${fg};line-height:1.15;text-align:center;max-width:900px}
 .line{width:60px;height:3px;background:${acc};margin:32px auto}
-.sub{font-size:18px;color:${fg};opacity:.6;text-align:center;margin-top:8px}
+.sub{font-size:22px;color:${fg};opacity:.6;text-align:center;margin-top:8px;max-width:800px;line-height:1.5}
 .brand{position:absolute;bottom:48px;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:${acc}}
 ${_c}style>${_c}head><body>
 <div class="label">🧪 Mock — Nexum360${_c}div>
 <h1>${tema}${_c}h1>
 <div class="line">${_c}div>
-<div class="sub">nexum360.com.br${_c}div>
+${subtexto ? `<div class="sub">${subtexto}${_c}div>` : ''}
 <div class="brand">nexum360${_c}div>
 ${_c}body>${_c}html>`;
         return respond({ success: true, html }, 1500);
       }
 
       // ── /api/analyze-brand ───────────────────────────────
-      if (path.includes('/api/analyze-brand')) {
+      if (route === '/api/analyze-brand') {
         const site = body.site_url || 'suamarca.com.br';
         return respond({ success: true, suggestions: {
           nome:           'Marca Exemplo',
@@ -4030,7 +4047,7 @@ ${_c}body>${_c}html>`;
       }
 
       // ── /api/suggest-brand-field ─────────────────────────
-      if (path.includes('/api/suggest-brand-field')) {
+      if (route === '/api/suggest-brand-field') {
         const field = body.field;
         const nome  = body.context?.nome || 'sua marca';
         if (field === 'tom_de_voz') {
