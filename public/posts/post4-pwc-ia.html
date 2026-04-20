@@ -16,7 +16,7 @@
     --muted: #666666;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { background: #eae7e0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text); }
+  html, body { background: var(--bg); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text); }
   body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
 
   .card {
@@ -207,8 +207,6 @@
     border-radius: 999px;
   }
 
-  @media (max-width: 1200px) { body { zoom: 0.65; } }
-  @media (max-width: 860px)  { body { zoom: 0.38; } }
 </style>
 </head>
 <body>
