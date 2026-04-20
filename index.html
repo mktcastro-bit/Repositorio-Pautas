@@ -4005,30 +4005,90 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       if (route === '/api/generate-art') {
         const pauta = body.pauta || body;
         const slideIndex = body.slideIndex ?? 0;
-        const slide = pauta.slides?.[slideIndex];
+        const slides = pauta.slides || [];
+        const totalSlides = slides.length || 1;
+        const slide = slides[slideIndex];
+        const isCarousel = pauta.formato === 'Carrossel';
+        const isCover = slideIndex === 0;
+        const isCTA = isCarousel && slideIndex === totalSlides - 1;
         const tema = slide?.titulo || pauta.tema || 'Conteúdo Nexum360';
         const subtexto = slide?.texto || pauta.gancho || '';
         const variante = pauta.variante || 'Dark';
-        const bg = variante === 'White' ? '#f5f5f0' : variante === 'Blue' ? '#0d1f3c' : '#0a0a0a';
-        const fg = variante === 'White' ? '#111111' : '#f0f0f0';
-        const acc = '#c8a96e';
+        const bg = variante === 'White' ? '#f5f4ef' : variante === 'Blue' ? '#070d1a' : '#0a0a0a';
+        const surface = variante === 'White' ? '#eeecea' : variante === 'Blue' ? '#0d1628' : '#111111';
+        const fg = variante === 'White' ? '#1a1a1a' : '#f0f0f0';
+        const muted = variante === 'White' ? '#666666' : variante === 'Blue' ? '#7a90b0' : '#888888';
+        const acc = variante === 'White' ? '#1a1a1a' : variante === 'Blue' ? '#4d8fda' : '#c8a96e';
         const _c = '</';
+        const rede = (pauta.rede_social || 'INSTAGRAM').toUpperCase();
+        const pub = (pauta.pub_formato || 'feed').toUpperCase();
+        const fmt = (pauta.formato || '').toUpperCase();
+        const formatTag = [rede, fmt, pub].filter(Boolean).join(' · ');
+        const slideLabel = isCarousel
+          ? (isCover ? 'CAPA' : isCTA ? 'CONCLUSÃO' : `SLIDE ${slideIndex + 1} / ${totalSlides}`)
+          : (pauta.pilar || 'NEXUM360').toUpperCase();
+
+        // Layout varia conforme o slide: capa (centralizado grande), meio (numero gigante + texto), CTA (box destaque)
+        let bodyInner;
+        if (isCover || !isCarousel) {
+          bodyInner = `
+<div class="header"><div class="logo">nexum360${_c}div><div class="header-right"><div class="format-tag">${formatTag}${_c}div><div class="pilar">${slideLabel}${_c}div>${_c}div>${_c}div>
+<div class="content">
+  <div class="source-tag">── MOCK · 2026${_c}div>
+  <h1>${tema}${_c}h1>
+  <div class="accent-line">${_c}div>
+  ${subtexto ? `<p class="body-text">${subtexto}${_c}p>` : ''}
+${_c}div>
+<div class="footer"><span>nexum360.com.br${_c}span><span class="tag">${(pauta.pilar||'').toUpperCase()}${_c}span>${_c}div>`;
+        } else if (isCTA) {
+          bodyInner = `
+<div class="header"><div class="logo">nexum360${_c}div><div class="header-right"><div class="format-tag">${formatTag}${_c}div><div class="pilar">${slideLabel}${_c}div>${_c}div>${_c}div>
+<div class="content">
+  <div class="insight-box">
+    <div class="insight-label">REFLEXÃO FINAL${_c}div>
+    <div class="insight-text">${tema}${_c}div>
+  ${_c}div>
+  ${subtexto ? `<p class="body-text">${subtexto}${_c}p>` : ''}
+  <div class="cta">→ nexum360.com.br${_c}div>
+${_c}div>
+<div class="footer"><span>Slide ${slideIndex + 1} de ${totalSlides}${_c}span><span class="tag">${(pauta.pilar||'').toUpperCase()}${_c}span>${_c}div>`;
+        } else {
+          bodyInner = `
+<div class="deco-number">${slideIndex + 1}${_c}div>
+<div class="header"><div class="logo">nexum360${_c}div><div class="header-right"><div class="format-tag">${formatTag}${_c}div><div class="pilar">${slideLabel}${_c}div>${_c}div>${_c}div>
+<div class="content">
+  <div class="source-tag">── PONTO ${slideIndex + 1}${_c}div>
+  <h2>${tema}${_c}h2>
+  <div class="accent-line">${_c}div>
+  ${subtexto ? `<p class="body-text">${subtexto}${_c}p>` : ''}
+${_c}div>
+<div class="footer"><span>Slide ${slideIndex + 1} de ${totalSlides}${_c}span><span class="tag">${(pauta.pilar||'').toUpperCase()}${_c}span>${_c}div>`;
+        }
+
         const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
 <style>*{margin:0;padding:0;box-sizing:border-box}
-body{width:1080px;height:1350px;background:${bg};display:flex;flex-direction:column;align-items:center;justify-content:center;padding:80px;font-family:'Segoe UI',sans-serif;position:relative}
-.label{font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:${acc};margin-bottom:24px}
-h1{font-size:52px;font-weight:700;color:${fg};line-height:1.15;text-align:center;max-width:900px}
-.line{width:60px;height:3px;background:${acc};margin:32px auto}
-.sub{font-size:22px;color:${fg};opacity:.6;text-align:center;margin-top:8px;max-width:800px;line-height:1.5}
-.brand{position:absolute;bottom:48px;font-size:14px;letter-spacing:.2em;text-transform:uppercase;color:${acc}}
-${_c}style>${_c}head><body>
-<div class="label">🧪 Mock — Nexum360${_c}div>
-<h1>${tema}${_c}h1>
-<div class="line">${_c}div>
-${subtexto ? `<div class="sub">${subtexto}${_c}div>` : ''}
-<div class="brand">nexum360${_c}div>
-${_c}body>${_c}html>`;
-        return respond({ success: true, html }, 1500);
+body{width:1080px;height:1350px;background:${bg};color:${fg};padding:88px 100px;font-family:system-ui,-apple-system,sans-serif;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+.header{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:700}
+.header-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.format-tag{font-size:.62rem;letter-spacing:.22em;color:${acc};text-transform:uppercase;font-weight:700;padding:4px 10px;border:1px solid ${acc};border-radius:999px}
+.pilar{font-size:.72rem;letter-spacing:.18em;color:${muted};text-transform:uppercase}
+.content{display:flex;flex-direction:column;justify-content:center;gap:28px;flex:1;padding:40px 0}
+.source-tag{font-size:.72rem;letter-spacing:.18em;color:${muted};text-transform:uppercase}
+h1{font-family:'Playfair Display',serif;font-size:4rem;font-weight:700;line-height:1.1;letter-spacing:-.02em}
+h2{font-family:'Playfair Display',serif;font-size:3.2rem;font-weight:700;line-height:1.15;letter-spacing:-.02em}
+.body-text{font-size:1.5rem;color:${muted};line-height:1.6;max-width:820px}
+.accent-line{width:56px;height:2px;background:${acc}}
+.insight-box{background:${surface};border-left:2px solid ${acc};border-radius:0 8px 8px 0;padding:32px 36px;display:flex;flex-direction:column;gap:12px}
+.insight-label{font-size:.68rem;letter-spacing:.2em;color:${acc};text-transform:uppercase;font-weight:700}
+.insight-text{font-family:'Playfair Display',serif;font-style:italic;font-size:2.2rem;line-height:1.25}
+.cta{font-size:1.2rem;color:${acc};letter-spacing:.06em;font-weight:600;margin-top:8px}
+.footer{display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:${muted}}
+.tag{font-size:.62rem;letter-spacing:.22em;color:${acc};text-transform:uppercase}
+.deco-number{position:absolute;top:140px;right:60px;font-family:'Playfair Display',serif;font-size:320px;font-weight:700;color:${acc};opacity:.08;line-height:.8;pointer-events:none}
+${_c}style>${_c}head><body>${bodyInner}${_c}body>${_c}html>`;
+        return respond({ success: true, html }, 1200);
       }
 
       // ── /api/analyze-brand ───────────────────────────────
