@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Nexum360 · v5 donut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f4ef;
+    --surface: #eeecea;
+    --border: #d8d5cf;
+    --accent: #1a1a1a;
+    --text: #1a1a1a;
+    --muted: #666666;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: #eae7e0; font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text); }
+  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+  .card {
+    width: 1080px;
+    height: 1350px;
+    background: var(--bg);
+    padding: 88px 100px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.01em; }
+  .pilar {
+    font-size: 0.68rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+
+  /* Título EXATO da pauta */
+  .titulo-block { display: flex; flex-direction: column; gap: 16px; }
+  .source-tag {
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 2.7rem;
+    line-height: 1.18;
+    letter-spacing: -0.022em;
+    color: var(--accent);
+    max-width: 860px;
+  }
+
+  /* Gráfico donut central */
+  .chart-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 52px;
+    padding: 8px 0;
+  }
+  .donut {
+    --p: 75;                     /* porcentagem preenchida */
+    --size: 340px;
+    --thick: 56px;
+    width: var(--size);
+    height: var(--size);
+    border-radius: 50%;
+    background:
+      conic-gradient(var(--accent) 0 calc(var(--p) * 1%), var(--border) calc(var(--p) * 1%) 100%);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .donut::before {
+    content: "";
+    position: absolute;
+    inset: var(--thick);
+    background: var(--bg);
+    border-radius: 50%;
+  }
+  .donut-center {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    z-index: 2;
+  }
+  .donut-num {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 5.2rem;
+    color: var(--accent);
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+  .donut-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 700;
+    text-align: center;
+    max-width: 170px;
+    line-height: 1.45;
+  }
+
+  /* Legenda ao lado do donut */
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    max-width: 380px;
+  }
+  .legend-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 20px;
+    position: relative;
+  }
+  .legend-item::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .legend-item.a::before { background: var(--accent); }
+  .legend-item.b::before { background: var(--border); border: 1px solid var(--muted); }
+  .legend-val {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 2rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+  .legend-txt {
+    font-size: 1.08rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .legend-txt strong { color: var(--accent); font-weight: 700; }
+
+  /* Ângulo Nexum no rodapé */
+  .angulo {
+    background: var(--surface);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 22px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .angulo .lbl {
+    font-size: 0.6rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 800;
+  }
+  .angulo .txt {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 1.4rem;
+    line-height: 1.35;
+  }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .tags { display: flex; gap: 8px; }
+  .tag {
+    font-size: 0.56rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 700;
+    padding: 5px 11px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+  }
+
+  @media (max-width: 1200px) { body { zoom: 0.65; } }
+  @media (max-width: 860px)  { body { zoom: 0.38; } }
+</style>
+</head>
+<body>
+  <article class="card">
+    <header class="header">
+      <div class="logo">nexum360</div>
+      <div class="pilar">Tecnologia e IA</div>
+    </header>
+
+    <div class="titulo-block">
+      <div class="source-tag">── PwC AI Performance Study · 2026</div>
+      <h1>75% dos ganhos com IA são capturados por apenas 20% das empresas (PwC 2026)</h1>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="donut">
+        <div class="donut-center">
+          <div class="donut-num">75%</div>
+          <div class="donut-label">dos ganhos com IA</div>
+        </div>
+      </div>
+      <div class="legend">
+        <div class="legend-item a">
+          <div class="legend-val">75% dos ganhos</div>
+          <div class="legend-txt">concentrados em <strong>20% das empresas</strong> — líderes em IA.</div>
+        </div>
+        <div class="legend-item b">
+          <div class="legend-val">25% dos ganhos</div>
+          <div class="legend-txt">divididos entre <strong>80% das empresas</strong> restantes.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="angulo">
+      <div class="lbl">Ângulo Nexum360</div>
+      <div class="txt">Líderes em IA decidem 2,8× mais rápido, sem intervenção humana. Não basta usar IA — tem que decidir com ela.</div>
+    </div>
+
+    <footer class="footer">
+      <div>nexum360.com.br · Inteligência &amp; Decisão com IA</div>
+      <div class="tags">
+        <span class="tag">Tecnologia · IA</span>
+        <span class="tag">A · P</span>
+      </div>
+    </footer>
+  </article>
+</body>
+</html>
