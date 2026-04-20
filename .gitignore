@@ -137,3 +137,9 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Artefatos gerados pela skill /gerar-post
+samples/
+
+# macOS
+.DS_Store
