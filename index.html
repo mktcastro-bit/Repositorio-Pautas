@@ -1563,8 +1563,11 @@
 
     let pautas = (() => {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw).map(migrate);
-      return defaultData;
+      if (!raw) return defaultData;
+      const stored = JSON.parse(raw).map(migrate);
+      const existingIds = new Set(stored.map(p => p.id));
+      const missing = defaultData.filter(p => !existingIds.has(p.id));
+      return missing.length ? [...stored, ...missing] : stored;
     })();
 
     const filters = { status:'todos', pilar:'todos', rede_social:'todos', formato:'todos' };
