@@ -1097,6 +1097,9 @@
       </div>
       <button class="settings-btn" onclick="toggleSettings()" style="border-color:var(--border)">⚙ API</button>
       <button class="settings-btn" id="dnaBtn" onclick="openBrandModal()" style="border-color:var(--border)">🧬 DNA</button>
+      <button class="settings-btn" onclick="exportBackup()" style="border-color:var(--border)" title="Exportar pautas + DNA">⬇ Exportar</button>
+      <button class="settings-btn" onclick="document.getElementById('importFile').click()" style="border-color:var(--border)" title="Importar backup">⬆ Importar</button>
+      <input type="file" id="importFile" accept="application/json,.json" style="display:none" onchange="importBackup(event)">
       <button class="gen-btn" onclick="openWorkflow()">✦ Gerar</button>
       <button class="add-btn" onclick="openModal()">+ Nova Pauta</button>
     </div>
@@ -2178,6 +2181,69 @@
     }
 
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(pautas)); }
+
+    // ── BACKUP: EXPORT / IMPORT ──
+    function exportBackup() {
+      try {
+        const payload = {
+          app: 'nexum360-repositorio-pautas',
+          version: 1,
+          exportedAt: new Date().toISOString(),
+          storage_key: STORAGE_KEY,
+          pautas: pautas,
+          brand_profile: (typeof brandProfile !== 'undefined') ? brandProfile : null,
+          vercel_url: localStorage.getItem('nexum360_vercel_url') || null,
+        };
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url  = URL.createObjectURL(blob);
+        const a    = document.createElement('a');
+        const stamp = new Date().toISOString().slice(0,10);
+        a.href = url;
+        a.download = `nexum360-backup-${stamp}.json`;
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        showToast('Backup exportado.', 'success');
+      } catch (e) {
+        showToast('Erro ao exportar: ' + e.message, 'error');
+      }
+    }
+
+    function importBackup(event) {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = ''; // reset para permitir reimportar o mesmo arquivo
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          if (!data || data.app !== 'nexum360-repositorio-pautas' || !Array.isArray(data.pautas)) {
+            throw new Error('Arquivo não é um backup válido.');
+          }
+          const ok = confirm(
+            `Importar backup com ${data.pautas.length} pauta(s)${data.brand_profile ? ' + DNA' : ''}?\n\n` +
+            `Exportado em: ${data.exportedAt || 'data desconhecida'}\n\n` +
+            `⚠ Isto SUBSTITUI os dados atuais do navegador.`
+          );
+          if (!ok) return;
+
+          pautas = data.pautas.map(migrate);
+          save();
+
+          if (data.brand_profile) {
+            localStorage.setItem(BRAND_KEY, JSON.stringify(data.brand_profile));
+            brandProfile = data.brand_profile;
+            if (typeof updateDnaBanner === 'function') updateDnaBanner();
+          }
+          if (data.vercel_url) localStorage.setItem('nexum360_vercel_url', data.vercel_url);
+
+          renderStats(); renderCards(); scaleCardIframes(); renderCalendar();
+          showToast('Backup importado com sucesso.', 'success');
+        } catch (e) {
+          showToast('Erro ao importar: ' + e.message, 'error');
+        }
+      };
+      reader.readAsText(file);
+    }
 
     // ── ESCALAR IFRAMES DOS CARDS ──────────────────────────────
     function scaleCardIframes() {
