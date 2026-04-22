@@ -433,6 +433,8 @@
     .detail-btn.publish { background: #1a1a1a; border-color: var(--green); color: var(--green); }
     .detail-btn.publish:hover { background: rgba(76,175,125,0.12); }
     .detail-btn.publish:disabled { opacity: 0.3; cursor: not-allowed; }
+    .detail-btn.danger { border-color: rgba(220,80,80,0.5); color: #e56c6c; }
+    .detail-btn.danger:hover { background: rgba(220,80,80,0.12); border-color: #e56c6c; }
 
     /* PUBLISH TOAST */
     .toast {
@@ -2042,6 +2044,7 @@
               </select>
               ${legendaBtn}
               <button class="detail-btn publish" onclick="openPublish(${p.id})">↑ Publicar</button>
+              <button class="detail-btn danger" onclick="deletePautaFromDetail(${p.id})">🗑 Apagar</button>
               <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
             </div>
             <div class="refine-area">
@@ -2127,6 +2130,14 @@
       if (!confirm('Remover esta pauta?')) return;
       pautas = pautas.filter(p=>p.id!==id);
       save(); renderStats(); renderCards(); scaleCardIframes(); renderCalendar();
+    }
+
+    function deletePautaFromDetail(id) {
+      if (!confirm('Apagar esta pauta? Esta ação não pode ser desfeita.')) return;
+      pautas = pautas.filter(p=>p.id!==id);
+      save(); renderStats(); renderCards(); scaleCardIframes(); renderCalendar();
+      closeModal('detailOverlay');
+      showToast('Pauta apagada.', 'success');
     }
 
     // ── MODAL ──
