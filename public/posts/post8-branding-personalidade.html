@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Nexum360 · Slide 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,800;1,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #070d1a;
+    --surface: #0d1628;
+    --border: #1a2b47;
+    --accent: #4d8fda;
+    --accent-alpha: rgba(77,143,218,0.12);
+    --text: #f0f0f0;
+    --muted: #7a90b0;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { background: var(--bg); font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--text); }
+  body { min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+  .card {
+    width: 1080px; height: 1350px;
+    background: var(--bg);
+    padding: 88px 100px;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .deco-number {
+    position: absolute;
+    bottom: 60px;
+    right: -30px;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 460px;
+    line-height: 0.8;
+    color: var(--accent);
+    opacity: 0.05;
+    letter-spacing: -0.05em;
+    pointer-events: none;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 2; }
+  .logo { font-family: 'Playfair Display', serif; font-weight: 700; font-size: 1.5rem; letter-spacing: -0.01em; }
+  .pilar { font-size: 0.68rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+
+  .content {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; gap: 38px;
+    padding: 40px 0 60px;
+  }
+  .source-tag { font-size: 0.75rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 5.2rem;
+    line-height: 1.04;
+    letter-spacing: -0.028em;
+    color: var(--text);
+    max-width: 900px;
+  }
+  h1 em { font-style: italic; color: var(--accent); }
+  .accent-line { width: 72px; height: 3px; background: var(--accent); }
+  .subhead {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 1.6rem;
+    color: var(--muted);
+    line-height: 1.45;
+    max-width: 700px;
+  }
+
+  .footer {
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 22px;
+    font-size: 0.82rem; color: var(--muted);
+    position: relative; z-index: 2;
+  }
+  .tags { display: flex; gap: 8px; }
+  .tag {
+    font-size: 0.58rem;
+    letter-spacing: 0.24em; text-transform: uppercase;
+    color: var(--accent); font-weight: 700;
+    padding: 5px 11px;
+    border: 1px solid var(--border); border-radius: 999px;
+  }
+</style>
+</head>
+<body>
+  <article class="card">
+    <div class="deco-number">01</div>
+    <header class="header">
+      <div class="logo">nexum360</div>
+      <div class="pilar">Estratégia de Marca</div>
+    </header>
+
+    <section class="content">
+      <div class="source-tag">── CARROSSEL · 01 / 08</div>
+      <h1>Sua marca tem <em>personalidade</em> — ou só tem logotipo?</h1>
+      <div class="accent-line"></div>
+      <div class="subhead">A diferença aparece na hora da escolha do cliente. Não no manual de identidade.</div>
+    </section>
+
+    <footer class="footer">
+      <div>nexum360.com.br · Estratégia &amp; Marca</div>
+      <div class="tags">
+        <span class="tag">Estratégia · Marca</span>
+      </div>
+    </footer>
+  </article>
+</body>
+</html>
