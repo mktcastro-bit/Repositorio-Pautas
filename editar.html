@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Editar pauta — Nexum360</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+  <!--
+    TODO (refactor): quando a 3ª página aparecer (DNA config / dashboard),
+    extrair :root vars + body reset + header + storage helpers para
+    assets/common.css e assets/common.js. Hoje (2 páginas) a duplicação
+    é menor que o custo de refatorar index.html de 4k linhas.
+  -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0a;
+      --s1: #111;
+      --s2: #161616;
+      --s3: #1d1d1d;
+      --border: #1e1e1e;
+      --border-strong: #2a2a2a;
+      --accent: #c8a96e;
+      --text: #f0f0f0;
+      --muted: #888;
+      --danger: #d96666;
+      --green: #4caf7d;
+    }
+
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; min-height: 100vh; }
+
+    /* HEADER */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0;
+      background: rgba(10,10,10,0.92); backdrop-filter: blur(12px); z-index: 50;
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .back-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 7px 14px; border-radius: 6px; cursor: pointer; text-decoration: none;
+    }
+    .back-btn:hover { border-color: var(--muted); color: var(--text); }
+    .logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; }
+    .logo span { color: var(--accent); }
+    .header-right { display: flex; gap: 10px; align-items: center; }
+    .header-right .save-status { font-size: 0.7rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+    .header-right .save-status.saved { color: var(--green); }
+    .btn {
+      background: var(--s2); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 18px; border-radius: 6px; cursor: pointer;
+    }
+    .btn:hover { border-color: var(--muted); }
+    .btn-primary { background: var(--accent); border-color: var(--accent); color: #0a0a0a; }
+    .btn-primary:hover { opacity: 0.88; border-color: var(--accent); }
+    .btn-ghost { background: transparent; }
+    .btn-danger { color: var(--danger); border-color: rgba(217,102,102,0.3); }
+    .btn-danger:hover { border-color: var(--danger); background: rgba(217,102,102,0.08); }
+
+    /* LAYOUT 2 COLUNAS */
+    .layout {
+      display: grid;
+      grid-template-columns: 420px 1fr;
+      gap: 0;
+      min-height: calc(100vh - 64px);
+    }
+    .col-left { border-right: 1px solid var(--border); padding: 24px 28px; overflow-y: auto; max-height: calc(100vh - 64px); position: sticky; top: 64px; }
+    .col-right { padding: 24px 32px; overflow-y: auto; }
+
+    /* SECTIONS */
+    .section { margin-bottom: 28px; }
+    .section-title {
+      font-size: 0.66rem; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--muted); padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 14px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .section-title .count { color: var(--accent); font-weight: 700; }
+
+    /* FORM BASE */
+    label.field { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+    label.field > .lbl { font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    label.field > .hint { font-size: 0.68rem; color: var(--muted); font-style: italic; margin-top: 2px; }
+    label.field input, label.field select, label.field textarea {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      padding: 9px 12px; font-size: 0.82rem; border-radius: 5px; font-family: inherit; width: 100%;
+      transition: border-color 0.15s;
+    }
+    label.field input:focus, label.field select:focus, label.field textarea:focus { outline: none; border-color: var(--accent); }
+    label.field textarea { min-height: 60px; resize: vertical; font-family: inherit; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* SLIDE LIST */
+    .slide-list { display: flex; flex-direction: column; gap: 6px; }
+    .slide-item {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--s1); border: 1px solid var(--border); border-radius: 6px;
+      padding: 9px 10px; cursor: pointer; transition: all 0.15s;
+    }
+    .slide-item:hover { border-color: var(--border-strong); }
+    .slide-item.active { border-color: var(--accent); background: rgba(200,169,110,0.08); }
+    .slide-item .idx {
+      background: var(--s3); color: var(--muted); font-size: 0.72rem; font-weight: 700;
+      width: 26px; height: 26px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; flex-shrink: 0;
+    }
+    .slide-item.active .idx { background: var(--accent); color: #0a0a0a; }
+    .slide-item .meta { flex: 1; min-width: 0; }
+    .slide-item .tipo { font-size: 0.7rem; color: var(--accent); font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; }
+    .slide-item .preview { font-size: 0.78rem; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
+    .slide-item .handles { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; }
+    .slide-item:hover .handles, .slide-item.active .handles { opacity: 1; }
+    .icon-btn {
+      background: transparent; border: none; color: var(--muted); cursor: pointer;
+      width: 24px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+    }
+    .icon-btn:hover { background: var(--s3); color: var(--text); }
+    .icon-btn.danger:hover { color: var(--danger); }
+    .add-slide-row { display: flex; gap: 6px; margin-top: 10px; align-items: center; }
+    .add-slide-row select { flex: 1; background: var(--s1); border: 1px dashed var(--border-strong); color: var(--muted); padding: 7px 10px; font-size: 0.75rem; border-radius: 5px; }
+    .add-slide-row select:focus { outline: none; border-color: var(--accent); color: var(--text); }
+
+    /* LEGENDAS TABS */
+    .tabs { display: flex; gap: 2px; background: var(--s1); border-radius: 6px; padding: 3px; margin-bottom: 10px; }
+    .tab-btn {
+      flex: 1; background: transparent; border: none; color: var(--muted);
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 7px 10px; border-radius: 4px; cursor: pointer;
+    }
+    .tab-btn.active { background: var(--accent); color: #0a0a0a; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    /* RIGHT COLUMN: SLIDE EDITOR */
+    .editor-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border);
+    }
+    .editor-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; }
+    .editor-title .tipo-tag {
+      display: inline-block; background: rgba(200,169,110,0.12); color: var(--accent);
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 0.66rem; font-weight: 700;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 4px; margin-left: 10px; vertical-align: middle;
+    }
+
+    .group-box {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
+      padding: 16px; margin-bottom: 14px;
+    }
+    .group-box .group-title {
+      font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--accent); font-weight: 700; margin-bottom: 12px;
+    }
+
+    .array-item {
+      background: var(--s2); border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 14px; margin-bottom: 10px; position: relative;
+    }
+    .array-item .item-header {
+      display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px;
+    }
+    .array-item .item-idx {
+      font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 700;
+    }
+    .array-add {
+      width: 100%; padding: 10px; background: transparent;
+      border: 1px dashed var(--border-strong); color: var(--muted);
+      border-radius: 6px; font-size: 0.78rem; font-weight: 600; cursor: pointer;
+      letter-spacing: 0.1em; text-transform: uppercase;
+    }
+    .array-add:hover { border-color: var(--accent); color: var(--accent); }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px; color: var(--muted);
+    }
+    .empty-state h3 { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: var(--text); margin-bottom: 10px; }
+
+    .rich-hint { color: var(--accent); font-family: ui-monospace, monospace; font-size: 0.7rem; }
+
+    /* PREVIEW */
+    .preview-wrap {
+      margin-top: 24px; background: var(--s1); border: 1px solid var(--border);
+      border-radius: 8px; padding: 18px;
+    }
+    .preview-wrap h4 { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; }
+    .preview-frame {
+      width: 100%; max-width: 540px; aspect-ratio: 1080/1350;
+      border: 1px solid var(--border); border-radius: 6px; background: #000;
+    }
+    .preview-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+    @media (max-width: 1000px) {
+      .layout { grid-template-columns: 1fr; }
+      .col-left { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <a href="index.html" class="back-btn">← Voltar</a>
+      <div>
+        <div class="logo">Nexum<span>360</span></div>
+        <div style="font-size:0.66rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-top:2px;">Editor de Pauta</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="save-status" id="saveStatus">—</span>
+      <button class="btn btn-ghost" onclick="discardChanges()">Descartar</button>
+      <button class="btn btn-primary" onclick="savePauta()">Salvar</button>
+    </div>
+  </header>
+
+  <div class="layout" id="layout">
+    <div class="col-left" id="colLeft">
+      <!-- renderizado via JS -->
+    </div>
+    <div class="col-right" id="colRight">
+      <!-- renderizado via JS -->
+    </div>
+  </div>
+
+  <script>
+    // ═══════════════════════════════════════════════════════
+    // STORAGE (mesmos keys do index.html)
+    // ═══════════════════════════════════════════════════════
+    const STORAGE_KEY = 'nexum360_pautas_v11';
+    const BRAND_KEY   = 'nexum360_brand_profile_v1';
+
+    function loadPautas() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+    function savePautas(arr) { localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); }
+
+    // ═══════════════════════════════════════════════════════
+    // QUERY PARAMS + ESTADO
+    // ═══════════════════════════════════════════════════════
+    const params = new URLSearchParams(location.search);
+    const pautaId = parseInt(params.get('id'), 10);
+    let pautaOriginal = null;
+    let pauta = null;     // cópia editável
+    let selectedSlide = 0;
+    let dirty = false;
+    let activeLegendaTab = 'ig';
+
+    function markDirty() {
+      dirty = true;
+      const el = document.getElementById('saveStatus');
+      el.textContent = '• Não salvo';
+      el.classList.remove('saved');
+    }
+    function markSaved() {
+      dirty = false;
+      const el = document.getElementById('saveStatus');
+      el.textContent = '✓ Salvo';
+      el.classList.add('saved');
+      setTimeout(() => { if (!dirty) el.textContent = '—'; el.classList.remove('saved'); }, 3000);
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SCHEMAS DE FORMULÁRIO POR TIPO DE SLIDE
+    // (espelha lib/render/schemas.js — manter sincronizado)
+    // ═══════════════════════════════════════════════════════
+    const RICH = { rich: true };
+    const OPT = { optional: true };
+
+    const CAIXA_DESTAQUE_FIELDS = [
+      { key: 'label', label: 'Label', type: 'text' },
+      { key: 'destaque', label: 'Destaque (1 palavra)', type: 'text' },
+      { key: 'descricao', label: 'Descrição', type: 'textarea' },
+    ];
+    const CAIXA_TITULO_FIELDS = [
+      { key: 'label', label: 'Label', type: 'text' },
+      { key: 'titulo', label: 'Título', type: 'text' },
+      { key: 'descricao', label: 'Descrição', type: 'textarea' },
+    ];
+
+    const FIELD_DEFS = {
+      capa: [
+        { key: 'tagline', label: 'Tagline', type: 'text', ...OPT, placeholder: 'Ex: Carrossel · 01/07' },
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'subtitulo', label: 'Subtítulo', type: 'textarea' },
+      ],
+      'grid-2-colunas': [
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'esquerda', label: 'Coluna esquerda', type: 'group', fields: CAIXA_DESTAQUE_FIELDS },
+        { key: 'direita', label: 'Coluna direita', type: 'group', fields: CAIXA_DESTAQUE_FIELDS },
+      ],
+      'lista-numerada': [
+        { key: 'label', label: 'Label', type: 'text', ...OPT, placeholder: 'Ex: Diagnóstico rápido' },
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'itens', label: 'Itens', type: 'array', min: 2, max: 5, itemLabel: 'Item', itemFields: [
+          { key: 'titulo', label: 'Título do item', type: 'textarea', ...RICH },
+          { key: 'descricao', label: 'Descrição', type: 'textarea' },
+        ]},
+      ],
+      'grid-4-pilares': [
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'pilares', label: 'Pilares', type: 'array', min: 4, max: 4, fixed: true, itemLabel: 'Pilar', itemFields: [
+          { key: 'label', label: 'Label', type: 'text' },
+          { key: 'texto', label: 'Texto', type: 'textarea' },
+        ]},
+      ],
+      'frase-destaque-com-box': [
+        { key: 'label', label: 'Label', type: 'text', ...OPT },
+        { key: 'titulo', label: 'Frase destaque', type: 'textarea', ...RICH },
+        { key: 'box', label: 'Caixa de apoio', type: 'group', fields: [
+          { key: 'label', label: 'Label', type: 'text' },
+          { key: 'texto', label: 'Texto', type: 'textarea' },
+        ]},
+      ],
+      'comparacao-contraste': [
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'caixa_a', label: 'Caixa A (antes/ruim)', type: 'group', fields: CAIXA_TITULO_FIELDS },
+        { key: 'caixa_b', label: 'Caixa B (depois/bom)', type: 'group', fields: CAIXA_TITULO_FIELDS },
+        { key: 'fechamento', label: 'Fechamento (opcional)', type: 'textarea', ...RICH, ...OPT },
+      ],
+      'cta-final': [
+        { key: 'tagline', label: 'Tagline', type: 'text', ...OPT },
+        { key: 'titulo', label: 'Título', type: 'textarea', ...RICH },
+        { key: 'metodo', label: 'Método (opcional)', type: 'group', optional: true, fields: [
+          { key: 'label', label: 'Label', type: 'text' },
+          { key: 'passos', label: 'Passos', type: 'array', min: 1, max: 5, itemLabel: 'Passo', itemFields: [
+            { key: 'destaque', label: 'Palavra-chave', type: 'text' },
+            { key: 'frase', label: 'Frase', type: 'textarea', ...RICH },
+          ]},
+        ]},
+        { key: 'cta', label: 'CTA', type: 'group', fields: [
+          { key: 'texto', label: 'Texto do CTA', type: 'text' },
+          { key: 'url', label: 'URL', type: 'text', placeholder: 'nexum360.com.br' },
+        ]},
+      ],
+      'teste-pergunta': [
+        { key: 'label', label: 'Label', type: 'text', ...OPT },
+        { key: 'pergunta', label: 'Pergunta', type: 'textarea', ...RICH },
+        { key: 'veredito', label: 'Veredito', type: 'array', min: 1, max: 4, itemLabel: 'Caso', itemFields: [
+          { key: 'condicao', label: 'Condição (ex: "Se sim")', type: 'text' },
+          { key: 'texto', label: 'Texto', type: 'textarea' },
+          { key: 'destaque', label: 'Destaque (opcional)', type: 'text', ...OPT },
+        ]},
+      ],
+    };
+
+    const TIPO_LABELS = {
+      'capa': 'Capa',
+      'grid-2-colunas': 'Grid 2 colunas',
+      'lista-numerada': 'Lista numerada',
+      'grid-4-pilares': 'Grid 4 pilares',
+      'frase-destaque-com-box': 'Frase destaque + box',
+      'comparacao-contraste': 'Comparação / contraste',
+      'cta-final': 'CTA final',
+      'teste-pergunta': 'Teste / pergunta',
+    };
+
+    const TIPOS_DISPONIVEIS = Object.keys(FIELD_DEFS);
+
+    // Defaults pra novos slides
+    function blankSlide(tipo) {
+      const blanks = {
+        'capa': { tipo, titulo: '', subtitulo: '' },
+        'grid-2-colunas': { tipo, titulo: '', esquerda: { label: '', destaque: '', descricao: '' }, direita: { label: '', destaque: '', descricao: '' } },
+        'lista-numerada': { tipo, titulo: '', itens: [{ titulo: '', descricao: '' }, { titulo: '', descricao: '' }] },
+        'grid-4-pilares': { tipo, titulo: '', pilares: [{ label: '', texto: '' }, { label: '', texto: '' }, { label: '', texto: '' }, { label: '', texto: '' }] },
+        'frase-destaque-com-box': { tipo, titulo: '', box: { label: '', texto: '' } },
+        'comparacao-contraste': { tipo, titulo: '', caixa_a: { label: '', titulo: '', descricao: '' }, caixa_b: { label: '', titulo: '', descricao: '' } },
+        'cta-final': { tipo, titulo: '', cta: { texto: '', url: '' } },
+        'teste-pergunta': { tipo, pergunta: '', veredito: [{ condicao: '', texto: '' }] },
+      };
+      return blanks[tipo];
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // RENDER: COLUNA ESQUERDA
+    // ═══════════════════════════════════════════════════════
+    function renderLeft() {
+      const el = document.getElementById('colLeft');
+      const hasTypedSlides = Array.isArray(pauta.slides) && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
+
+      el.innerHTML = `
+        <div class="section">
+          <div class="section-title">Metadata</div>
+          ${renderInput('Tema', 'tema', 'textarea', pauta.tema || '')}
+          <div class="field-row">
+            ${renderSelect('Pilar', 'pilar', pauta.pilar, ['Tecnologia e IA','Estratégia de Marca','Marketing e Performance','Mentalidade e Gestão Empresarial','Bastidores e Diagnóstico de Negócios'])}
+            ${renderSelect('Rede social', 'rede_social', pauta.rede_social || 'Ambos', ['Instagram','LinkedIn','Ambos'])}
+          </div>
+          <div class="field-row">
+            ${renderSelect('Formato', 'formato', pauta.formato, ['Carrossel','Post Único','Artigo','Notícia'])}
+            ${renderSelect('Status', 'status', pauta.status, ['Ideia','Produção','Pronto','Publicado'])}
+          </div>
+          ${renderInput('Gancho', 'gancho', 'textarea', pauta.gancho || '')}
+          ${renderInput('Ângulo Nexum360', 'angulo_nexum', 'textarea', pauta.angulo_nexum || pauta.angulo || '')}
+          ${renderInput('Fonte', 'fonte', 'text', pauta.fonte || '')}
+          ${renderInput('Notas', 'notas', 'textarea', pauta.notas || '')}
+        </div>
+
+        <div class="section">
+          <div class="section-title">
+            <span>Slides</span>
+            <span class="count">${hasTypedSlides ? pauta.slides.length : '—'}</span>
+          </div>
+          ${hasTypedSlides ? renderSlideList() : `<div style="color:var(--muted);font-size:0.8rem;padding:14px;background:var(--s1);border-radius:6px;">
+            Esta pauta não tem <code>slides[]</code> tipados. Slides legados (URLs de imagens) não são editáveis aqui. Gere conteúdo novo via <code>/gerar-post</code> pra usar o editor.
+          </div>`}
+        </div>
+
+        <div class="section">
+          <div class="section-title">Legendas</div>
+          <div class="tabs">
+            <button class="tab-btn ${activeLegendaTab==='ig'?'active':''}" onclick="switchLegenda('ig')">Instagram</button>
+            <button class="tab-btn ${activeLegendaTab==='li'?'active':''}" onclick="switchLegenda('li')">LinkedIn</button>
+          </div>
+          <div class="tab-pane ${activeLegendaTab==='ig'?'active':''}">
+            <textarea id="f-legenda_ig" rows="10" style="width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);padding:10px;font-family:inherit;font-size:0.8rem;border-radius:5px;" oninput="updateMeta('legenda_ig', this.value)">${escapeHtml(pauta.legenda_ig || '')}</textarea>
+          </div>
+          <div class="tab-pane ${activeLegendaTab==='li'?'active':''}">
+            <textarea id="f-legenda_li" rows="10" style="width:100%;background:var(--s1);border:1px solid var(--border);color:var(--text);padding:10px;font-family:inherit;font-size:0.8rem;border-radius:5px;" oninput="updateMeta('legenda_li', this.value)">${escapeHtml(pauta.legenda_li || '')}</textarea>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSlideList() {
+      const items = pauta.slides.map((s, i) => {
+        const preview = slidePreviewText(s);
+        return `
+          <div class="slide-item ${i===selectedSlide?'active':''}" onclick="selectSlide(${i})">
+            <div class="idx">${String(i+1).padStart(2,'0')}</div>
+            <div class="meta">
+              <div class="tipo">${TIPO_LABELS[s.tipo] || s.tipo}</div>
+              <div class="preview">${escapeHtml(preview)}</div>
+            </div>
+            <div class="handles">
+              <button class="icon-btn" onclick="event.stopPropagation();moveSlide(${i},-1)" ${i===0?'disabled style="opacity:0.3"':''} title="Mover pra cima">↑</button>
+              <button class="icon-btn" onclick="event.stopPropagation();moveSlide(${i},1)" ${i===pauta.slides.length-1?'disabled style="opacity:0.3"':''} title="Mover pra baixo">↓</button>
+              <button class="icon-btn danger" onclick="event.stopPropagation();deleteSlide(${i})" title="Remover">✕</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const addOpts = TIPOS_DISPONIVEIS.map(t => `<option value="${t}">+ ${TIPO_LABELS[t]}</option>`).join('');
+
+      return `
+        <div class="slide-list">${items}</div>
+        <div class="add-slide-row">
+          <select onchange="addSlide(this.value); this.value='';">
+            <option value="">+ Adicionar slide…</option>
+            ${addOpts}
+          </select>
+        </div>
+      `;
+    }
+
+    function slidePreviewText(slide) {
+      const t = slide.titulo || slide.pergunta || slide.cta?.texto || '';
+      return stripRich(t).slice(0, 60);
+    }
+
+    function stripRich(s) {
+      return String(s || '').replace(/~~|\*\*|_/g, '');
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // RENDER: COLUNA DIREITA (EDITOR DO SLIDE SELECIONADO)
+    // ═══════════════════════════════════════════════════════
+    function renderRight() {
+      const el = document.getElementById('colRight');
+      const hasTypedSlides = Array.isArray(pauta.slides) && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
+
+      if (!hasTypedSlides || !pauta.slides.length) {
+        el.innerHTML = `<div class="empty-state">
+          <h3>Sem slides pra editar</h3>
+          <p>Use o <code>+ Adicionar slide</code> na esquerda ou gere conteúdo novo via <code>/gerar-post</code>.</p>
+        </div>`;
+        return;
+      }
+
+      const slide = pauta.slides[selectedSlide];
+      if (!slide) {
+        selectedSlide = 0;
+        renderRight();
+        return;
+      }
+
+      const defs = FIELD_DEFS[slide.tipo];
+      if (!defs) {
+        el.innerHTML = `<div class="empty-state">
+          <h3>Tipo desconhecido</h3>
+          <p>O tipo <code>${escapeHtml(slide.tipo)}</code> não tem editor. Atualize <code>FIELD_DEFS</code> em editar.html.</p>
+        </div>`;
+        return;
+      }
+
+      el.innerHTML = `
+        <div class="editor-header">
+          <div class="editor-title">
+            Slide ${selectedSlide + 1} <span class="tipo-tag">${TIPO_LABELS[slide.tipo]}</span>
+          </div>
+          <div>
+            <button class="btn btn-ghost" onclick="testRenderSlide()">Testar render</button>
+          </div>
+        </div>
+
+        <div id="fieldsContainer"></div>
+
+        <div class="preview-wrap" id="previewWrap" style="display:none;">
+          <h4>Preview (via /api/generate-art)</h4>
+          <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin"></iframe>
+          <div class="preview-actions">
+            <button class="btn btn-ghost" onclick="document.getElementById('previewWrap').style.display='none'">Fechar</button>
+          </div>
+        </div>
+      `;
+
+      const container = document.getElementById('fieldsContainer');
+      container.innerHTML = defs.map(def => renderFieldDef(def, slide, ['slides', selectedSlide])).join('');
+    }
+
+    // Renderiza um field definition. `path` é o caminho até o objeto pai no estado.
+    function renderFieldDef(def, obj, parentPath) {
+      const value = obj[def.key];
+      const fullPath = [...parentPath, def.key];
+
+      if (def.type === 'text' || def.type === 'textarea') {
+        return renderInputPath(def.label, fullPath, def.type, value ?? '', {
+          hint: def.rich ? 'Rich text: <span class="rich-hint">_destaque_</span> <span class="rich-hint">**forte**</span> <span class="rich-hint">~~riscado~~</span>' : null,
+          placeholder: def.placeholder,
+        });
+      }
+
+      if (def.type === 'group') {
+        const inner = def.fields.map(f => renderFieldDef(f, value || {}, fullPath)).join('');
+        return `<div class="group-box">
+          <div class="group-title">${def.label}</div>
+          ${inner}
+        </div>`;
+      }
+
+      if (def.type === 'array') {
+        const arr = Array.isArray(value) ? value : [];
+        const items = arr.map((item, i) => {
+          const inner = def.itemFields.map(f => renderFieldDef(f, item, [...fullPath, i])).join('');
+          const canRemove = !def.fixed && arr.length > (def.min || 0);
+          return `<div class="array-item">
+            <div class="item-header">
+              <span class="item-idx">${def.itemLabel} ${i + 1}</span>
+              ${canRemove ? `<button class="icon-btn danger" onclick="removeArrayItem('${fullPath.join('.')}', ${i})" title="Remover">✕</button>` : ''}
+            </div>
+            ${inner}
+          </div>`;
+        }).join('');
+
+        const canAdd = !def.fixed && arr.length < (def.max || 999);
+        return `<div class="group-box">
+          <div class="group-title">${def.label} ${def.fixed ? `(fixo: ${def.min})` : `(${arr.length}/${def.max || '∞'})`}</div>
+          ${items}
+          ${canAdd ? `<button class="array-add" onclick="addArrayItem('${fullPath.join('.')}', '${def.itemFields.map(f=>f.key).join('|')}')">+ Adicionar ${def.itemLabel.toLowerCase()}</button>` : ''}
+        </div>`;
+      }
+
+      return '';
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // HELPERS DE RENDER (inputs genéricos)
+    // ═══════════════════════════════════════════════════════
+    function renderInput(label, key, type, value) {
+      const ctrl = type === 'textarea'
+        ? `<textarea oninput="updateMeta('${key}', this.value)" rows="2">${escapeHtml(value)}</textarea>`
+        : `<input type="text" value="${escapeHtml(value)}" oninput="updateMeta('${key}', this.value)">`;
+      return `<label class="field"><span class="lbl">${label}</span>${ctrl}</label>`;
+    }
+    function renderSelect(label, key, value, options) {
+      const opts = options.map(o => `<option ${o===value?'selected':''}>${o}</option>`).join('');
+      return `<label class="field"><span class="lbl">${label}</span><select onchange="updateMeta('${key}', this.value)">${opts}</select></label>`;
+    }
+    function renderInputPath(label, path, type, value, opts = {}) {
+      const pathStr = path.join('.');
+      const hint = opts.hint ? `<span class="hint">${opts.hint}</span>` : '';
+      const ph = opts.placeholder ? ` placeholder="${escapeHtml(opts.placeholder)}"` : '';
+      const ctrl = type === 'textarea'
+        ? `<textarea oninput="updatePath('${pathStr}', this.value)" rows="2"${ph}>${escapeHtml(value)}</textarea>`
+        : `<input type="text" value="${escapeHtml(value)}" oninput="updatePath('${pathStr}', this.value)"${ph}>`;
+      return `<label class="field"><span class="lbl">${label}</span>${ctrl}${hint}</label>`;
+    }
+
+    function escapeHtml(s) {
+      return String(s ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // MUTAÇÕES (todas marcam dirty e re-renderizam o que for preciso)
+    // ═══════════════════════════════════════════════════════
+    function updateMeta(key, value) {
+      pauta[key] = value;
+      markDirty();
+    }
+
+    // path = "slides.2.esquerda.descricao" — aplica valor profundo
+    function updatePath(pathStr, value) {
+      const parts = pathStr.split('.');
+      let cur = pauta;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const p = parts[i];
+        const key = isNaN(p) ? p : parseInt(p, 10);
+        if (cur[key] == null) cur[key] = isNaN(parts[i+1]) ? {} : [];
+        cur = cur[key];
+      }
+      const last = parts[parts.length - 1];
+      cur[isNaN(last) ? last : parseInt(last, 10)] = value;
+      markDirty();
+      // Atualiza só o preview da slide na lista esquerda (evita re-render completo da coluna direita)
+      const slideItem = document.querySelector('.slide-item.active .preview');
+      if (slideItem) slideItem.textContent = slidePreviewText(pauta.slides[selectedSlide]);
+    }
+
+    function selectSlide(i) {
+      selectedSlide = i;
+      renderLeft();
+      renderRight();
+    }
+
+    function moveSlide(i, dir) {
+      const j = i + dir;
+      if (j < 0 || j >= pauta.slides.length) return;
+      [pauta.slides[i], pauta.slides[j]] = [pauta.slides[j], pauta.slides[i]];
+      if (selectedSlide === i) selectedSlide = j;
+      else if (selectedSlide === j) selectedSlide = i;
+      markDirty();
+      renderLeft();
+      renderRight();
+    }
+
+    function deleteSlide(i) {
+      if (!confirm(`Remover slide ${i + 1}?`)) return;
+      pauta.slides.splice(i, 1);
+      if (selectedSlide >= pauta.slides.length) selectedSlide = Math.max(0, pauta.slides.length - 1);
+      markDirty();
+      renderLeft();
+      renderRight();
+    }
+
+    function addSlide(tipo) {
+      if (!tipo) return;
+      if (!Array.isArray(pauta.slides)) pauta.slides = [];
+      pauta.slides.push(blankSlide(tipo));
+      selectedSlide = pauta.slides.length - 1;
+      markDirty();
+      renderLeft();
+      renderRight();
+    }
+
+    function addArrayItem(pathStr, fieldKeys) {
+      const parts = pathStr.split('.').map(p => isNaN(p) ? p : parseInt(p, 10));
+      const arr = parts.reduce((o, k) => o[k], pauta);
+      const blank = {};
+      fieldKeys.split('|').forEach(k => { blank[k] = ''; });
+      arr.push(blank);
+      markDirty();
+      renderRight();
+    }
+
+    function removeArrayItem(pathStr, idx) {
+      const parts = pathStr.split('.').map(p => isNaN(p) ? p : parseInt(p, 10));
+      const arr = parts.reduce((o, k) => o[k], pauta);
+      arr.splice(idx, 1);
+      markDirty();
+      renderRight();
+    }
+
+    function switchLegenda(which) {
+      activeLegendaTab = which;
+      renderLeft();
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // SAVE / DISCARD / RENDER TEST
+    // ═══════════════════════════════════════════════════════
+    function savePauta() {
+      const all = loadPautas();
+      const idx = all.findIndex(p => p.id === pautaId);
+      if (idx < 0) { alert('Pauta não encontrada ao salvar.'); return; }
+      all[idx] = pauta;
+      savePautas(all);
+      pautaOriginal = JSON.parse(JSON.stringify(pauta));
+      markSaved();
+    }
+
+    function discardChanges() {
+      if (!dirty) return;
+      if (!confirm('Descartar todas as mudanças não salvas?')) return;
+      pauta = JSON.parse(JSON.stringify(pautaOriginal));
+      selectedSlide = 0;
+      dirty = false;
+      document.getElementById('saveStatus').textContent = '—';
+      renderLeft();
+      renderRight();
+    }
+
+    async function testRenderSlide() {
+      const slide = pauta.slides[selectedSlide];
+      const url = (localStorage.getItem('nexum360_vercel_url') || 'https://repositorio-pautas-git-main-luciano-castro.vercel.app').replace(/\/$/, '');
+      const body = {
+        conteudo: slide,
+        indice: selectedSlide + 1,
+        total: pauta.slides.length,
+        pilar: pauta.pilar,
+        tags: [pauta.pilar],
+      };
+      try {
+        const r = await fetch(`${url}/api/generate-art`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (!data.success) { alert('Erro: ' + (data.error || 'desconhecido')); return; }
+        document.getElementById('previewWrap').style.display = 'block';
+        const frame = document.getElementById('previewFrame');
+        frame.srcdoc = data.html;
+        frame.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } catch (e) {
+        alert('Falha no render: ' + e.message);
+      }
+    }
+
+    // ═══════════════════════════════════════════════════════
+    // BOOT
+    // ═══════════════════════════════════════════════════════
+    (function boot() {
+      if (!pautaId) {
+        document.getElementById('layout').innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted);">
+          <h2 style="font-family:'Playfair Display',serif;color:var(--text);margin-bottom:12px;">Pauta não especificada</h2>
+          <p>Adicione <code>?id=N</code> na URL. Ex: <code>editar.html?id=8</code></p>
+          <p style="margin-top:20px;"><a href="index.html" class="back-btn" style="display:inline-block;">← Voltar pro repositório</a></p>
+        </div>`;
+        return;
+      }
+      const all = loadPautas();
+      pautaOriginal = all.find(p => p.id === pautaId);
+      if (!pautaOriginal) {
+        document.getElementById('layout').innerHTML = `<div style="padding:60px;text-align:center;color:var(--muted);">
+          <h2 style="font-family:'Playfair Display',serif;color:var(--text);margin-bottom:12px;">Pauta ${pautaId} não encontrada</h2>
+          <p style="margin-top:20px;"><a href="index.html" class="back-btn" style="display:inline-block;">← Voltar</a></p>
+        </div>`;
+        return;
+      }
+      pauta = JSON.parse(JSON.stringify(pautaOriginal));
+      // Garantir shape mínimo
+      if (!Array.isArray(pauta.slides)) pauta.slides = [];
+      renderLeft();
+      renderRight();
+    })();
+
+    // Aviso antes de sair com alterações
+    window.addEventListener('beforeunload', (e) => {
+      if (dirty) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // Atalhos: Ctrl+S salva
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        savePauta();
+      }
+    });
+  </script>
+</body>
+</html>

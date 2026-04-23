@@ -1692,6 +1692,7 @@
                 <option value="Produção"  ${p.status==='Produção' ?'selected':''}>Em Produção</option>
                 <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
               </select>
+              <a class="action-btn" href="editar.html?id=${p.id}" onclick="event.stopPropagation()" title="Editar">✎</a>
               <button class="action-btn danger" onclick="deletePauta(${p.id})">✕</button>
             </div>
           </div>`);
