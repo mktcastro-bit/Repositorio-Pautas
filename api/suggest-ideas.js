@@ -79,6 +79,29 @@ RETORNE EXATAMENTE este JSON (sem markdown):
   ]
 }`;
 
+  const tool = {
+    name: 'deliver_ideas',
+    description: 'Entrega 6 ideias de conteúdo em formato estruturado. Use SEMPRE esta tool para responder.',
+    input_schema: {
+      type: 'object',
+      required: ['ideas'],
+      properties: {
+        ideas: {
+          type: 'array',
+          minItems: 6, maxItems: 6,
+          items: {
+            type: 'object',
+            required: ['titulo', 'subtitulo'],
+            properties: {
+              titulo: { type: 'string', description: 'Título direto e impactante (máx 12 palavras)' },
+              subtitulo: { type: 'string', description: 'Ângulo ou gancho estratégico (máx 20 palavras)' },
+            },
+          },
+        },
+      },
+    },
+  };
+
   try {
     const r = await fetch(ANTHROPIC_API, {
       method:  'POST',
@@ -92,6 +115,8 @@ RETORNE EXATAMENTE este JSON (sem markdown):
         max_tokens: 1024,
         system:     SYSTEM_PROMPT,
         messages:   [{ role: 'user', content: userPrompt }],
+        tools: [tool],
+        tool_choice: { type: 'tool', name: 'deliver_ideas' },
       }),
     });
 
@@ -100,15 +125,14 @@ RETORNE EXATAMENTE este JSON (sem markdown):
       return res.status(502).json({ error: `Anthropic API error: ${r.status} — ${err}` });
     }
 
-    const data   = await r.json();
-    const raw    = data.content?.[0]?.text || '';
-    const clean  = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-    const start  = clean.indexOf('{');
-    const end    = clean.lastIndexOf('}');
-    if (start === -1 || end === -1) throw new Error('Resposta não contém JSON válido.');
-    const result = JSON.parse(clean.slice(start, end + 1));
+    const data = await r.json();
+    const toolUse = data.content?.find(b => b.type === 'tool_use');
+    if (!toolUse?.input) {
+      console.error('[suggest-ideas] Sem tool_use:', JSON.stringify(data.content));
+      return res.status(500).json({ error: 'Modelo não retornou tool_use estruturado.' });
+    }
 
-    return res.status(200).json({ success: true, ideas: result.ideas || [] });
+    return res.status(200).json({ success: true, ideas: toolUse.input.ideas || [] });
 
   } catch (err) {
     console.error('[suggest-ideas]', err.message);

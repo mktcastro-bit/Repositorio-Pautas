@@ -142,6 +142,9 @@ export default async function handler(req, res) {
         max_tokens: 4096,
         system:     SYSTEM_PROMPT,
         messages:   [{ role: 'user', content: userPrompt }],
+        // Força saída estruturada via tool use — elimina JSON malformado.
+        tools: [DELIVER_TOOL],
+        tool_choice: { type: 'tool', name: 'deliver_content' },
       }),
     });
 
@@ -152,15 +155,18 @@ export default async function handler(req, res) {
     }
 
     const data  = await r.json();
-    const raw   = data.content?.[0]?.text || '';
     const usage = data.usage || {};
 
-    const jsonStr = extractJson(raw);
-    const result  = JSON.parse(jsonStr);
+    // Procura o bloco tool_use na resposta.
+    const toolUse = data.content?.find(b => b.type === 'tool_use');
+    if (!toolUse?.input) {
+      console.error('[generate] Sem tool_use:', JSON.stringify(data.content));
+      return res.status(500).json({ error: 'Modelo não retornou tool_use estruturado.' });
+    }
 
     return res.status(200).json({
       success: true,
-      result,
+      result: toolUse.input,
       usage: {
         input_tokens: usage.input_tokens,
         output_tokens: usage.output_tokens,
@@ -172,6 +178,49 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message });
   }
 }
+
+// ── TOOL DEFINITION (JSON Schema) ────────────────────────────
+// O modelo é forçado a chamar esta tool — o `input` é sempre JSON válido.
+// Schema é intencionalmente leve no `slides[]` (additionalProperties:true)
+// porque são 8 tipos discriminados; a validação fina fica no lib/render/schemas.js.
+const DELIVER_TOOL = {
+  name: 'deliver_content',
+  description: 'Entrega o conteúdo completo da pauta em formato estruturado. Use SEMPRE esta tool para responder.',
+  input_schema: {
+    type: 'object',
+    required: ['tema', 'gancho', 'angulo', 'picah', 'slides', 'legenda_ig', 'legenda_li', 'hashtags_ig', 'hashtags_li'],
+    properties: {
+      tema: { type: 'string', description: 'Título completo do conteúdo' },
+      gancho: { type: 'string', description: 'Frase de abertura impactante' },
+      angulo: { type: 'string', description: 'Como o conteúdo posiciona a marca estrategicamente' },
+      picah: {
+        type: 'array',
+        items: { type: 'string', enum: ['P', 'I', 'C', 'A', 'H'] },
+        minItems: 1,
+      },
+      slides: {
+        type: 'array',
+        minItems: 1,
+        maxItems: 8,
+        items: {
+          type: 'object',
+          required: ['tipo'],
+          properties: {
+            tipo: {
+              type: 'string',
+              enum: ['capa', 'grid-2-colunas', 'lista-numerada', 'grid-4-pilares', 'frase-destaque-com-box', 'comparacao-contraste', 'cta-final', 'teste-pergunta'],
+            },
+          },
+          additionalProperties: true,
+        },
+      },
+      legenda_ig: { type: 'string' },
+      legenda_li: { type: 'string' },
+      hashtags_ig: { type: 'array', items: { type: 'string' } },
+      hashtags_li: { type: 'array', items: { type: 'string' } },
+    },
+  },
+};
 
 // ── HELPERS ───────────────────────────────────────────────────
 
@@ -231,24 +280,4 @@ Retorne EXATAMENTE este JSON (sem markdown, sem crases, sem explicações):
 }`;
 }
 
-function extractJson(text) {
-  const clean = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-  const start = clean.indexOf('{');
-  const end   = clean.lastIndexOf('}');
-  if (start === -1 || end === -1) throw new Error('Resposta não contém JSON válido.');
-  const raw = clean.slice(start, end + 1);
-
-  // Sanitiza quebras de linha literais dentro de strings JSON
-  let sanitized = '';
-  let inString  = false;
-  let escape    = false;
-  for (let i = 0; i < raw.length; i++) {
-    const ch = raw[i];
-    if (escape) { sanitized += ch; escape = false; continue; }
-    if (ch === '\\') { escape = true; sanitized += ch; continue; }
-    if (ch === '"') { inString = !inString; sanitized += ch; continue; }
-    if (inString && (ch === '\n' || ch === '\r')) { sanitized += '\\n'; continue; }
-    sanitized += ch;
-  }
-  return sanitized;
-}
+// extractJson removido — saída agora é via tool_use, JSON sempre válido.
