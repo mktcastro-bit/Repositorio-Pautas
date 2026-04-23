@@ -59,12 +59,23 @@ CONTEÚDO: flex-direction column, justify-content center, gap variável
 7. deco-number: número gigante (300-420px) em background com opacity 0.04, Playfair, cor accent, posição absolute
 8. bullet-list: lista sem marcador, cada item com "→" prefix, font-size 1.5rem, cor text, gap 16px
 
+━━━ TAMANHOS MÍNIMOS DE TEXTO (OBRIGATÓRIO — o card é 1080×1350 e será visualizado reduzido no feed) ━━━
+
+NUNCA use tamanhos menores que os limites abaixo, mesmo que o layout "peça" algo menor:
+- Descrições, corpo de texto de apoio, legendas explicativas: ≥ 1.3rem
+- Subtítulos, citações curtas, itens de lista: ≥ 1.5rem
+- Labels de seção em uppercase (source-tag, pilar-label, insight-label, counter): ≥ 0.72rem (letra-espaçada)
+- Footer / assinatura / URL: ≥ 0.85rem
+- Tags pill: ≥ 0.62rem
+
+Se você se vir escrevendo font-size menor que 1rem para texto em lower-case (que não seja uppercase-label), PARE — aumente. Texto pequeno demais fica ilegível no Instagram.
+
 ━━━ REGRAS ━━━
 - Retorne APENAS o HTML completo, sem markdown, sem explicações
 - Inclua sempre as Google Fonts no <head>
 - Use apenas CSS inline ou <style> — sem dependências externas além das fontes
 - O card deve ter overflow: hidden
-- Adicione media queries para escalar o card em telas menores (scale 0.65 em max-width 1200px, scale 0.38 em max-width 860px)
+- NÃO adicione media queries com zoom/scale no body — o card é sempre 1080×1350 e será renderizado em PNG nesse tamanho.
 - Seja criativo com o layout mas mantenha o design premium e minimalista
 - Não use emojis no design
 - Adapte os elementos ao conteúdo — não force todos os elementos em todo post`;

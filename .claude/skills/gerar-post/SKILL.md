@@ -97,6 +97,8 @@ Para **cada slide** (ou apenas o slide pedido em `slide=N`):
 - **VARIE layouts entre slides** — capa pode ser diferente de slide do meio que é diferente do CTA final. Use `deco-number`, `insight-box`, `stat-numbers`, `bullet-list` quando couber.
 - **NÃO chame API externa** — tudo acontece na sua resposta.
 - **NÃO reescreva prompts inline**. Sempre releia os arquivos `api/*.js` antes de gerar, para refletir a versão atual.
+- **TAMANHOS MÍNIMOS (crítico — falha recorrente):** respeite a seção "TAMANHOS MÍNIMOS DE TEXTO" do `SYSTEM_PROMPT` em `api/generate-art.js`. O card é 1080×1350 exibido reduzido no feed — texto abaixo de 1rem para lower-case fica ilegível. Se achar que precisa "apertar" o layout com texto pequeno, corte conteúdo em vez de encolher fonte.
+- **NÃO coloque `@media zoom`** no CSS — o card é renderizado em PNG no tamanho nativo.
 - Se o usuário pedir para iterar/regenerar um slide específico, aceite `slide=N` e regere só aquele.
 - Mantenha as respostas curtas no chat — o conteúdo rico vai para os arquivos.
 

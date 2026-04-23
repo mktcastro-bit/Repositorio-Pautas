@@ -1,0 +1,46 @@
+{
+  "versao": 1,
+  "atualizado_em": "2026-04-22T12:09:20.560Z",
+  "identidade": {
+    "nome": "Nexum360",
+    "descricao": "Consultoria contemporânea de marketing, inovação e comunicação que une ciência do comportamento humano com tecnologia e inteligência artificial para estratégia, marca e presença digital.",
+    "proposta_valor": "Estratégia cocriada com as pessoas, impulsionada por ciência, tecnologia e IA para gerar diferenciação real e aderência ao mercado."
+  },
+  "areas_atuacao": [],
+  "publico": {
+    "perfil": "B2B",
+    "cargo": [
+      "gestores",
+      "empresarios",
+      "empreendedores"
+    ],
+    "maturidade": "intermediário",
+    "dor_principal": "Empresas que precisam estruturar marca, comunicação e inovação com base em dados e comportamento humano, reduzindo incerteza e acelerando resultados."
+  },
+  "voz": {
+    "tom": [
+      "direto",
+      "provocativo",
+      "inteligente"
+    ],
+    "sofisticacao": "premium",
+    "linguagem": "provocativa",
+    "evitar": [
+      "Jargões vazios como 'soluções inovadoras' ou 'transformação digital' sem contexto",
+      "Tom motivacional excessivo que soa como coach de autoajuda",
+      "Linguagem técnica de agência tradicional focada em métricas isoladas (CPL, ROAS) sem conectar à estratégia de negócio",
+      "Promessas de resultado rápido ou fórmulas mágicas de crescimento",
+      "Excesso de storytelling emocional que dilui a autoridade e o raciocínio estratégico"
+    ]
+  },
+  "visual": {
+    "estilo": "Minimalista sofisticado, dark luxury, contemporâneo e estratégico",
+    "cor_primaria": "#c8a96e",
+    "cor_secundaria": "#0a0a0a",
+    "cor_terciaria": "#fdfaf5",
+    "referencias": ""
+  },
+  "fontes_enriquecimento": {
+    "site": "https://www.nexum360.com.br/"
+  }
+}
