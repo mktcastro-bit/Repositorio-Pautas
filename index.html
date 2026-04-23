@@ -2048,6 +2048,7 @@
                 <option value="Publicado" ${p.status==='Publicado'?'selected':''}>Publicado</option>
               </select>
               ${legendaBtn}
+              <a class="detail-btn" href="editar.html?id=${p.id}" style="text-decoration:none;display:inline-flex;align-items:center;">✎ Editar</a>
               <button class="detail-btn publish" onclick="openPublish(${p.id})">↑ Publicar</button>
               <button class="detail-btn danger" onclick="deletePautaFromDetail(${p.id})">🗑 Apagar</button>
               <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
