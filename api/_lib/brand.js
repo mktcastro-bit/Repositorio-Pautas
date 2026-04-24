@@ -39,6 +39,32 @@ export function brandContextBlock(bp) {
   const cores = [visual.cor_primaria, visual.cor_secundaria, visual.cor_terciaria].filter(Boolean);
   if (cores.length) lines.push(`- Paleta de cores da marca: ${cores.join(' · ')}`);
 
+  // Assets da marca — inventário para IA escolher via asset_hint
+  const assets = bp.assets;
+  if (assets) {
+    const assetLines = [];
+    const logoVars = ['principal', 'secundaria', 'monograma', 'monocromatica']
+      .filter(v => assets.logo?.[v]?.data);
+    if (logoVars.length)
+      assetLines.push(`- Logo — variantes disponíveis: ${logoVars.join(' · ')}`);
+
+    const listAssets = (arr, label) => {
+      const valid = (arr || []).filter(a => a?.data);
+      if (valid.length)
+        assetLines.push(`- ${label}: ${valid.map(a => `${a.id} "${a.nome}"${a.tags?.length ? ' [' + a.tags.join(', ') + ']' : ''}`).join(' · ')}`);
+    };
+    listAssets(assets.simbolos,   'Símbolos');
+    listAssets(assets.icones,     'Ícones');
+    listAssets(assets.backgrounds,'Backgrounds');
+
+    if (assetLines.length) {
+      lines.push('');
+      lines.push('ASSETS DA MARCA (use asset_hint nos slides para selecionar):');
+      assetLines.forEach(l => lines.push(l));
+      lines.push('  → Escolha pelo propósito semântico do slide. Capa = logo principal. CTA = monograma. Slide de contraste = sem símbolo ou símbolo neutro. Deixe null quando não agregar valor.');
+    }
+  }
+
   lines.push('');
   lines.push('DIRETRIZ: gere conteúdo que SÓ essa marca poderia assinar. Se o output couber em qualquer consultoria do mesmo nicho, reescreva.');
 

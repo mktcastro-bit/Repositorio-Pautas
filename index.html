@@ -703,6 +703,61 @@
     .dna-btn-primary:hover { opacity: 0.85; }
     .dna-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
+    /* ── DNA ASSETS (passo 5) ── */
+    .dna-assets-section { display: flex; flex-direction: column; gap: 10px; }
+    .dna-assets-section + .dna-assets-section { margin-top: 6px; padding-top: 18px; border-top: 1px solid var(--border); }
+    .dna-assets-title { font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); font-weight: 700; }
+    .dna-logo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .dna-logo-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .dna-logo-thumb {
+      width: 100%; aspect-ratio: 2/1; background: var(--s1); border: 1px dashed var(--border);
+      border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      overflow: hidden; cursor: pointer; transition: border-color 0.18s; min-height: 60px;
+    }
+    .dna-logo-thumb:hover { border-color: var(--accent); }
+    .dna-logo-thumb img { max-width: 90%; max-height: 90%; object-fit: contain; }
+    .dna-logo-thumb-empty { color: var(--muted); font-size: 1.4rem; line-height: 1; }
+    .dna-logo-label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .dna-logo-remove { background: transparent; border: none; color: var(--muted); font-size: 0.7rem; cursor: pointer; padding: 0; }
+    .dna-logo-remove:hover { color: #e05; }
+    .dna-asset-upload-label {
+      display: inline-block; cursor: pointer; background: transparent;
+      border: 1px solid var(--border); color: var(--muted);
+      font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; font-weight: 600;
+      padding: 5px 11px; border-radius: 5px; transition: all 0.15s; text-align: center; white-space: nowrap;
+    }
+    .dna-asset-upload-label:hover { border-color: var(--accent); color: var(--accent); }
+    .dna-asset-upload-label input[type="file"] { display: none; }
+    .dna-assets-list { display: flex; flex-direction: column; gap: 8px; }
+    .dna-asset-item {
+      display: flex; align-items: center; gap: 10px; background: var(--s1);
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px;
+    }
+    .dna-asset-item-thumb {
+      width: 48px; height: 48px; object-fit: contain; background: var(--s2);
+      border-radius: 5px; flex-shrink: 0; border: 1px solid var(--border);
+    }
+    .dna-asset-item-info { flex: 1; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .dna-asset-item-nome {
+      background: transparent; border: none; border-bottom: 1px solid var(--border);
+      color: var(--text); font-size: 0.84rem; padding: 2px 0; outline: none; width: 100%;
+    }
+    .dna-asset-item-nome:focus { border-bottom-color: var(--accent); }
+    .dna-asset-item-tags { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+    .dna-asset-tag {
+      background: rgba(77,143,218,0.1); border: 1px solid rgba(77,143,218,0.3);
+      color: var(--accent); font-size: 0.68rem; padding: 2px 8px; border-radius: 10px;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .dna-asset-tag button { background: none; border: none; cursor: pointer; color: inherit; padding: 0; font-size: 0.6rem; line-height: 1; }
+    .dna-asset-tag-input {
+      background: transparent; border: none; border-bottom: 1px dashed var(--border);
+      color: var(--muted); font-size: 0.68rem; padding: 2px 4px; outline: none; width: 80px;
+    }
+    .dna-asset-tag-input:focus { border-bottom-color: var(--accent); }
+    .dna-asset-item-remove { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 0.8rem; padding: 4px; flex-shrink: 0; }
+    .dna-asset-item-remove:hover { color: #e05; }
+    .dna-asset-add-wrap { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
     /* ── DNA VOZ INFO + AI ASSIST ── */
     /* ── PILAR EDITOR ── */
     .pilar-editor-wrap { position: relative; }
@@ -1206,6 +1261,7 @@
         <button class="dna-step-tab" data-step="2" onclick="dnaGoStep(2)"><span class="dna-step-num">2</span> Público</button>
         <button class="dna-step-tab" data-step="3" onclick="dnaGoStep(3)"><span class="dna-step-num">3</span> Voz</button>
         <button class="dna-step-tab" data-step="4" onclick="dnaGoStep(4)"><span class="dna-step-num">4</span> Identidade</button>
+        <button class="dna-step-tab" data-step="5" onclick="dnaGoStep(5)"><span class="dna-step-num">5</span> Assets</button>
       </div>
       <div class="dna-body" id="dnaBody">
 
@@ -1398,9 +1454,81 @@
             <textarea id="dna-referencias" rows="2" placeholder="Ex: contraste alto, tipografia serifada nos títulos"></textarea>
           </label>
         </div>
+
+        <!-- PASSO 5 — ASSETS -->
+        <div class="dna-pane" data-pane="5">
+          <div class="dna-help">Faça upload dos assets visuais da marca. A IA lê o inventário e sugere qual usar em cada slide — você pode sobrescrever no editor. Prefira SVG (menor e escalável). Limite: 500 KB por arquivo.</div>
+
+          <!-- Logomarca: 4 variantes fixas -->
+          <div class="dna-assets-section">
+            <div class="dna-assets-title">Logomarca</div>
+            <div class="dna-logo-grid">
+              <div class="dna-logo-slot">
+                <div class="dna-logo-thumb" id="asset-logo-principal-thumb" onclick="document.getElementById('asset-logo-principal-input').click()">
+                  <span class="dna-logo-thumb-empty">＋</span>
+                </div>
+                <div class="dna-logo-label">Principal</div>
+                <label class="dna-asset-upload-label">Carregar<input type="file" id="asset-logo-principal-input" accept="image/svg+xml,image/png,image/jpeg,image/webp" onchange="dnaUploadLogo('principal',this)"></label>
+                <button class="dna-logo-remove" id="asset-logo-principal-remove" style="display:none" onclick="dnaRemoveLogo('principal')">✕ Remover</button>
+              </div>
+              <div class="dna-logo-slot">
+                <div class="dna-logo-thumb" id="asset-logo-secundaria-thumb" onclick="document.getElementById('asset-logo-secundaria-input').click()">
+                  <span class="dna-logo-thumb-empty">＋</span>
+                </div>
+                <div class="dna-logo-label">Secundária</div>
+                <label class="dna-asset-upload-label">Carregar<input type="file" id="asset-logo-secundaria-input" accept="image/svg+xml,image/png,image/jpeg,image/webp" onchange="dnaUploadLogo('secundaria',this)"></label>
+                <button class="dna-logo-remove" id="asset-logo-secundaria-remove" style="display:none" onclick="dnaRemoveLogo('secundaria')">✕ Remover</button>
+              </div>
+              <div class="dna-logo-slot">
+                <div class="dna-logo-thumb" id="asset-logo-monograma-thumb" onclick="document.getElementById('asset-logo-monograma-input').click()">
+                  <span class="dna-logo-thumb-empty">＋</span>
+                </div>
+                <div class="dna-logo-label">Monograma</div>
+                <label class="dna-asset-upload-label">Carregar<input type="file" id="asset-logo-monograma-input" accept="image/svg+xml,image/png,image/jpeg,image/webp" onchange="dnaUploadLogo('monograma',this)"></label>
+                <button class="dna-logo-remove" id="asset-logo-monograma-remove" style="display:none" onclick="dnaRemoveLogo('monograma')">✕ Remover</button>
+              </div>
+              <div class="dna-logo-slot">
+                <div class="dna-logo-thumb" id="asset-logo-monocromatica-thumb" onclick="document.getElementById('asset-logo-monocromatica-input').click()">
+                  <span class="dna-logo-thumb-empty">＋</span>
+                </div>
+                <div class="dna-logo-label">Monocromática</div>
+                <label class="dna-asset-upload-label">Carregar<input type="file" id="asset-logo-monocromatica-input" accept="image/svg+xml,image/png,image/jpeg,image/webp" onchange="dnaUploadLogo('monocromatica',this)"></label>
+                <button class="dna-logo-remove" id="asset-logo-monocromatica-remove" style="display:none" onclick="dnaRemoveLogo('monocromatica')">✕ Remover</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Símbolos da marca -->
+          <div class="dna-assets-section">
+            <div class="dna-assets-title">Símbolos da Marca <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(monograma, brand mark, decorações)</span></div>
+            <div class="dna-assets-list" id="dna-simbolos-list"></div>
+            <div class="dna-asset-add-wrap">
+              <label class="dna-asset-upload-label">＋ Adicionar símbolo<input type="file" accept="image/svg+xml,image/png" onchange="dnaUploadAssetItem('simbolos',this)"></label>
+            </div>
+          </div>
+
+          <!-- Ícones -->
+          <div class="dna-assets-section">
+            <div class="dna-assets-title">Ícones <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(pictogramas para ilustrar pontos)</span></div>
+            <div class="dna-assets-list" id="dna-icones-list"></div>
+            <div class="dna-asset-add-wrap">
+              <label class="dna-asset-upload-label">＋ Adicionar ícone<input type="file" accept="image/svg+xml,image/png" onchange="dnaUploadAssetItem('icones',this)"></label>
+            </div>
+          </div>
+
+          <!-- Backgrounds -->
+          <div class="dna-assets-section">
+            <div class="dna-assets-title">Backgrounds <span style="font-weight:400;color:var(--muted);text-transform:none;letter-spacing:0">(texturas, padrões, fotos)</span></div>
+            <div class="dna-assets-list" id="dna-backgrounds-list"></div>
+            <div class="dna-asset-add-wrap">
+              <label class="dna-asset-upload-label">＋ Adicionar background<input type="file" accept="image/svg+xml,image/png,image/jpeg,image/webp" onchange="dnaUploadAssetItem('backgrounds',this)"></label>
+            </div>
+          </div>
+        </div>
+
       </div>
       <div class="dna-footer">
-        <div class="dna-footer-hint" id="dnaFooterHint">Passo 1 de 4 — Identidade</div>
+        <div class="dna-footer-hint" id="dnaFooterHint">Passo 1 de 5 — Identidade</div>
         <div class="dna-footer-actions">
           <button class="dna-btn-secondary" id="dnaPrevBtn" onclick="dnaGoStep(dnaCurrentStep-1)" style="display:none">← Anterior</button>
           <button class="dna-btn-secondary" id="dnaSkipBtn" onclick="closeModal('brandOverlay')">Fechar sem salvar</button>
@@ -1757,6 +1885,7 @@
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
             conteudo,
+            dna:    buildDnaWithAssets(conteudo.asset_hint),
             indice: slideIndex + 1,
             total:  p.slides.length,
             pilar:  p.pilar,
@@ -3105,6 +3234,7 @@
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({
             conteudo,
+            dna:    buildDnaWithAssets(conteudo.asset_hint),
             indice: slideIndex + 1,
             total:  slides.length,
             pilar:  wfGenParams.pilar,
@@ -3212,7 +3342,8 @@
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                conteudo, indice: i + 1, total: slides.length,
+                conteudo, dna: buildDnaWithAssets(conteudo.asset_hint),
+                indice: i + 1, total: slides.length,
                 pilar: params.pilar, tags: [params.pilar],
               }),
             });
@@ -3490,6 +3621,8 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
     let brandProfile  = loadBrandProfile();
     let dnaCurrentStep = 1;
     let _dnaTagsBuffer = { areas: [], cargo: [], evitar: [] };
+    let _dnaAssetsBuffer = { logo: { principal: null, secundaria: null, monograma: null, monocromatica: null }, simbolos: [], icones: [], backgrounds: [] };
+    const MAX_ASSET_BYTES = 500 * 1024; // 500 KB
 
     function loadBrandProfile() {
       try {
@@ -3560,20 +3693,36 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
       _dnaTagsBuffer.evitar = Array.isArray(voz.evitar)        ? [...voz.evitar]       : [];
       dnaRenderTags('areas');  dnaRenderTags('cargo');  dnaRenderTags('evitar');
 
+      // Popula buffer de assets
+      const savedAssets = bp.assets || {};
+      _dnaAssetsBuffer = {
+        logo: {
+          principal:     savedAssets.logo?.principal     || null,
+          secundaria:    savedAssets.logo?.secundaria    || null,
+          monograma:     savedAssets.logo?.monograma     || null,
+          monocromatica: savedAssets.logo?.monocromatica || null,
+        },
+        simbolos:    Array.isArray(savedAssets.simbolos)    ? [...savedAssets.simbolos]    : [],
+        icones:      Array.isArray(savedAssets.icones)      ? [...savedAssets.icones]      : [],
+        backgrounds: Array.isArray(savedAssets.backgrounds) ? [...savedAssets.backgrounds] : [],
+      };
+      ['principal','secundaria','monograma','monocromatica'].forEach(dnaRenderLogoSlot);
+      ['simbolos','icones','backgrounds'].forEach(dnaRenderAssetsList);
+
       dnaGoStep(1);
       document.getElementById('brandOverlay').classList.add('open');
     }
 
     function dnaGoStep(n) {
-      n = Math.max(1, Math.min(4, n));
+      n = Math.max(1, Math.min(5, n));
       dnaCurrentStep = n;
       document.querySelectorAll('.dna-step-tab').forEach(t => t.classList.toggle('active', Number(t.dataset.step) === n));
       document.querySelectorAll('.dna-pane').forEach(p => p.classList.toggle('active', Number(p.dataset.pane) === n));
-      const labels = ['Marca','Público','Voz','Identidade Final'];
-      document.getElementById('dnaFooterHint').textContent = `Passo ${n} de 4 — ${labels[n-1]}`;
+      const labels = ['Marca','Público','Voz','Identidade Final','Assets Visuais'];
+      document.getElementById('dnaFooterHint').textContent = `Passo ${n} de 5 — ${labels[n-1]}`;
       document.getElementById('dnaPrevBtn').style.display = n > 1 ? '' : 'none';
-      document.getElementById('dnaNextBtn').style.display = n < 4 ? '' : 'none';
-      document.getElementById('dnaSaveBtn').style.display = n === 4 ? '' : 'none';
+      document.getElementById('dnaNextBtn').style.display = n < 5 ? '' : 'none';
+      document.getElementById('dnaSaveBtn').style.display = n >= 4 ? '' : 'none';
     }
 
     function dnaToggleChip(btn) { btn.classList.toggle('active'); }
@@ -3613,6 +3762,133 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         }
       });
     });
+
+    // ─── DNA ASSETS ──────────────────────────────────────────────
+
+    function dnaRenderLogoSlot(variante) {
+      const asset = _dnaAssetsBuffer.logo?.[variante];
+      const thumb = document.getElementById(`asset-logo-${variante}-thumb`);
+      const removeBtn = document.getElementById(`asset-logo-${variante}-remove`);
+      if (!thumb) return;
+      if (asset?.data) {
+        thumb.innerHTML = `<img src="${asset.data}" alt="${variante}" style="max-width:90%;max-height:80%;object-fit:contain;">`;
+        if (removeBtn) removeBtn.style.display = '';
+      } else {
+        thumb.innerHTML = `<span class="dna-logo-thumb-empty">＋</span>`;
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+    }
+
+    function dnaUploadLogo(variante, input) {
+      const file = input.files?.[0];
+      input.value = '';
+      if (!file) return;
+      if (file.size > MAX_ASSET_BYTES) {
+        showToast(`Arquivo muito grande (${(file.size/1024).toFixed(0)} KB). Limite: 500 KB. Prefira SVG.`, 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        if (!_dnaAssetsBuffer.logo) _dnaAssetsBuffer.logo = {};
+        _dnaAssetsBuffer.logo[variante] = { data: e.target.result, nome: file.name, formato: file.type };
+        dnaRenderLogoSlot(variante);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function dnaRemoveLogo(variante) {
+      if (_dnaAssetsBuffer.logo) _dnaAssetsBuffer.logo[variante] = null;
+      dnaRenderLogoSlot(variante);
+    }
+
+    function dnaRenderAssetsList(categoria) {
+      const list = document.getElementById(`dna-${categoria}-list`);
+      if (!list) return;
+      const items = _dnaAssetsBuffer[categoria] || [];
+      list.innerHTML = items.map((item, i) => `
+        <div class="dna-asset-item">
+          <img src="${item.data}" alt="${escHtml(item.nome)}" class="dna-asset-item-thumb">
+          <div class="dna-asset-item-info">
+            <input class="dna-asset-item-nome" value="${escHtml(item.nome)}" placeholder="Nome" oninput="dnaRenameAsset('${categoria}',${i},this.value)">
+            <div class="dna-asset-item-tags">
+              ${(item.tags||[]).map((t,ti) => `<span class="dna-asset-tag">${escHtml(t)}<button type="button" onclick="dnaRemoveAssetTag('${categoria}',${i},${ti})">✕</button></span>`).join('')}
+              <input class="dna-asset-tag-input" placeholder="+ tag  Enter" onkeydown="dnaAddAssetTagKey(event,'${categoria}',${i})">
+            </div>
+          </div>
+          <button class="dna-asset-item-remove" type="button" title="Remover" onclick="dnaRemoveAsset('${categoria}',${i})">✕</button>
+        </div>`).join('');
+    }
+
+    function dnaUploadAssetItem(categoria, input) {
+      const file = input.files?.[0];
+      input.value = '';
+      if (!file) return;
+      if (file.size > MAX_ASSET_BYTES) {
+        showToast(`Arquivo muito grande (${(file.size/1024).toFixed(0)} KB). Limite: 500 KB.`, 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = e => {
+        const id = `${categoria.replace(/s$/,'')}_${Date.now()}`;
+        const nome = file.name.replace(/\.[^.]+$/, '');
+        _dnaAssetsBuffer[categoria].push({ id, nome, data: e.target.result, tags: [] });
+        dnaRenderAssetsList(categoria);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function dnaRemoveAsset(categoria, i) {
+      _dnaAssetsBuffer[categoria].splice(i, 1);
+      dnaRenderAssetsList(categoria);
+    }
+    function dnaRenameAsset(categoria, i, val) {
+      if (_dnaAssetsBuffer[categoria][i]) _dnaAssetsBuffer[categoria][i].nome = val;
+    }
+    function dnaAddAssetTagKey(e, categoria, i) {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      const val = e.target.value.trim();
+      if (!val) return;
+      if (!_dnaAssetsBuffer[categoria][i].tags) _dnaAssetsBuffer[categoria][i].tags = [];
+      if (!_dnaAssetsBuffer[categoria][i].tags.includes(val)) {
+        _dnaAssetsBuffer[categoria][i].tags.push(val);
+        dnaRenderAssetsList(categoria);
+      }
+      e.target.value = '';
+    }
+    function dnaRemoveAssetTag(categoria, i, ti) {
+      _dnaAssetsBuffer[categoria][i].tags.splice(ti, 1);
+      dnaRenderAssetsList(categoria);
+    }
+
+    // Constrói o objeto DNA com assets resolvidos para enviar ao /api/generate-art
+    function buildDnaWithAssets(assetHint) {
+      const assets = brandProfile?.assets || {};
+      const logoVariante = assetHint?.logo_variante || 'principal';
+      const logoData = assets.logo?.[logoVariante]?.data || assets.logo?.principal?.data || null;
+      const decoId = assetHint?.decoracao_id || null;
+      const decoData = decoId
+        ? [...(assets.simbolos||[]), ...(assets.backgrounds||[])].find(a => a.id === decoId)?.data || null
+        : null;
+      return {
+        marca: {
+          nome: brandProfile?.identidade?.nome || 'Nexum360',
+          assinatura_url: (brandProfile?.fontes_enriquecimento?.site || 'nexum360.com.br').replace(/^https?:\/\//, '').replace(/\/$/, ''),
+        },
+        cores: { bg_primario:'#070d1a', bg_surface:'#0d1628', borda:'#1a2b47', texto_primario:'#f0f0f0', texto_secundario:'#7a90b0', accent:'#4d8fda' },
+        tipografia: { display:'Playfair Display', corpo:'system-ui', escala:'confortavel', peso_display:'700' },
+        destaque: { estilo:'italico-cor', intensidade:'forte' },
+        decoracao: { tipo: decoData ? 'simbolo-asset' : 'numero-slide', opacidade:0.06, tamanho:'XL', posicao:'canto-inf-dir', asset_id: decoId, asset_url: decoData },
+        labels: { transformacao:'uppercase', spacing:'wide', prefixo:'traco-duplo' },
+        contador: { formato:'XX_barra_YY' },
+        caixas: { radius:'M', estilo:'borda-lateral', preenchimento:'accent-alpha' },
+        header: { estilo:'logo-pilar' },
+        rodape: { estilo:'completo', align:'space-between' },
+        logo: { asset_id: null, asset_url: logoData, tamanho_header:'M', fallback_texto: brandProfile?.identidade?.nome?.toLowerCase() || 'nexum360' },
+      };
+    }
+
+    // ─────────────────────────────────────────────────────────────
 
     function saveBrandProfile() {
       // Flush último texto sem Enter
@@ -3654,6 +3930,8 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
         fontes_enriquecimento: {
           site: document.getElementById('dna-url').value.trim(),
         },
+        // Assets: preserva dados já carregados (base64 não é re-serializado dos inputs)
+        assets: _dnaAssetsBuffer,
       };
 
       if (!bp.identidade.nome) {

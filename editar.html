@@ -247,6 +247,39 @@
     }
     .ai-apply-card .apply-btn:hover { opacity: 0.88; }
 
+    /* ASSET HINT OVERRIDE */
+    .asset-hint-panel {
+      background: rgba(77,143,218,0.05); border: 1px solid rgba(77,143,218,0.2);
+      border-radius: 8px; padding: 12px 14px; margin-bottom: 18px;
+    }
+    .asset-hint-header {
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;
+    }
+    .asset-hint-title {
+      font-size: 0.62rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: #4d8fda; font-weight: 700; display: flex; align-items: center; gap: 8px;
+    }
+    .asset-hint-badge {
+      background: rgba(77,143,218,0.15); border: 1px solid rgba(77,143,218,0.3);
+      color: #4d8fda; font-size: 0.58rem; padding: 2px 7px; border-radius: 10px;
+      font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em;
+    }
+    .asset-hint-body { margin-top: 12px; display: none; }
+    .asset-hint-panel.open .asset-hint-body { display: flex; flex-direction: column; gap: 12px; }
+    .asset-hint-row { display: flex; flex-direction: column; gap: 5px; }
+    .asset-hint-label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+    .asset-hint-select {
+      background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      font-size: 0.82rem; padding: 7px 10px; border-radius: 5px; outline: none;
+      appearance: auto;
+    }
+    .asset-hint-select:focus { border-color: #4d8fda; }
+    .asset-hint-preview { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .asset-hint-preview img { width: 40px; height: 40px; object-fit: contain; background: var(--s2); border: 1px solid var(--border); border-radius: 4px; }
+    .asset-hint-preview-empty { font-size: 0.72rem; color: var(--muted); font-style: italic; }
+    .asset-hint-toggle { color: #4d8fda; transition: transform 0.2s; }
+    .asset-hint-panel.open .asset-hint-toggle { transform: rotate(180deg); }
+
     @media (max-width: 1000px) {
       .layout { grid-template-columns: 1fr; }
       .col-left { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
@@ -302,8 +335,120 @@
     let dirty = false;
     let activeLegendaTab = 'ig';
     let aiPanelOpen = false;
+    let assetHintOpen = false;
     let lastRenderedHtml = null;    // última arte retornada por /api/generate-art
     let brandProfile = null;
+
+    // ─── ASSET HELPERS (espelha index.html) ──────────────────
+    function getAssets() {
+      return brandProfile?.assets || {};
+    }
+    function buildDnaWithAssets(assetHint) {
+      const assets = getAssets();
+      const logoVariante = assetHint?.logo_variante || 'principal';
+      const logoData = assets.logo?.[logoVariante]?.data || assets.logo?.principal?.data || null;
+      const decoId = assetHint?.decoracao_id || null;
+      const decoData = decoId
+        ? [...(assets.simbolos||[]), ...(assets.backgrounds||[])].find(a => a.id === decoId)?.data || null
+        : null;
+      return {
+        marca: { nome: brandProfile?.identidade?.nome || 'Nexum360', assinatura_url: (brandProfile?.fontes_enriquecimento?.site || 'nexum360.com.br').replace(/^https?:\/\//, '').replace(/\/$/, '') },
+        cores: { bg_primario:'#070d1a', bg_surface:'#0d1628', borda:'#1a2b47', texto_primario:'#f0f0f0', texto_secundario:'#7a90b0', accent:'#4d8fda' },
+        tipografia: { display:'Playfair Display', corpo:'system-ui', escala:'confortavel', peso_display:'700' },
+        destaque: { estilo:'italico-cor', intensidade:'forte' },
+        decoracao: { tipo: decoData ? 'simbolo-asset' : 'numero-slide', opacidade:0.06, tamanho:'XL', posicao:'canto-inf-dir', asset_id: decoId, asset_url: decoData },
+        labels: { transformacao:'uppercase', spacing:'wide', prefixo:'traco-duplo' },
+        contador: { formato:'XX_barra_YY' },
+        caixas: { radius:'M', estilo:'borda-lateral', preenchimento:'accent-alpha' },
+        header: { estilo:'logo-pilar' },
+        rodape: { estilo:'completo', align:'space-between' },
+        logo: { asset_id: null, asset_url: logoData, tamanho_header:'M', fallback_texto: brandProfile?.identidade?.nome?.toLowerCase() || 'nexum360' },
+      };
+    }
+
+    function renderAssetHintPanel() {
+      const slide = pauta?.slides?.[selectedSlide];
+      if (!slide) return '';
+      const assets = getAssets();
+      const hint = slide.asset_hint || {};
+
+      // Variantes de logo disponíveis
+      const logoVars = ['principal','secundaria','monograma','monocromatica'].filter(v => assets.logo?.[v]?.data);
+      // Símbolos disponíveis para decoração
+      const simbolos = (assets.simbolos || []).filter(s => s.data);
+
+      // Se não houver nenhum asset uploadado, mostra aviso simples
+      if (!logoVars.length && !simbolos.length) {
+        return `<div class="asset-hint-panel" style="opacity:0.6">
+          <div class="asset-hint-header">
+            <span class="asset-hint-title">🖼 Assets de Arte <span class="asset-hint-badge">sem assets</span></span>
+          </div>
+          <p style="font-size:0.72rem;color:var(--muted);margin-top:8px">Nenhum asset carregado no DNA. Acesse 🧬 DNA → Assets para fazer upload do logo e símbolos.</p>
+        </div>`;
+      }
+
+      const currentLogo = hint.logo_variante || '';
+      const currentDeco = hint.decoracao_id || '';
+      const logoPreview = currentLogo && assets.logo?.[currentLogo]?.data
+        ? `<img src="${assets.logo[currentLogo].data}" alt="${currentLogo}">`
+        : `<span class="asset-hint-preview-empty">padrão</span>`;
+      const decoPreview = currentDeco && simbolos.find(s => s.id === currentDeco)
+        ? `<img src="${simbolos.find(s=>s.id===currentDeco).data}" alt="${currentDeco}">`
+        : `<span class="asset-hint-preview-empty">número do slide</span>`;
+
+      return `<div class="asset-hint-panel ${assetHintOpen?'open':''}" id="assetHintPanel">
+        <div class="asset-hint-header" onclick="toggleAssetHintPanel()">
+          <span class="asset-hint-title">🖼 Assets de Arte <span class="asset-hint-badge">slide ${selectedSlide+1}</span></span>
+          <span class="asset-hint-toggle">▾</span>
+        </div>
+        <div class="asset-hint-body">
+          ${logoVars.length ? `
+          <div class="asset-hint-row">
+            <div class="asset-hint-label">Logo (variante)</div>
+            <select class="asset-hint-select" onchange="setAssetHint('logo_variante', this.value)">
+              <option value="">Padrão (principal)</option>
+              ${logoVars.map(v => `<option value="${v}" ${currentLogo===v?'selected':''}>${v.charAt(0).toUpperCase()+v.slice(1)}</option>`).join('')}
+            </select>
+            <div class="asset-hint-preview">${logoPreview}</div>
+          </div>` : ''}
+          ${simbolos.length ? `
+          <div class="asset-hint-row">
+            <div class="asset-hint-label">Decoração de fundo</div>
+            <select class="asset-hint-select" onchange="setAssetHint('decoracao_id', this.value)">
+              <option value="">Número do slide</option>
+              ${simbolos.map(s => `<option value="${s.id}" ${currentDeco===s.id?'selected':''}>${s.nome}</option>`).join('')}
+            </select>
+            <div class="asset-hint-preview">${decoPreview}</div>
+          </div>` : ''}
+          <div style="font-size:0.68rem;color:var(--muted);margin-top:4px">
+            Alterações afetam apenas este slide. Clique em <strong>Gerar / testar arte</strong> para ver o resultado.
+          </div>
+        </div>
+      </div>`;
+    }
+
+    function toggleAssetHintPanel() {
+      assetHintOpen = !assetHintOpen;
+      const p = document.getElementById('assetHintPanel');
+      if (p) p.classList.toggle('open', assetHintOpen);
+    }
+
+    function setAssetHint(field, value) {
+      const slide = pauta?.slides?.[selectedSlide];
+      if (!slide) return;
+      if (!slide.asset_hint) slide.asset_hint = {};
+      slide.asset_hint[field] = value || null;
+      markDirty();
+      // Re-render preview da decoração sem re-renderizar o painel inteiro
+      const previewEl = document.querySelector(`.asset-hint-row:last-of-type .asset-hint-preview`);
+      // Simples: só re-renderiza o painel
+      const panel = document.getElementById('assetHintPanel');
+      if (panel) panel.outerHTML = renderAssetHintPanel();
+      assetHintOpen = true;
+      const newPanel = document.getElementById('assetHintPanel');
+      if (newPanel) newPanel.classList.add('open');
+    }
+    // ─────────────────────────────────────────────────────────
 
     function getVercelUrl() {
       return (localStorage.getItem('nexum360_vercel_url') || 'https://repositorio-pautas-git-main-luciano-castro.vercel.app').replace(/\/$/, '');
@@ -630,7 +775,7 @@
         return;
       }
 
-      el.innerHTML = renderAiPanelHtml() + `
+      el.innerHTML = renderAiPanelHtml() + renderAssetHintPanel() + `
         <div class="editor-header">
           <div class="editor-title">
             Slide ${selectedSlide + 1} <span class="tipo-tag">${TIPO_LABELS[slide.tipo]}</span>
@@ -842,6 +987,7 @@
       const url = getVercelUrl();
       const body = {
         conteudo: slide,
+        dna:      buildDnaWithAssets(slide.asset_hint),
         indice: selectedSlide + 1,
         total: pauta.slides.length,
         pilar: pauta.pilar,

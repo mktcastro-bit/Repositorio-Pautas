@@ -42,5 +42,16 @@
   },
   "fontes_enriquecimento": {
     "site": "https://www.nexum360.com.br/"
+  },
+  "assets": {
+    "logo": {
+      "principal":     null,
+      "secundaria":    null,
+      "monograma":     null,
+      "monocromatica": null
+    },
+    "simbolos":    [],
+    "icones":      [],
+    "backgrounds": []
   }
 }

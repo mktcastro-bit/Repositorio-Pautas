@@ -219,6 +219,22 @@ const DELIVER_TOOL = {
               type: 'string',
               enum: ['capa', 'grid-2-colunas', 'lista-numerada', 'grid-4-pilares', 'frase-destaque-com-box', 'comparacao-contraste', 'cta-final', 'teste-pergunta'],
             },
+            // Sugestão de assets da marca por slide (C3 — IA sugere, usuário sobrescreve no editor)
+            asset_hint: {
+              type: 'object',
+              description: 'Escolha de assets da marca para este slide. Todos opcionais — só preencha quando o asset melhora a leitura. null = não usar.',
+              properties: {
+                logo_variante: {
+                  type: 'string',
+                  enum: ['principal', 'secundaria', 'monograma', 'monocromatica'],
+                  description: 'Variante da logomarca no header. "monograma" para CTA final, "principal" para capa e slides de conteúdo.',
+                },
+                decoracao_id: {
+                  type: 'string',
+                  description: 'ID do símbolo/padrão para usar como decoração de fundo (do inventário de assets). null = usar número do slide.',
+                },
+              },
+            },
           },
           additionalProperties: true,
         },
@@ -279,7 +295,9 @@ Retorne EXATAMENTE este JSON (sem markdown, sem crases, sem explicações):
   "slides": [
     /* cada item segue o schema do tipo escolhido — ver tipos disponíveis no system prompt.
        Exemplo de slide 1:
-       { "tipo":"capa", "tagline":"...", "titulo":"Texto com _destaque_", "subtitulo":"..." }
+       { "tipo":"capa", "tagline":"...", "titulo":"Texto com _destaque_", "subtitulo":"...",
+         "asset_hint": { "logo_variante": "principal", "decoracao_id": null } }
+       Inclua asset_hint em cada slide APENAS quando houver assets disponíveis no inventário.
     */
   ],
   "legenda_ig": "legenda completa para Instagram com CTA e 10-12 hashtags",
