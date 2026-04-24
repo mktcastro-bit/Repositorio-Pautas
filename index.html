@@ -381,6 +381,11 @@
       width: 100%; height: 100%;
       object-fit: contain;
       opacity: 0; transition: opacity 0.3s ease; cursor: zoom-in;
+      overflow: hidden; display: flex; align-items: center; justify-content: center;
+    }
+    .detail-carousel .carousel-slide iframe {
+      width: 1080px; height: 1350px; border: 0; background: #000;
+      transform-origin: center center; pointer-events: none;
     }
     .detail-carousel .carousel-slide.active { opacity: 1; }
     .detail-carousel .carousel-btn { opacity: 0; }
@@ -1536,6 +1541,7 @@
   <div class="lightbox" id="lightbox" onclick="closeLightbox()">
     <button class="lightbox-btn lightbox-prev" id="lb-prev" onclick="event.stopPropagation();lightboxNav(-1)">&#8249;</button>
     <img class="lightbox-img" id="lb-img" src="" alt="" onclick="event.stopPropagation()">
+    <iframe class="lightbox-iframe" id="lb-iframe" style="display:none;width:1080px;height:1350px;max-width:90vw;max-height:90vh;border:0;background:#000" onclick="event.stopPropagation()"></iframe>
     <button class="lightbox-btn lightbox-next" id="lb-next" onclick="event.stopPropagation();lightboxNav(1)">&#8250;</button>
     <button class="lightbox-close" onclick="event.stopPropagation();closeLightbox()">&#10005;</button>
     <div class="lightbox-counter" id="lb-counter"></div>
@@ -1650,15 +1656,19 @@
           ? `<span>📅 ${formatDate(p.data_planejada)}</span>`
           : '<span style="opacity:0.4">Sem data</span>';
 
-        const slides = p.slides && p.slides.length ? p.slides : (p.slide_preview ? [p.slide_preview] : []);
+        const contents = getSlideContents(p);
         let previewImg = '';
-        if (slides.length >= 1) {
-          previewImg = `<img class="card-preview" src="${slides[0]}" alt="preview" onerror="this.style.display='none'">`;
+        if (contents.kind === 'html') {
+          previewImg = `<div class="card-iframe-wrap"><iframe srcdoc="${contents.items[0].replace(/"/g,'&quot;')}" scrolling="no" loading="lazy"></iframe></div>`;
+        } else if (contents.kind === 'url') {
+          previewImg = `<img class="card-preview" src="${contents.items[0]}" alt="preview" onerror="this.style.display='none'">`;
         } else if (p.art_html) {
           previewImg = `<div class="card-iframe-wrap"><iframe srcdoc="${p.art_html.replace(/"/g,'&quot;')}" scrolling="no" loading="lazy"></iframe></div>`;
         } else if (p.arquivo) {
           previewImg = `<div class="card-iframe-wrap"><iframe src="${p.arquivo}" scrolling="no" loading="lazy"></iframe></div>`;
         }
+        // Compat visual: slides.length pra ajustar margem do card-top
+        const slides = contents.items;
 
         const hasLegenda = p.legenda_ig || p.legenda_li;
         const legendaSection = hasLegenda ? `
@@ -2002,10 +2012,16 @@
       if (!p) return;
       const picahBadges = (p.picah||[]).map(x=>`<span class="badge badge-picah">${x}</span>`).join('');
 
-      const detailSlides = getSlides(p);
+      const contents = getSlideContents(p);
+      const detailSlides = contents.items;
       let preview;
+      // Helper local pra montar um "slide" visual conforme o tipo de conteúdo.
+      const slideEl = (item, i) => contents.kind === 'html'
+        ? `<div class="carousel-slide${i===0?' active':''}" onclick="openLightbox(${p.id},${i})" style="cursor:zoom-in"><iframe srcdoc="${item.replace(/"/g,'&quot;')}" scrolling="no" loading="lazy" style="pointer-events:none"></iframe></div>`
+        : `<img class="carousel-slide${i===0?' active':''}" src="${item}" alt="Slide ${i+1}" onclick="openLightbox(${p.id},${i})" draggable="false">`;
+
       if (detailSlides.length > 1) {
-        const slideHtml = detailSlides.map((src,i) => `<img class="carousel-slide${i===0?' active':''}" src="${src}" alt="Slide ${i+1}" onclick="openLightbox(${p.id},${i})" draggable="false">`).join('');
+        const slideHtml = detailSlides.map(slideEl).join('');
         const dotHtml   = detailSlides.map((_,i) => `<div class="carousel-dot${i===0?' active':''}"></div>`).join('');
         preview = `<div class="detail-carousel">
           <div class="carousel-track">${slideHtml}</div>
@@ -2014,7 +2030,9 @@
           <div class="carousel-dots">${dotHtml}</div>
         </div>`;
       } else if (detailSlides.length === 1) {
-        preview = `<img src="${detailSlides[0]}" alt="Preview" style="cursor:zoom-in" onclick="openLightbox(${p.id},0)" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`;
+        preview = contents.kind === 'html'
+          ? `<div class="preview-iframe-wrap" style="cursor:zoom-in" onclick="openLightbox(${p.id},0)"><iframe srcdoc="${detailSlides[0].replace(/"/g,'&quot;')}" scrolling="no" loading="lazy" style="pointer-events:none"></iframe></div>`
+          : `<img src="${detailSlides[0]}" alt="Preview" style="cursor:zoom-in" onclick="openLightbox(${p.id},0)" onerror="this.parentElement.innerHTML='<div class=\\'detail-preview-empty\\'><span>🖼</span><p>Prévia não disponível</p></div>'">`;
       } else if (p.art_html) {
         preview = `<div class="preview-iframe-wrap"><iframe srcdoc="${p.art_html.replace(/"/g,'&quot;')}" scrolling="no" loading="lazy"></iframe></div>`;
       } else if (p.arquivo) {
@@ -2124,6 +2142,7 @@
           </div>
         </div>`;
       document.getElementById('detailOverlay').classList.add('open');
+      scaleDetailIframes();
     }
 
     // ── VIEW TOGGLE ──
@@ -2280,11 +2299,38 @@
       });
     }
 
+    function scaleDetailIframes() {
+      requestAnimationFrame(() => {
+        document.querySelectorAll('.detail-carousel .carousel-slide iframe, .preview-iframe-wrap iframe').forEach(iframe => {
+          const wrap = iframe.parentElement;
+          if (!wrap) return;
+          const w = wrap.offsetWidth, h = wrap.offsetHeight;
+          if (!w || !h) return;
+          const scale = Math.min(w / 1080, h / 1350);
+          iframe.style.transform = `scale(${scale})`;
+        });
+      });
+    }
+
     // ── CAROUSEL ──────────────────────────────────────────────
     const carouselState = {};
 
+    // Arquitetura nova: p.slide_htmls[] = HTML renderizado (renderiza via iframe).
+    // Arquitetura legada: p.slides[] = array de URLs de imagem (renderiza via <img>).
+    // Nova p.slides[] = array de JSON estruturado (NÃO renderizável direto — precisa slide_htmls).
+    function getSlideContents(p) {
+      if (Array.isArray(p.slide_htmls) && p.slide_htmls.length) {
+        return { kind: 'html', items: p.slide_htmls };
+      }
+      if (Array.isArray(p.slides) && p.slides.length && typeof p.slides[0] === 'string') {
+        return { kind: 'url', items: p.slides };
+      }
+      if (p.slide_preview) return { kind: 'url', items: [p.slide_preview] };
+      return { kind: 'none', items: [] };
+    }
+    // Compat: funções antigas ainda esperam um array. Retorna items da mesma forma.
     function getSlides(p) {
-      return p.slides && p.slides.length ? p.slides : (p.slide_preview ? [p.slide_preview] : []);
+      return getSlideContents(p).items;
     }
 
     function carouselNav(id, dir) {
@@ -2315,11 +2361,13 @@
     }
 
     // ── LIGHTBOX ──────────────────────────────────────────────
-    let lbSlides = [], lbIdx = 0;
+    let lbSlides = [], lbIdx = 0, lbKind = 'url';
 
     function openLightbox(id, idx) {
       const p = pautas.find(x => x.id === id); if (!p) return;
-      lbSlides = getSlides(p);
+      const contents = getSlideContents(p);
+      lbSlides = contents.items;
+      lbKind = contents.kind;
       lbIdx = idx;
       _updateLightbox();
       document.getElementById('lightbox').classList.add('open');
@@ -2334,7 +2382,17 @@
     }
 
     function _updateLightbox() {
-      document.getElementById('lb-img').src = lbSlides[lbIdx];
+      const img = document.getElementById('lb-img');
+      const iframe = document.getElementById('lb-iframe');
+      if (lbKind === 'html') {
+        img.style.display = 'none';
+        iframe.style.display = '';
+        iframe.srcdoc = lbSlides[lbIdx] || '';
+      } else {
+        iframe.style.display = 'none';
+        img.style.display = '';
+        img.src = lbSlides[lbIdx] || '';
+      }
       document.getElementById('lb-counter').textContent = lbSlides.length > 1 ? `${lbIdx + 1} / ${lbSlides.length}` : '';
       document.getElementById('lb-prev').style.display = lbSlides.length > 1 ? '' : 'none';
       document.getElementById('lb-next').style.display = lbSlides.length > 1 ? '' : 'none';
