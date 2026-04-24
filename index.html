@@ -3056,19 +3056,25 @@
       showProgress('loading');
       showToast('Gerando arte com IA... aguarde', 'loading', true);
 
-      const pauta = {
-        ...wfGenResult,
-        pilar:       wfGenParams.pilar,
-        variante:    wfGenParams.variante,
-        formato:     wfGenParams.formato,
-        rede_social: wfGenParams.rede_social,
-      };
-
       try {
+        // Novo formato: /api/generate-art espera { conteudo, indice, total, pilar, tags }.
+        // wfGenResult é o JSON retornado por /api/generate (já tem slides[] tipado).
+        const slides = wfGenResult?.slides || [];
+        const conteudo = slides[slideIndex];
+        if (!conteudo || !conteudo.tipo) {
+          throw new Error(`Slide ${slideIndex + 1} não tem formato tipado.`);
+        }
+
         const r = await fetch(`${url}/api/generate-art`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ pauta, slideIndex }),
+          body:    JSON.stringify({
+            conteudo,
+            indice: slideIndex + 1,
+            total:  slides.length,
+            pilar:  wfGenParams.pilar,
+            tags:   [wfGenParams.pilar],
+          }),
           signal:  controller.signal,
         });
         const d = await r.json();
