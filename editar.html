@@ -196,6 +196,57 @@
     }
     .preview-actions { display: flex; gap: 8px; margin-top: 12px; }
 
+    /* AI PANEL */
+    .ai-panel {
+      background: linear-gradient(180deg, rgba(200,169,110,0.06), rgba(200,169,110,0.02));
+      border: 1px solid rgba(200,169,110,0.2); border-radius: 10px;
+      padding: 16px; margin-bottom: 24px;
+    }
+    .ai-panel-header {
+      display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+      user-select: none;
+    }
+    .ai-panel-title {
+      font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+    }
+    .ai-panel-body { margin-top: 14px; display: none; }
+    .ai-panel.open .ai-panel-body { display: block; }
+    .ai-panel.open .ai-panel-toggle { transform: rotate(180deg); }
+    .ai-panel-toggle { color: var(--accent); transition: transform 0.2s; }
+    .ai-input-row { display: flex; gap: 8px; align-items: stretch; }
+    .ai-textarea {
+      flex: 1; background: var(--s1); border: 1px solid var(--border); color: var(--text);
+      padding: 10px 12px; font-size: 0.82rem; border-radius: 5px; font-family: inherit;
+      min-height: 70px; resize: vertical;
+    }
+    .ai-textarea:focus { outline: none; border-color: var(--accent); }
+    .ai-send {
+      background: var(--accent); color: #0a0a0a; border: 0; border-radius: 5px;
+      padding: 0 18px; font-size: 1.2rem; cursor: pointer; font-weight: 700;
+    }
+    .ai-send:hover { opacity: 0.88; }
+    .ai-send:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ai-result { margin-top: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .ai-result-msg { font-size: 0.78rem; color: var(--muted); line-height: 1.6; font-style: italic; }
+    .ai-apply-card {
+      background: var(--s1); border: 1px solid var(--border); border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .ai-apply-card .field-name {
+      font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent); font-weight: 700;
+    }
+    .ai-apply-card .preview-text {
+      font-size: 0.78rem; color: var(--text); line-height: 1.6; white-space: pre-wrap;
+    }
+    .ai-apply-card .apply-btn {
+      align-self: flex-start; background: var(--accent); border: 0; color: #0a0a0a;
+      font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 6px 12px; border-radius: 4px; cursor: pointer;
+    }
+    .ai-apply-card .apply-btn:hover { opacity: 0.88; }
+
     @media (max-width: 1000px) {
       .layout { grid-template-columns: 1fr; }
       .col-left { position: static; max-height: none; border-right: none; border-bottom: 1px solid var(--border); }
@@ -250,6 +301,13 @@
     let selectedSlide = 0;
     let dirty = false;
     let activeLegendaTab = 'ig';
+    let aiPanelOpen = false;
+    let lastRenderedHtml = null;    // última arte retornada por /api/generate-art
+    let brandProfile = null;
+
+    function getVercelUrl() {
+      return (localStorage.getItem('nexum360_vercel_url') || 'https://repositorio-pautas-git-main-luciano-castro.vercel.app').replace(/\/$/, '');
+    }
 
     function markDirty() {
       dirty = true;
@@ -501,12 +559,29 @@
       }
 
       el.innerHTML = `
+        <div class="ai-panel ${aiPanelOpen?'open':''}" id="aiPanel">
+          <div class="ai-panel-header" onclick="toggleAiPanel()">
+            <div class="ai-panel-title">✦ Refinar com IA</div>
+            <div class="ai-panel-toggle">▾</div>
+          </div>
+          <div class="ai-panel-body">
+            <div style="font-size:0.72rem;color:var(--muted);margin-bottom:10px;">
+              Descreva em português o que mudar. A IA edita tema, gancho, legendas ou slides conforme o pedido.
+            </div>
+            <div class="ai-input-row">
+              <textarea class="ai-textarea" id="aiPrompt" placeholder="Ex: Deixe a legenda do Instagram mais curta. Ou: Reescreva o slide 3 mais provocativo."></textarea>
+              <button class="ai-send" id="aiSendBtn" onclick="doRefine()">→</button>
+            </div>
+            <div class="ai-result" id="aiResult"></div>
+          </div>
+        </div>
+
         <div class="editor-header">
           <div class="editor-title">
             Slide ${selectedSlide + 1} <span class="tipo-tag">${TIPO_LABELS[slide.tipo]}</span>
           </div>
           <div>
-            <button class="btn btn-ghost" onclick="testRenderSlide()">Testar render</button>
+            <button class="btn btn-ghost" onclick="testRenderSlide()">Gerar / testar arte</button>
           </div>
         </div>
 
@@ -516,6 +591,7 @@
           <h4>Preview (via /api/generate-art)</h4>
           <iframe class="preview-frame" id="previewFrame" sandbox="allow-same-origin"></iframe>
           <div class="preview-actions">
+            <button class="btn btn-primary" id="applyArtBtn" onclick="applyRenderedArt()">✓ Aplicar esta arte</button>
             <button class="btn btn-ghost" onclick="document.getElementById('previewWrap').style.display='none'">Fechar</button>
           </div>
         </div>
@@ -708,7 +784,7 @@
 
     async function testRenderSlide() {
       const slide = pauta.slides[selectedSlide];
-      const url = (localStorage.getItem('nexum360_vercel_url') || 'https://repositorio-pautas-git-main-luciano-castro.vercel.app').replace(/\/$/, '');
+      const url = getVercelUrl();
       const body = {
         conteudo: slide,
         indice: selectedSlide + 1,
@@ -724,6 +800,7 @@
         });
         const data = await r.json();
         if (!data.success) { alert('Erro: ' + (data.error || 'desconhecido')); return; }
+        lastRenderedHtml = data.html;
         document.getElementById('previewWrap').style.display = 'block';
         const frame = document.getElementById('previewFrame');
         frame.srcdoc = data.html;
@@ -731,6 +808,119 @@
       } catch (e) {
         alert('Falha no render: ' + e.message);
       }
+    }
+
+    function applyRenderedArt() {
+      if (!lastRenderedHtml) { alert('Nenhuma arte renderizada ainda.'); return; }
+      if (!Array.isArray(pauta.slide_htmls)) pauta.slide_htmls = [];
+      // Garante tamanho suficiente pra caber no índice atual
+      while (pauta.slide_htmls.length < pauta.slides.length) pauta.slide_htmls.push('');
+      pauta.slide_htmls[selectedSlide] = lastRenderedHtml;
+      if (selectedSlide === 0) pauta.art_html = lastRenderedHtml;
+      markDirty();
+      alert(`Arte do slide ${selectedSlide + 1} aplicada. Clique em Salvar pra persistir no repositório.`);
+    }
+
+    function toggleAiPanel() {
+      aiPanelOpen = !aiPanelOpen;
+      document.getElementById('aiPanel').classList.toggle('open', aiPanelOpen);
+    }
+
+    async function doRefine() {
+      const promptEl = document.getElementById('aiPrompt');
+      const btn      = document.getElementById('aiSendBtn');
+      const resultEl = document.getElementById('aiResult');
+      const instrucao = (promptEl.value || '').trim();
+      if (!instrucao) { alert('Digite uma instrução antes de enviar.'); return; }
+
+      btn.disabled = true; btn.textContent = '…';
+      resultEl.innerHTML = '<div class="ai-result-msg">Processando com IA…</div>';
+
+      try {
+        const r = await fetch(`${getVercelUrl()}/api/refine`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pauta, instrucao, brand_profile: brandProfile }),
+        });
+        const d = await r.json();
+        if (!d.success) throw new Error(d.error || 'Falha no refine');
+        renderRefineResult(d.result);
+      } catch (e) {
+        resultEl.innerHTML = `<div class="ai-result-msg" style="color:var(--danger);">Erro: ${escapeHtml(e.message)}</div>`;
+      } finally {
+        btn.disabled = false; btn.textContent = '→';
+      }
+    }
+
+    function renderRefineResult(res) {
+      const resultEl = document.getElementById('aiResult');
+      const cards = [];
+      if (res.resposta) {
+        cards.push(`<div class="ai-result-msg">${escapeHtml(res.resposta)}</div>`);
+      }
+
+      const simpleFields = [
+        ['tema', 'Tema'],
+        ['gancho', 'Gancho'],
+        ['angulo_nexum', 'Ângulo Nexum360'],
+        ['legenda_ig', 'Legenda Instagram'],
+        ['legenda_li', 'Legenda LinkedIn'],
+      ];
+      simpleFields.forEach(([field, name]) => {
+        if (res[field] !== undefined && res[field] !== pauta[field]) {
+          cards.push(`
+            <div class="ai-apply-card">
+              <div class="field-name">${name}</div>
+              <div class="preview-text">${escapeHtml(res[field])}</div>
+              <button class="apply-btn" onclick="applyRefineField('${field}', ${JSON.stringify(res[field]).replace(/"/g,'&quot;')})">✓ Aplicar</button>
+            </div>
+          `);
+        }
+      });
+
+      if (Array.isArray(res.slides)) {
+        res.slides.forEach((newSlide, i) => {
+          const orig = pauta.slides?.[i];
+          // Compara por título/pergunta/texto pra evitar ruído
+          const changed = !orig || JSON.stringify(orig) !== JSON.stringify(newSlide);
+          if (!changed) return;
+          cards.push(`
+            <div class="ai-apply-card">
+              <div class="field-name">Slide ${i+1} · ${TIPO_LABELS[newSlide.tipo] || newSlide.tipo || 'slide'}</div>
+              <div class="preview-text">${escapeHtml(slidePreviewText(newSlide))}</div>
+              <button class="apply-btn" onclick="applyRefineSlide(${i})">✓ Aplicar</button>
+            </div>
+          `);
+        });
+        // Guarda globalmente pra applyRefineSlide acessar
+        window._lastRefineSlides = res.slides;
+      }
+
+      if (cards.length === (res.resposta ? 1 : 0)) {
+        cards.push(`<div class="ai-result-msg">Nenhuma alteração retornada pela IA.</div>`);
+      }
+      resultEl.innerHTML = cards.join('');
+    }
+
+    function applyRefineField(field, value) {
+      pauta[field] = value;
+      markDirty();
+      renderLeft();
+      alert(`${field} atualizado. Clique em Salvar pra persistir.`);
+    }
+
+    function applyRefineSlide(i) {
+      const slides = window._lastRefineSlides;
+      if (!slides || !slides[i]) return;
+      if (!Array.isArray(pauta.slides)) pauta.slides = [];
+      pauta.slides[i] = slides[i];
+      // Invalida arte renderizada deste slide (texto mudou → arte precisa regerar)
+      if (Array.isArray(pauta.slide_htmls)) pauta.slide_htmls[i] = '';
+      markDirty();
+      selectedSlide = i;
+      renderLeft();
+      renderRight();
+      alert(`Slide ${i+1} atualizado. Use "Gerar / testar arte" pra regerar a arte.`);
     }
 
     // ═══════════════════════════════════════════════════════
@@ -757,6 +947,8 @@
       pauta = JSON.parse(JSON.stringify(pautaOriginal));
       // Garantir shape mínimo
       if (!Array.isArray(pauta.slides)) pauta.slides = [];
+      // Carrega brand profile pra usar em /api/refine
+      try { brandProfile = JSON.parse(localStorage.getItem(BRAND_KEY) || 'null'); } catch { brandProfile = null; }
       renderLeft();
       renderRight();
     })();

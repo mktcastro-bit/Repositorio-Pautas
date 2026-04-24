@@ -2091,55 +2091,6 @@
               <button class="detail-btn danger" onclick="deletePautaFromDetail(${p.id})">🗑 Apagar</button>
               <button class="detail-btn" onclick="closeModal('detailOverlay')">Fechar</button>
             </div>
-            <div class="refine-area">
-              <div class="refine-header">
-                <div class="refine-title">Refinar com IA</div>
-                <div class="refine-steps">
-                  <div class="refine-step active" id="refine-step-1-${p.id}">
-                    <span class="refine-step-num">1</span>
-                    <span>Texto</span>
-                  </div>
-                  <div class="refine-step-connector"></div>
-                  <div class="refine-step" id="refine-step-2-${p.id}">
-                    <span class="refine-step-num">2</span>
-                    <span>Arte</span>
-                  </div>
-                </div>
-              </div>
-              <div class="refine-step-block step-1">
-                <div class="refine-step-heading">
-                  <span class="refine-step-badge">1</span>
-                  <span class="refine-step-label">Alterar Texto</span>
-                </div>
-                <div class="refine-input-row">
-                  <textarea class="refine-textarea" id="refine-prompt-${p.id}" placeholder="Ex: Deixe a legenda do Instagram mais curta e direta. Reduza para metade do tamanho atual."></textarea>
-                  <button class="refine-send" onclick="doRefine(${p.id})" id="refine-btn-${p.id}">→</button>
-                </div>
-                <div class="refine-result" id="refine-result-${p.id}">
-                  <div class="refine-result-msg" id="refine-msg-${p.id}"></div>
-                  <div class="refine-apply-row" id="refine-apply-${p.id}"></div>
-                </div>
-              </div>
-              <div class="refine-step-arrow">↓</div>
-              <div class="refine-step-block step-2">
-                <div class="refine-step-heading">
-                  <span class="refine-step-badge">2</span>
-                  <span class="refine-step-label">Gerar Arte</span>
-                </div>
-                <div class="gen-art-row">
-                  ${p.slides?.length ? `
-                  <select class="gen-art-select" id="gen-art-slide-${p.id}">
-                    ${p.slides.map((_,i) => `<option value="${i}">Slide ${i+1}</option>`).join('')}
-                  </select>` : ''}
-                  <button class="detail-btn" onclick="doGenArt(${p.id})" id="gen-art-btn-${p.id}">✦ Gerar Arte</button>
-                  <button class="detail-btn" id="gen-art-cancel-${p.id}" style="display:none" onclick="cancelGenArt(${p.id})">✕ Cancelar</button>
-                </div>
-                <div class="gen-art-preview" id="gen-art-preview-${p.id}">
-                  <div class="gen-art-iframe-wrap" id="gen-art-wrap-${p.id}"></div>
-                  <div class="gen-art-actions" id="gen-art-actions-${p.id}"></div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>`;
       document.getElementById('detailOverlay').classList.add('open');
