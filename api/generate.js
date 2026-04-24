@@ -21,6 +21,11 @@
  */
 
 import { brandContextBlock } from './_lib/brand.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
@@ -111,6 +116,18 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
 
+  const body = req.body || {};
+
+  // Modo mock — retorna fixture bundlada, zero custo, zero latência.
+  if (body.mock) {
+    try {
+      const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, '_fixtures', 'content.json'), 'utf8'));
+      return res.status(200).json({ success: true, result: fixture, mock: true });
+    } catch (e) {
+      return res.status(500).json({ error: 'Falha ao ler fixture: ' + e.message });
+    }
+  }
+
   const { ANTHROPIC_API_KEY: apiKey } = process.env;
   if (!apiKey) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada no Vercel.' });
@@ -125,7 +142,7 @@ export default async function handler(req, res) {
     tema              = '',
     gancho            = '',
     brand_profile     = null,
-  } = req.body || {};
+  } = body;
 
   const userPrompt = buildUserPrompt({ pilar, rede_social, formato, pub_formato, ideia_selecionada, tema, gancho, brand_profile });
 
@@ -140,7 +157,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model:      MODEL,
         max_tokens: 4096,
-        system:     SYSTEM_PROMPT,
+        // Prompt caching: SYSTEM_PROMPT é idêntico entre chamadas, cacheia ~90% do custo.
+        system:     [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages:   [{ role: 'user', content: userPrompt }],
         // Força saída estruturada via tool use — elimina JSON malformado.
         tools: [DELIVER_TOOL],

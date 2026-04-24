@@ -1125,6 +1125,10 @@
     </label>
     <button class="settings-btn" onclick="checkHealth()">Testar conexão</button>
     <div class="api-status" id="apiStatus"><div class="api-dot" id="apiDot"></div><span id="apiMsg">Não testado</span></div>
+    <label style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:0 12px;border-left:1px solid var(--border);margin-left:6px;">
+      <input type="checkbox" id="mockMode" onchange="toggleMockMode()" style="width:auto;margin:0;cursor:pointer;">
+      <span id="mockLabel" style="font-weight:700;color:var(--muted);">🧪 Modo teste (grátis)</span>
+    </label>
   </div>
 
   <!-- STATS -->
@@ -2344,6 +2348,20 @@
     });
 
     // ── SETTINGS ──────────────────────────────────────────────
+    const MOCK_KEY = 'nexum360_mock_mode';
+    function isMockMode() { return localStorage.getItem(MOCK_KEY) === '1'; }
+    function toggleMockMode() {
+      const on = document.getElementById('mockMode').checked;
+      localStorage.setItem(MOCK_KEY, on ? '1' : '0');
+      const lbl = document.getElementById('mockLabel');
+      lbl.style.color = on ? 'var(--yellow)' : 'var(--muted)';
+      lbl.textContent = on ? '🧪 Modo teste ATIVO (grátis)' : '🧪 Modo teste (grátis)';
+    }
+    function loadMockMode() {
+      const on = isMockMode();
+      const cb = document.getElementById('mockMode');
+      if (cb) { cb.checked = on; toggleMockMode(); }
+    }
     function toggleSettings() {
       document.getElementById('settingsBar').classList.toggle('open');
     }
@@ -2784,7 +2802,7 @@
         const r = await fetch(`${url}/api/suggest-ideas`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(wfGenParams),
+          body:    JSON.stringify({ ...wfGenParams, mock: isMockMode() }),
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error || 'Falha ao gerar ideias.');
@@ -2853,7 +2871,7 @@
         const r = await fetch(`${url}/api/generate`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(params),
+          body:    JSON.stringify({ ...params, mock: isMockMode() }),
         });
         const d = await r.json();
         if (!d.success) throw new Error(d.error || 'Falha ao gerar conteúdo.');
@@ -3222,7 +3240,7 @@
         const r = await fetch(`${url}/api/generate`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify(params),
+          body:    JSON.stringify({ ...params, mock: isMockMode() }),
         });
         const d = await r.json();
 
@@ -4002,6 +4020,7 @@ Siga o posicionamento: Nexum360 transforma IA em decisão, resultado e crescimen
 
     // Init
     loadVercelUrl();
+    loadMockMode();
     renderStats();
     renderCards();
   </script>

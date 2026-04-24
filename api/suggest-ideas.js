@@ -8,6 +8,11 @@
  */
 
 import { brandContextBlock } from './_lib/brand.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
@@ -27,6 +32,18 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Método não permitido.' });
 
+  const body = req.body || {};
+
+  // Modo mock — retorna fixture bundlada, zero custo, zero latência.
+  if (body.mock) {
+    try {
+      const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, '_fixtures', 'ideas.json'), 'utf8'));
+      return res.status(200).json({ success: true, ideas: fixture.ideas || [], mock: true });
+    } catch (e) {
+      return res.status(500).json({ error: 'Falha ao ler fixture: ' + e.message });
+    }
+  }
+
   const { ANTHROPIC_API_KEY: apiKey } = process.env;
   if (!apiKey) return res.status(500).json({ error: 'ANTHROPIC_API_KEY não configurada.' });
 
@@ -38,7 +55,7 @@ export default async function handler(req, res) {
     sugestao         = '',
     temas_existentes = [],
     brand_profile    = null,
-  } = req.body || {};
+  } = body;
 
   const brandBlock = brandContextBlock(brand_profile);
   const marcaNome  = brand_profile?.identidade?.nome || 'a marca';
@@ -113,7 +130,8 @@ RETORNE EXATAMENTE este JSON (sem markdown):
       body: JSON.stringify({
         model:      MODEL,
         max_tokens: 1024,
-        system:     SYSTEM_PROMPT,
+        // Prompt caching: SYSTEM_PROMPT é idêntico entre chamadas, cacheia ~90% do custo.
+        system:     [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
         messages:   [{ role: 'user', content: userPrompt }],
         tools: [tool],
         tool_choice: { type: 'tool', name: 'deliver_ideas' },
