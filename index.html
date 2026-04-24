@@ -3162,61 +3162,75 @@
     }
 
     async function wfSavePauta(closeAfter = false) {
-      if (!wfGenResult || !wfGenParams) return;
-      const result = wfGenResult;
-      const params  = wfGenParams;
-      const now     = new Date().toISOString().split('T')[0];
-      const newId   = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+      try {
+        if (!wfGenResult || !wfGenParams) {
+          showToast('Nada pra salvar: gere o conteúdo primeiro.', 'error');
+          return;
+        }
+        const result = wfGenResult;
+        const params  = wfGenParams;
+        const now     = new Date().toISOString().split('T')[0];
+        const newId   = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+        const slides  = Array.isArray(result.slides) ? result.slides : [];
 
-      // Renderiza TODOS os slides localmente (custo zero — /api/generate-art
-      // agora é wrapper puro da lib/render). Grava cada HTML em slide_htmls[i].
-      const slides = Array.isArray(result.slides) ? result.slides : [];
-      let slide_htmls = [];
-      if (slides.length) {
-        showToast('Renderizando artes de todos os slides…', 'loading', true);
+        // PASSO 1: salva IMEDIATAMENTE (sem artes) — garante que nada se perde.
+        const novaPauta = {
+          id: newId, tema: result.tema || 'Conteúdo gerado por IA',
+          pilar: params.pilar, rede_social: params.rede_social,
+          formato: params.formato, variante: params.variante, status: 'Ideia',
+          gancho: result.gancho||'', angulo_nexum: result.angulo_nexum || result.angulo || '',
+          picah: result.picah||[], legenda_ig: result.legenda_ig||'',
+          legenda_li: result.legenda_li||'', slides,
+          slide_htmls: [],
+          fonte: '', arquivo: '', slide_preview: '',
+          art_html: window._wfArtHtml || '',
+          data_criacao: now, data_planejada: null, data_publicacao: null,
+          notas: `Gerado por IA em ${now}.`,
+        };
+        pautas.unshift(novaPauta);
+        save(); renderCards(); scaleCardIframes();
+        showToast('Pauta salva! Renderizando artes…', 'loading', true);
+        if (closeAfter) closeModal('workflowOverlay');
+
+        // PASSO 2: renderiza artes de todos os slides em paralelo, em background.
+        if (!slides.length) { hideToast(); return; }
         const url = getVercelUrl();
+        let slide_htmls = [];
         try {
-          const renders = await Promise.all(slides.map(async (conteudo, i) => {
+          slide_htmls = await Promise.all(slides.map(async (conteudo, i) => {
             const r = await fetch(`${url}/api/generate-art`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
-                conteudo,
-                indice: i + 1,
-                total: slides.length,
-                pilar: params.pilar,
-                tags: [params.pilar],
+                conteudo, indice: i + 1, total: slides.length,
+                pilar: params.pilar, tags: [params.pilar],
               }),
             });
             const d = await r.json();
-            if (!d.success) throw new Error(d.error || `Falha no slide ${i + 1}`);
+            if (!d.success) throw new Error(d.error || `Slide ${i+1} falhou`);
             return d.html;
           }));
-          slide_htmls = renders;
-          hideToast();
         } catch (e) {
+          console.error('[wfSavePauta] render falhou:', e);
           hideToast();
-          showToast(`Aviso: falha ao renderizar arte (${e.message}). Pauta será salva sem artes.`, 'error');
-          slide_htmls = [];
+          showToast(`Pauta salva, mas render de arte falhou: ${e.message}. Edite pra regerar.`, 'error');
+          return;
         }
-      }
 
-      pautas.unshift({
-        id: newId, tema: result.tema || 'Conteúdo gerado por IA',
-        pilar: params.pilar, rede_social: params.rede_social,
-        formato: params.formato, variante: params.variante, status: 'Ideia',
-        gancho: result.gancho||'', angulo_nexum: result.angulo_nexum || result.angulo || '',
-        picah: result.picah||[], legenda_ig: result.legenda_ig||'',
-        legenda_li: result.legenda_li||'', slides: slides,
-        slide_htmls,                            // NOVO: HTML renderizado por slide
-        fonte: '', arquivo: '', slide_preview: '',
-        art_html: slide_htmls[0] || window._wfArtHtml || '',
-        data_criacao: now, data_planejada: null, data_publicacao: null,
-        notas: `Gerado por IA em ${now}.`,
-      });
-      save(); renderCards(); scaleCardIframes();
-      showToast(`Pauta adicionada com ${slide_htmls.length} slide(s) renderizado(s)!`, 'success');
-      if (closeAfter) closeModal('workflowOverlay');
+        // PASSO 3: atualiza pauta com as artes e persiste de novo.
+        const p = pautas.find(x => x.id === newId);
+        if (p) {
+          p.slide_htmls = slide_htmls;
+          p.art_html = slide_htmls[0] || p.art_html || '';
+          save(); renderCards(); scaleCardIframes();
+        }
+        hideToast();
+        showToast(`Pauta adicionada com ${slide_htmls.length} slide(s) renderizado(s)!`, 'success');
+      } catch (e) {
+        console.error('[wfSavePauta] erro inesperado:', e);
+        hideToast();
+        showToast(`Erro ao salvar: ${e.message}`, 'error');
+      }
     }
 
     // ── GERAÇÃO DE CONTEÚDO IA ────────────────────────────────
