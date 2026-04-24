@@ -420,6 +420,50 @@
 
     const TIPOS_DISPONIVEIS = Object.keys(FIELD_DEFS);
 
+    // ═══════════════════════════════════════════════════════
+    // NORMALIZAÇÃO DEFENSIVA: pauta.slides sem .tipo → infere.
+    // Cobre casos onde /api/generate, /api/refine ou save legado
+    // gravaram slides sem discriminador.
+    // ═══════════════════════════════════════════════════════
+    function inferTipo(slide, index, total) {
+      if (!slide || typeof slide !== 'object') return null;
+      if (slide.tipo && FIELD_DEFS[slide.tipo]) return slide.tipo;
+      // Shape-based: campos únicos de cada tipo
+      if (slide.cta && (slide.cta.texto !== undefined || slide.cta.url !== undefined)) return 'cta-final';
+      if (Array.isArray(slide.veredito)) return 'teste-pergunta';
+      if (slide.pergunta) return 'teste-pergunta';
+      if (slide.caixa_a && slide.caixa_b) return 'comparacao-contraste';
+      if (slide.esquerda && slide.direita) return 'grid-2-colunas';
+      if (Array.isArray(slide.pilares)) return 'grid-4-pilares';
+      if (Array.isArray(slide.itens)) return 'lista-numerada';
+      if (slide.box) return 'frase-destaque-com-box';
+      // Position-based fallback
+      if (index === 0) return 'capa';
+      if (index === total - 1) return 'cta-final';
+      return 'frase-destaque-com-box';
+    }
+
+    // Retorna { changed, legacy }. legacy=true quando slides[] é array de
+    // strings (URLs de imagem do fluxo antigo) — editor não pode mexer.
+    function normalizeSlides(p) {
+      if (!Array.isArray(p.slides)) return { changed: false, legacy: false };
+      if (p.slides.some(s => typeof s === 'string')) return { changed: false, legacy: true };
+      let changed = false;
+      const total = p.slides.length;
+      p.slides = p.slides.map((s, i) => {
+        if (!s || typeof s !== 'object') return s;
+        if (s.tipo && FIELD_DEFS[s.tipo]) return s;
+        const inferred = inferTipo(s, i, total);
+        if (inferred && inferred !== s.tipo) {
+          console.warn('[editar] slide[%d] sem .tipo válido — inferido como "%s"', i, inferred, s);
+          changed = true;
+          return { ...s, tipo: inferred };
+        }
+        return s;
+      });
+      return { changed, legacy: false };
+    }
+
     // Defaults pra novos slides
     function blankSlide(tipo) {
       const blanks = {
@@ -440,7 +484,9 @@
     // ═══════════════════════════════════════════════════════
     function renderLeft() {
       const el = document.getElementById('colLeft');
-      const hasTypedSlides = Array.isArray(pauta.slides) && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
+      const hasTypedSlides = Array.isArray(pauta.slides) && pauta.slides.length
+        && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
+      const legacy = Array.isArray(pauta.slides) && pauta.slides.some(s => typeof s === 'string');
 
       el.innerHTML = `
         <div class="section">
@@ -466,7 +512,9 @@
             <span class="count">${hasTypedSlides ? pauta.slides.length : '—'}</span>
           </div>
           ${hasTypedSlides ? renderSlideList() : `<div style="color:var(--muted);font-size:0.8rem;padding:14px;background:var(--s1);border-radius:6px;">
-            Esta pauta não tem <code>slides[]</code> tipados. Slides legados (URLs de imagens) não são editáveis aqui. Gere conteúdo novo via <code>/gerar-post</code> pra usar o editor.
+            ${legacy
+              ? 'Slides legados (URLs de imagem) — não editáveis aqui. Use o painel de IA ou <code>/gerar-post</code> pra gerar conteúdo novo.'
+              : 'Sem slides ainda. Adicione abaixo ou use o painel ✦ Refinar com IA à direita.'}
           </div>`}
         </div>
 
@@ -528,37 +576,12 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    // RENDER: COLUNA DIREITA (EDITOR DO SLIDE SELECIONADO)
+    // RENDER: COLUNA DIREITA
+    // Painel IA sempre visível (edita tema/gancho/legendas mesmo
+    // sem slides tipados). Editor de slide só aparece quando dá.
     // ═══════════════════════════════════════════════════════
-    function renderRight() {
-      const el = document.getElementById('colRight');
-      const hasTypedSlides = Array.isArray(pauta.slides) && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
-
-      if (!hasTypedSlides || !pauta.slides.length) {
-        el.innerHTML = `<div class="empty-state">
-          <h3>Sem slides pra editar</h3>
-          <p>Use o <code>+ Adicionar slide</code> na esquerda ou gere conteúdo novo via <code>/gerar-post</code>.</p>
-        </div>`;
-        return;
-      }
-
-      const slide = pauta.slides[selectedSlide];
-      if (!slide) {
-        selectedSlide = 0;
-        renderRight();
-        return;
-      }
-
-      const defs = FIELD_DEFS[slide.tipo];
-      if (!defs) {
-        el.innerHTML = `<div class="empty-state">
-          <h3>Tipo desconhecido</h3>
-          <p>O tipo <code>${escapeHtml(slide.tipo)}</code> não tem editor. Atualize <code>FIELD_DEFS</code> em editar.html.</p>
-        </div>`;
-        return;
-      }
-
-      el.innerHTML = `
+    function renderAiPanelHtml() {
+      return `
         <div class="ai-panel ${aiPanelOpen?'open':''}" id="aiPanel">
           <div class="ai-panel-header" onclick="toggleAiPanel()">
             <div class="ai-panel-title">✦ Refinar com IA</div>
@@ -575,7 +598,39 @@
             <div class="ai-result" id="aiResult"></div>
           </div>
         </div>
+      `;
+    }
 
+    function renderRight() {
+      const el = document.getElementById('colRight');
+      const typed = Array.isArray(pauta.slides) && pauta.slides.length
+        && pauta.slides.every(s => s && typeof s === 'object' && s.tipo);
+      const legacy = Array.isArray(pauta.slides) && pauta.slides.some(s => typeof s === 'string');
+
+      // Sem slides editáveis: mostra AI panel + mensagem contextual
+      if (!typed) {
+        const msg = legacy
+          ? `<h3>Slides legados (imagens)</h3>
+             <p>Esta pauta tem <code>slides[]</code> como URLs de imagem — editor de slides não se aplica.
+             Use o painel acima pra refinar tema, legendas ou gerar conteúdo novo via <code>/gerar-post</code>.</p>`
+          : `<h3>Sem slides pra editar</h3>
+             <p>Use o <code>+ Adicionar slide</code> na esquerda ou refine com IA acima.</p>`;
+        el.innerHTML = renderAiPanelHtml() + `<div class="empty-state">${msg}</div>`;
+        return;
+      }
+
+      if (selectedSlide >= pauta.slides.length) selectedSlide = 0;
+      const slide = pauta.slides[selectedSlide];
+      const defs = FIELD_DEFS[slide.tipo];
+      if (!defs) {
+        el.innerHTML = renderAiPanelHtml() + `<div class="empty-state">
+          <h3>Tipo desconhecido</h3>
+          <p>O tipo <code>${escapeHtml(slide.tipo)}</code> não tem editor. Atualize <code>FIELD_DEFS</code> em editar.html.</p>
+        </div>`;
+        return;
+      }
+
+      el.innerHTML = renderAiPanelHtml() + `
         <div class="editor-header">
           <div class="editor-title">
             Slide ${selectedSlide + 1} <span class="tipo-tag">${TIPO_LABELS[slide.tipo]}</span>
@@ -947,6 +1002,16 @@
       pauta = JSON.parse(JSON.stringify(pautaOriginal));
       // Garantir shape mínimo
       if (!Array.isArray(pauta.slides)) pauta.slides = [];
+      // Normaliza: infere .tipo em slides que perderam o discriminador
+      const norm = normalizeSlides(pauta);
+      if (norm.changed) {
+        markDirty();
+        const status = document.getElementById('saveStatus');
+        if (status) {
+          status.textContent = '⚠ Tipos inferidos — revise e salve';
+          status.style.color = 'var(--accent)';
+        }
+      }
       // Carrega brand profile pra usar em /api/refine
       try { brandProfile = JSON.parse(localStorage.getItem(BRAND_KEY) || 'null'); } catch { brandProfile = null; }
       renderLeft();
