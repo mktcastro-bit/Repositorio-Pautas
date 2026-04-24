@@ -386,6 +386,7 @@
     .detail-carousel .carousel-slide iframe {
       width: 1080px; height: 1350px; border: 0; background: #000;
       transform-origin: center center; pointer-events: none;
+      flex-shrink: 0;  /* impede flex-container de encolher pra largura do box (quebra tipografia) */
     }
     .detail-carousel .carousel-slide.active { opacity: 1; }
     .detail-carousel .carousel-btn { opacity: 0; }
