@@ -3008,7 +3008,7 @@
         <div class="wf-art-slide-select">
           <label class="wf-result-label" style="white-space:nowrap;align-self:center">Slide:</label>
           <select class="wf-select" id="wf-art-slide" style="width:auto">
-            ${slides.map((s,i)=>`<option value="${i}">Slide ${i+1} — ${(s.titulo||'').substring(0,30)}${(s.titulo||'').length>30?'…':''}</option>`).join('')}
+            ${slides.map((s,i)=>`<option value="${i}">Slide ${i+1} — ${slidePreview(s,30)}</option>`).join('')}
           </select>
         </div>` : '';
 
@@ -3047,10 +3047,17 @@
 
       document.getElementById('workflowFooter').innerHTML = `
         <button class="wf-secondary" onclick="wfRenderStep1()">← Editar Texto</button>
-        <div style="display:flex;gap:8px">
-          <button class="wf-secondary" onclick="wfSavePauta()">Salvar no Repositório</button>
-          <button class="wf-primary" onclick="closeModal('workflowOverlay')">Concluir</button>
-        </div>`;
+        <button class="wf-primary" onclick="wfSavePauta(true)">Concluir e Salvar</button>`;
+    }
+
+    // Helper: devolve um preview textual curto para QUALQUER tipo de slide.
+    // Cada tipo usa campo diferente (titulo, pergunta, cta.texto). Sem isso
+    // o dropdown aparece vazio em tipos como teste-pergunta.
+    function slidePreview(s, maxLen = 40) {
+      if (!s || typeof s !== 'object') return '';
+      const raw = s.titulo || s.pergunta || s.cta?.texto || s.box?.texto || s.subtitulo || '';
+      const clean = String(raw).replace(/~~|\*\*|_/g, '');
+      return clean.length > maxLen ? clean.substring(0, maxLen) + '…' : clean;
     }
 
     async function doWfGenArt() {
@@ -3154,27 +3161,62 @@
       window._wfGenArtController?.abort();
     }
 
-    function wfSavePauta() {
+    async function wfSavePauta(closeAfter = false) {
       if (!wfGenResult || !wfGenParams) return;
       const result = wfGenResult;
       const params  = wfGenParams;
       const now     = new Date().toISOString().split('T')[0];
       const newId   = pautas.length ? Math.max(...pautas.map(p=>p.id))+1 : 1;
+
+      // Renderiza TODOS os slides localmente (custo zero — /api/generate-art
+      // agora é wrapper puro da lib/render). Grava cada HTML em slide_htmls[i].
+      const slides = Array.isArray(result.slides) ? result.slides : [];
+      let slide_htmls = [];
+      if (slides.length) {
+        showToast('Renderizando artes de todos os slides…', 'loading', true);
+        const url = getVercelUrl();
+        try {
+          const renders = await Promise.all(slides.map(async (conteudo, i) => {
+            const r = await fetch(`${url}/api/generate-art`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                conteudo,
+                indice: i + 1,
+                total: slides.length,
+                pilar: params.pilar,
+                tags: [params.pilar],
+              }),
+            });
+            const d = await r.json();
+            if (!d.success) throw new Error(d.error || `Falha no slide ${i + 1}`);
+            return d.html;
+          }));
+          slide_htmls = renders;
+          hideToast();
+        } catch (e) {
+          hideToast();
+          showToast(`Aviso: falha ao renderizar arte (${e.message}). Pauta será salva sem artes.`, 'error');
+          slide_htmls = [];
+        }
+      }
+
       pautas.unshift({
         id: newId, tema: result.tema || 'Conteúdo gerado por IA',
         pilar: params.pilar, rede_social: params.rede_social,
         formato: params.formato, variante: params.variante, status: 'Ideia',
-        gancho: result.gancho||'', angulo_nexum: result.angulo_nexum||'',
+        gancho: result.gancho||'', angulo_nexum: result.angulo_nexum || result.angulo || '',
         picah: result.picah||[], legenda_ig: result.legenda_ig||'',
-        legenda_li: result.legenda_li||'', slides: result.slides||[],
+        legenda_li: result.legenda_li||'', slides: slides,
+        slide_htmls,                            // NOVO: HTML renderizado por slide
         fonte: '', arquivo: '', slide_preview: '',
-        art_html: window._wfArtHtml || '',
+        art_html: slide_htmls[0] || window._wfArtHtml || '',
         data_criacao: now, data_planejada: null, data_publicacao: null,
         notas: `Gerado por IA em ${now}.`,
       });
       save(); renderCards(); scaleCardIframes();
-      closeModal('workflowOverlay');
-      showToast('Pauta adicionada ao repositório!', 'success');
+      showToast(`Pauta adicionada com ${slide_htmls.length} slide(s) renderizado(s)!`, 'success');
+      if (closeAfter) closeModal('workflowOverlay');
     }
 
     // ── GERAÇÃO DE CONTEÚDO IA ────────────────────────────────
