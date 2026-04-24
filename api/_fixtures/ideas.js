@@ -1,3 +1,4 @@
+export default
 {
   "ideas": [
     {
@@ -26,3 +27,4 @@
     }
   ]
 }
+;

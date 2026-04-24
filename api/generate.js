@@ -21,11 +21,7 @@
  */
 
 import { brandContextBlock } from './_lib/brand.js';
-import fs from 'node:fs';
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import contentFixture from './_fixtures/content.js';
 
 const ANTHROPIC_API = 'https://api.anthropic.com/v1/messages';
 const MODEL         = 'claude-sonnet-4-6';
@@ -120,12 +116,7 @@ export default async function handler(req, res) {
 
   // Modo mock — retorna fixture bundlada, zero custo, zero latência.
   if (body.mock) {
-    try {
-      const fixture = JSON.parse(fs.readFileSync(path.join(__dirname, '_fixtures', 'content.json'), 'utf8'));
-      return res.status(200).json({ success: true, result: fixture, mock: true });
-    } catch (e) {
-      return res.status(500).json({ error: 'Falha ao ler fixture: ' + e.message });
-    }
+    return res.status(200).json({ success: true, result: contentFixture, mock: true });
   }
 
   const { ANTHROPIC_API_KEY: apiKey } = process.env;

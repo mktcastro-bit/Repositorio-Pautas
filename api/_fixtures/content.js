@@ -1,3 +1,4 @@
+export default
 {
   "tema": "Sua marca não tem problema de design. Tem problema de decisão.",
   "gancho": "Reposicionar começa no que a empresa escolhe recusar — não no que decide redesenhar.",
@@ -100,3 +101,4 @@
   "hashtags_ig": ["#EstratégiaDeMarca","#Branding","#Posicionamento","#MarketingB2B","#Nexum360","#ConsultoriaDeMarca","#MarcaForte","#DecisãoEstratégica","#Reposicionamento","#GuerraDePreço","#MargemDeLucro","#BrandingEstratégico"],
   "hashtags_li": ["#EstratégiaDeMarca","#Branding","#Posicionamento","#B2B","#ConsultoriaDeMarca","#Rebranding","#Marketing","#Nexum360"]
 }
+;
