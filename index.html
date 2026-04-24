@@ -1728,10 +1728,25 @@
       showToast('Gerando arte com IA... aguarde', 'loading', true);
 
       try {
+        // Novo formato: /api/generate-art espera { conteudo, indice, total, pilar, tags }.
+        // O conteúdo é o objeto tipado do slide (p.slides[slideIndex] quando for JSON tipado).
+        const slidesTipados = Array.isArray(p.slides) && p.slides.every(s => s && typeof s === 'object' && s.tipo);
+        if (!slidesTipados) {
+          throw new Error('Esta pauta não tem slides[] tipados. Gere conteúdo novo via /gerar-post pra usar o renderer.');
+        }
+        const conteudo = p.slides[slideIndex];
+        if (!conteudo) throw new Error(`Slide ${slideIndex + 1} não existe.`);
+
         const r = await fetch(`${url}/api/generate-art`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ pauta: p, slideIndex }),
+          body:    JSON.stringify({
+            conteudo,
+            indice: slideIndex + 1,
+            total:  p.slides.length,
+            pilar:  p.pilar,
+            tags:   [p.pilar],
+          }),
           signal:  controller.signal,
         });
         const d = await r.json();
